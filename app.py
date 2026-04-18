@@ -15,7 +15,7 @@ SCOPES = [
 ]
 
 SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
-FOLDER_ID = "1ExWjGHYBgILVKA2-nd6voRZUajm-zeOL"
+FOLDER_ID = "1v1UPHiDF3eimPdCfaGGueKWg9M8jzdMJ"
 
 # =========================
 # CONEXIÓN
