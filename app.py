@@ -1,57 +1,77 @@
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
 
-# 🔐 ID de tu Google Sheet (el que ya estás usando)
-SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDkblVN37c8"
+# =========================
+# CONFIGURACIÓN
+# =========================
 
-# 🔌 CONEXIÓN SEGURA
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDkblVN37c8"  # 👈 CAMBIAR SI HICISTE COPIA
+
+# =========================
+# CONEXIÓN A GOOGLE
+# =========================
+
 def conectar():
-    scope = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
-
     creds = Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
-        scopes=scope
+        scopes=SCOPES
     )
 
     client = gspread.authorize(creds)
+    drive_service = build("drive", "v3", credentials=creds)
 
-    sheet = client.open_by_key(SPREADSHEET_ID)
+    try:
+        sheet = client.open_by_key(SPREADSHEET_ID)
+        sheet_actas = sheet.worksheet("Hoja 1")
+        sheet_detalle = sheet.worksheet("Hoja 2")
+    except Exception as e:
+        st.error("❌ Error al acceder al Google Sheet")
+        st.error("👉 Verificá:")
+        st.write("- Que el ID sea correcto")
+        st.write("- Que el archivo esté compartido con la cuenta de servicio")
+        st.write("- Que las hojas se llamen exactamente 'Hoja 1' y 'Hoja 2'")
+        raise e
 
-    # ⚠️ NO usar nombres → usar índice
-    sheet_actas = sheet.get_worksheet(0)    # Hoja 1
-    sheet_detalle = sheet.get_worksheet(1)  # Hoja 2
-
-    return sheet_actas, sheet_detalle
+    return drive_service, sheet_actas, sheet_detalle
 
 
-# 🚀 PROCESAMIENTO SIMPLE (ejemplo base)
+# =========================
+# PROCESAMIENTO
+# =========================
+
 def procesar_actas():
-    sheet_actas, sheet_detalle = conectar()
+    try:
+        drive, sheet_actas, sheet_detalle = conectar()
 
-    data = sheet_actas.get_all_records()
+        st.success("✅ Conexión exitosa a Google Sheets")
 
-    if not data:
-        st.warning("No hay datos en la hoja.")
-        return
+        # Ejemplo: leer datos
+        data = sheet_actas.get_all_records()
 
-    st.success(f"Se cargaron {len(data)} registros")
+        st.subheader("📊 Datos encontrados")
+        st.dataframe(data)
 
-    for fila in data:
-        st.write(fila)
+        st.success("🚀 Listo para procesar actas")
+
+    except Exception as e:
+        st.error("❌ Error al procesar las actas")
+        st.exception(e)
 
 
-# 🎨 INTERFAZ
+# =========================
+# INTERFAZ STREAMLIT
+# =========================
+
 st.set_page_config(page_title="Extractor de Actas", layout="wide")
 
 st.title("📊 Extractor de Actas - Consejo de Investigación")
 
 if st.button("🚀 Procesar actas"):
-    try:
-        procesar_actas()
-    except Exception as e:
-        st.error("Error al procesar las actas")
-        st.exception(e)
+    procesar_actas()
