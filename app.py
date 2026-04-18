@@ -12,7 +12,7 @@ from googleapiclient.http import MediaIoBaseDownload
 # CONFIG
 # -----------------------------
 FOLDER_ID = "13OCGBUo4SibDbZeMOVOOJ4Pj4OzrEcSa"
-SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
+SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDKbIVN37c8"
 
 st.set_page_config(page_title="Extractor de Actas", layout="wide")
 st.title("📊 Extractor de Actas - Consejo de Investigación")
