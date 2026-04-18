@@ -1,137 +1,153 @@
 import streamlit as st
-import pandas as pd
-from io import BytesIO
+import io
+import re
+import pdfplumber
+import gspread
 
-from utils import compute_consistency_for_df
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 
+# -----------------------------
+# CONFIG
+# -----------------------------
+FOLDER_ID = "13OCGBUo4SibDbZeMOVOOJ4Pj4OzrEcSa"
+SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
 
-st.set_page_config(
-    page_title="Consistencia PEI (Objetivo ↔ Actividad)",
-    page_icon="📘",
-    layout="wide"
-)
+st.set_page_config(page_title="Extractor de Actas", layout="wide")
+st.title("📊 Extractor de Actas - Consejo de Investigación")
 
-st.title("📘 Calculadora de Consistencia PEI")
-st.write(
-    """
-    Esta herramienta calcula la **consistencia** entre el **objetivo específico**
-    elegido por la unidad académica y la **actividad única** cargada, usando
-    similitud semántica (TF-IDF) y devolviendo una nota discreta:
+# -----------------------------
+# CONEXIÓN GOOGLE
+# -----------------------------
+def conectar():
 
-    **0, 10, 30, 50, 70, 90 o 100 (%).**
-    """
-)
+    scope = [
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/spreadsheets"
+    ]
 
-uploaded_file = st.file_uploader(
-    "Cargar archivo Excel con Objetivos y Actividades",
-    type=["xlsx"]
-)
-
-if uploaded_file is None:
-    st.info("Subí un archivo .xlsx para comenzar.")
-    st.stop()
-
-# 1) Leer el archivo
-try:
-    df = pd.read_excel(uploaded_file, engine="openpyxl")
-except Exception as e:
-    st.error(f"No se pudo leer el archivo: {e}")
-    st.stop()
-
-st.subheader("Vista previa del archivo original")
-st.dataframe(df.head(), use_container_width=True)
-
-if df.empty:
-    st.error("El archivo no tiene filas.")
-    st.stop()
-
-columns = list(df.columns)
-
-st.markdown("### Seleccioná las columnas correspondientes")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    col_obj_codigo = st.selectbox(
-        "Columna con el **código / identificador** del objetivo específico",
-        options=columns,
-        index=0
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=scope
     )
 
-    col_actividad = st.selectbox(
-        "Columna con el texto de la **actividad única**",
-        options=columns,
-        index=1 if len(columns) > 1 else 0
-    )
+    drive = build('drive', 'v3', credentials=creds)
+    client = gspread.authorize(creds)
 
-with col2:
-    col_obj_texto = st.selectbox(
-        "Columna con el **texto completo** del objetivo específico",
-        options=columns,
-        index=2 if len(columns) > 2 else 0
-    )
+    sheet_actas = client.open_by_key(SPREADSHEET_ID).worksheet("Hoja 1")
+    sheet_detalle = client.open_by_key(SPREADSHEET_ID).worksheet("Hoja 2")
 
-    col_detalle = st.selectbox(
-        "Columna con el **detalle de la actividad** (si existe)",
-        options=["(sin detalle)"] + columns,
-        index=0
-    )
+    return drive, sheet_actas, sheet_detalle
 
-if col_detalle == "(sin detalle)":
-    # Creamos una columna vacía para simplificar la lógica
-    df["_DETALLE_VACIO_"] = ""
-    col_detalle_real = "_DETALLE_VACIO_"
-else:
-    col_detalle_real = col_detalle
 
-st.markdown("---")
+# -----------------------------
+# DRIVE
+# -----------------------------
+def listar_pdfs(drive):
+    query = f"'{FOLDER_ID}' in parents and mimeType='application/pdf'"
+    return drive.files().list(q=query).execute().get('files', [])
 
-if st.button("Calcular consistencia", type="primary"):
-    with st.spinner("Calculando similitud y consistencia..."):
-        result_df = compute_consistency_for_df(
-            df,
-            col_obj_codigo=col_obj_codigo,
-            col_obj_texto=col_obj_texto,
-            col_actividad=col_actividad,
-            col_detalle=col_detalle_real
-        )
 
-    st.subheader("Resultados con Consistencia (%)")
-    st.dataframe(result_df.head(50), use_container_width=True)
+def descargar_pdf(drive, file_id):
+    request = drive.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
 
-    # Indicadores básicos
-    st.markdown("### Indicadores globales")
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
 
-    # Promedio de consistencia
-    mean_consistency = result_df["Consistencia (%)"].mean()
-    st.write(f"**Consistencia promedio:** {mean_consistency:.2f} %")
+    fh.seek(0)
+    return fh
 
-    # Distribución de valores en la escala discreta
-    distrib = (
-        result_df["Consistencia (%)"]
-        .value_counts()
-        .sort_index()
-        .rename_axis("Consistencia")
-        .reset_index(name="Cantidad")
-    )
 
-    st.write("**Distribución de actividades por nivel de consistencia:**")
-    st.dataframe(distrib, use_container_width=True)
+# -----------------------------
+# PDF → TEXTO
+# -----------------------------
+def extraer_texto(pdf):
+    texto = ""
+    with pdfplumber.open(pdf) as p:
+        for page in p.pages:
+            if page.extract_text():
+                texto += page.extract_text() + "\n"
+    return texto
 
-    # Preparar descarga de Excel
-    def to_excel_bytes(df_out: pd.DataFrame) -> bytes:
-        buffer = BytesIO()
-        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            df_out.to_excel(writer, index=False, sheet_name="Consistencia_PEI")
-        return buffer.getvalue()
 
-    excel_bytes = to_excel_bytes(result_df)
+# -----------------------------
+# EXTRACCIÓN
+# -----------------------------
+def extraer_acta_info(texto):
 
-    st.download_button(
-        label="📥 Descargar resultados en Excel",
-        data=excel_bytes,
-        file_name="consistencia_pei_objetivo_actividad.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-else:
-    st.info("Configurá las columnas y hacé clic en **Calcular consistencia**.")
+    acta = re.search(r'ACTA\s*N[°º]?\s*(\d+)', texto, re.IGNORECASE)
+    fecha = re.search(r'\d{1,2}/\d{1,2}/\d{4}', texto)
+
+    acta = acta.group(1) if acta else ""
+    fecha = fecha.group() if fecha else ""
+    anio = fecha.split("/")[-1] if fecha else ""
+
+    unidad = ""
+    u = re.search(r'FACULTAD\s*[:\-]?\s*(.*)', texto, re.IGNORECASE)
+    if u:
+        unidad = u.group(1).strip()
+
+    return acta, fecha, anio, unidad
+
+
+def extraer_detalle(texto):
+
+    filas = []
+
+    for linea in texto.split("\n"):
+        l = linea.upper()
+
+        if "PROYECTO" in l:
+            filas.append(("Proyecto", linea.strip()))
+
+        elif "INFORME FINAL" in l:
+            filas.append(("Informe Final", linea.strip()))
+
+        elif "INFORME DE AVANCE" in l:
+            filas.append(("Informe de Avance", linea.strip()))
+
+        elif "CATEGORIZ" in l:
+            filas.append(("Categorización", linea.strip()))
+
+    return filas
+
+
+# -----------------------------
+# BOTÓN PRINCIPAL
+# -----------------------------
+if st.button("🚀 Procesar actas"):
+
+    drive, sheet_actas, sheet_detalle = conectar()
+
+    archivos = listar_pdfs(drive)
+
+    actas_existentes = sheet_actas.col_values(1)
+
+    nuevas = 0
+
+    for f in archivos:
+
+        pdf = descargar_pdf(drive, f['id'])
+        texto = extraer_texto(pdf)
+
+        acta, fecha, anio, unidad = extraer_acta_info(texto)
+
+        if not acta or acta in actas_existentes:
+            continue
+
+        # HOJA ACTAS
+        sheet_actas.append_row([acta, fecha, anio, unidad])
+
+        # HOJA DETALLE
+        detalles = extraer_detalle(texto)
+
+        for tipo, descripcion in detalles:
+            sheet_detalle.append_row([acta, fecha, anio, tipo, descripcion])
+
+        nuevas += 1
+
+    st.success(f"✅ {nuevas} actas procesadas correctamente")
