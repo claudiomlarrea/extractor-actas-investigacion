@@ -1,30 +1,15 @@
 import streamlit as st
-import io
-import re
-import pdfplumber
 import gspread
-
 from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-FOLDER_ID = "13OCGBUo4SibDbZeMOVOOJ4Pj4OzrEcSa"
-SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDKbIVN37c8"
+# 🔐 ID de tu Google Sheet (el que ya estás usando)
+SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDkblVN37c8"
 
-st.set_page_config(page_title="Extractor de Actas", layout="wide")
-st.title("📊 Extractor de Actas - Consejo de Investigación")
-
-# -----------------------------
-# CONEXIÓN GOOGLE
-# -----------------------------
+# 🔌 CONEXIÓN SEGURA
 def conectar():
-
     scope = [
-        "https://www.googleapis.com/auth/drive",
-        "https://www.googleapis.com/auth/spreadsheets"
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
     ]
 
     creds = Credentials.from_service_account_info(
@@ -32,122 +17,41 @@ def conectar():
         scopes=scope
     )
 
-    drive = build('drive', 'v3', credentials=creds)
     client = gspread.authorize(creds)
 
-    sheet_actas = client.open_by_key(SPREADSHEET_ID).worksheet("Hoja 1")
-    sheet_detalle = client.open_by_key(SPREADSHEET_ID).worksheet("Hoja 2")
+    sheet = client.open_by_key(SPREADSHEET_ID)
 
-    return drive, sheet_actas, sheet_detalle
+    # ⚠️ NO usar nombres → usar índice
+    sheet_actas = sheet.get_worksheet(0)    # Hoja 1
+    sheet_detalle = sheet.get_worksheet(1)  # Hoja 2
 
-
-# -----------------------------
-# DRIVE
-# -----------------------------
-def listar_pdfs(drive):
-    query = f"'{FOLDER_ID}' in parents and mimeType='application/pdf'"
-    return drive.files().list(q=query).execute().get('files', [])
+    return sheet_actas, sheet_detalle
 
 
-def descargar_pdf(drive, file_id):
-    request = drive.files().get_media(fileId=file_id)
-    fh = io.BytesIO()
-    downloader = MediaIoBaseDownload(fh, request)
+# 🚀 PROCESAMIENTO SIMPLE (ejemplo base)
+def procesar_actas():
+    sheet_actas, sheet_detalle = conectar()
 
-    done = False
-    while not done:
-        _, done = downloader.next_chunk()
+    data = sheet_actas.get_all_records()
 
-    fh.seek(0)
-    return fh
+    if not data:
+        st.warning("No hay datos en la hoja.")
+        return
 
+    st.success(f"Se cargaron {len(data)} registros")
 
-# -----------------------------
-# PDF → TEXTO
-# -----------------------------
-def extraer_texto(pdf):
-    texto = ""
-    with pdfplumber.open(pdf) as p:
-        for page in p.pages:
-            if page.extract_text():
-                texto += page.extract_text() + "\n"
-    return texto
+    for fila in data:
+        st.write(fila)
 
 
-# -----------------------------
-# EXTRACCIÓN
-# -----------------------------
-def extraer_acta_info(texto):
+# 🎨 INTERFAZ
+st.set_page_config(page_title="Extractor de Actas", layout="wide")
 
-    acta = re.search(r'ACTA\s*N[°º]?\s*(\d+)', texto, re.IGNORECASE)
-    fecha = re.search(r'\d{1,2}/\d{1,2}/\d{4}', texto)
+st.title("📊 Extractor de Actas - Consejo de Investigación")
 
-    acta = acta.group(1) if acta else ""
-    fecha = fecha.group() if fecha else ""
-    anio = fecha.split("/")[-1] if fecha else ""
-
-    unidad = ""
-    u = re.search(r'FACULTAD\s*[:\-]?\s*(.*)', texto, re.IGNORECASE)
-    if u:
-        unidad = u.group(1).strip()
-
-    return acta, fecha, anio, unidad
-
-
-def extraer_detalle(texto):
-
-    filas = []
-
-    for linea in texto.split("\n"):
-        l = linea.upper()
-
-        if "PROYECTO" in l:
-            filas.append(("Proyecto", linea.strip()))
-
-        elif "INFORME FINAL" in l:
-            filas.append(("Informe Final", linea.strip()))
-
-        elif "INFORME DE AVANCE" in l:
-            filas.append(("Informe de Avance", linea.strip()))
-
-        elif "CATEGORIZ" in l:
-            filas.append(("Categorización", linea.strip()))
-
-    return filas
-
-
-# -----------------------------
-# BOTÓN PRINCIPAL
-# -----------------------------
 if st.button("🚀 Procesar actas"):
-
-    drive, sheet_actas, sheet_detalle = conectar()
-
-    archivos = listar_pdfs(drive)
-
-    actas_existentes = sheet_actas.col_values(1)
-
-    nuevas = 0
-
-    for f in archivos:
-
-        pdf = descargar_pdf(drive, f['id'])
-        texto = extraer_texto(pdf)
-
-        acta, fecha, anio, unidad = extraer_acta_info(texto)
-
-        if not acta or acta in actas_existentes:
-            continue
-
-        # HOJA ACTAS
-        sheet_actas.append_row([acta, fecha, anio, unidad])
-
-        # HOJA DETALLE
-        detalles = extraer_detalle(texto)
-
-        for tipo, descripcion in detalles:
-            sheet_detalle.append_row([acta, fecha, anio, tipo, descripcion])
-
-        nuevas += 1
-
-    st.success(f"✅ {nuevas} actas procesadas correctamente")
+    try:
+        procesar_actas()
+    except Exception as e:
+        st.error("Error al procesar las actas")
+        st.exception(e)
