@@ -12,7 +12,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-SPREADSHEET_ID = "17MiyW17W7oLlwSCKjDXCoA85CwBkYqHYhDkblVN37c8"  # 👈 CAMBIAR SI HICISTE COPIA
+SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"  # 👈 CAMBIAR SI HICISTE COPIA
 
 # =========================
 # CONEXIÓN A GOOGLE
