@@ -1,33 +1,21 @@
 import streamlit as st
-import re
 from PyPDF2 import PdfReader
-import gspread
-from google.oauth2.service_account import Credentials
-
-SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
+import re
 
 # =========================
-# CONEXIÓN
+# CONFIG
 # =========================
 
-def conectar():
-    scope = [
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
+st.set_page_config(page_title="Normalizador de Actas", layout="wide")
 
-    creds = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=scope
-    )
+st.title("🧠 Normalizador de Actas - Consejo de Investigación")
 
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(SPREADSHEET_ID)
-
-    return sheet.worksheet("Hoja 1"), sheet.worksheet("Hoja 2")
+st.markdown("""
+Subí actas en PDF y el sistema generará un **TXT limpio y estructurado** listo para análisis.
+""")
 
 # =========================
-# PDF
+# FUNCIONES
 # =========================
 
 def extraer_texto_pdf(file):
@@ -35,188 +23,93 @@ def extraer_texto_pdf(file):
     texto = ""
 
     for page in reader.pages:
-        texto += (page.extract_text() or "") + "\n"
+        contenido = page.extract_text()
+        if contenido:
+            texto += contenido + "\n"
 
     return texto
 
-# =========================
-# DATOS ACTA
-# =========================
 
-def extraer_datos_basicos(texto):
+def limpiar_texto(texto):
+    """
+    Limpieza institucional del texto
+    """
 
-    acta = re.search(r'ACTA\s*N[º°]?\s*(\d+)', texto)
-    acta = acta.group(1) if acta else "Detectar"
+    # eliminar múltiples espacios
+    texto = re.sub(r'\s+', ' ', texto)
 
-    fecha_match = re.search(
-        r'(\d{1,2})\s+d[ií]as del mes de\s+(\w+)\s+de\s+dos mil\s+(\w+)',
-        texto,
-        re.IGNORECASE
-    )
+    # normalizar saltos de línea
+    texto = re.sub(r'\.\s+', '.\n', texto)
 
-    meses = {
-        "enero":"01","febrero":"02","marzo":"03","abril":"04",
-        "mayo":"05","junio":"06","julio":"07","agosto":"08",
-        "septiembre":"09","octubre":"10","noviembre":"11","diciembre":"12"
-    }
+    # separar títulos en mayúsculas
+    texto = re.sub(r'([A-ZÁÉÍÓÚÑ ]{8,})', r'\n\1\n', texto)
 
-    anios = {
-        "veinticinco":"2025",
-        "veinticuatro":"2024"
-    }
+    # eliminar caracteres raros
+    texto = texto.replace("�", "")
 
-    if fecha_match:
-        dia = fecha_match.group(1)
-        mes = meses.get(fecha_match.group(2).lower(), "00")
-        anio = anios.get(fecha_match.group(3).lower(), "2025")
-        fecha = f"{dia}/{mes}/{anio}"
-    else:
-        fecha = "Detectar"
-        anio = "Detectar"
+    return texto.strip()
 
-    unidad = "UCCuyo" if "universidad católica de cuyo" in texto.lower() else "Detectar"
 
-    return acta, fecha, anio, unidad
+def estructurar_texto(texto):
+    """
+    Agrega separadores útiles para el siguiente paso
+    """
+
+    # separar por temas numerados
+    texto = re.sub(r'\n\s*(\d+\.)', r'\n\n=== ITEM \1 ===\n', texto)
+
+    # separar facultades
+    texto = re.sub(r'(Facultad de [A-Za-zÁÉÍÓÚÑ ]+)', r'\n\n=== \1 ===\n', texto)
+
+    return texto
+
 
 # =========================
-# DETECTAR TIPO
+# UI
 # =========================
 
-def detectar_tipo(texto):
-    t = texto.lower()
+files = st.file_uploader(
+    "📄 Subí los PDFs de actas",
+    type=["pdf"],
+    accept_multiple_files=True
+)
 
-    if "proyecto de investigación" in t:
-        return "Proyecto de Investigación"
-    elif "proyecto de cátedra" in t:
-        return "Proyecto de Cátedra"
-    elif "informe final" in t:
-        return "Informe Final"
-    elif "informe de avance" in t:
-        return "Informe de Avance"
-    elif "informe de cátedra" in t:
-        return "Informe de Cátedra"
-    else:
-        return "Otro"
+if st.button("🚀 Normalizar actas"):
 
-# =========================
-# EXTRAER ITEMS (VERSIÓN PRO)
-# =========================
+    if not files:
+        st.warning("Subí al menos un PDF")
+        st.stop()
 
-def extraer_items(texto):
+    for file in files:
 
-    items = []
+        st.subheader(f"📄 Procesando: {file.name}")
 
-    # NORMALIZAR TEXTO
-    texto = texto.replace("\n", " ")
+        try:
+            texto_crudo = extraer_texto_pdf(file)
 
-    # DIVIDIR POR PROYECTOS (clave)
-    bloques = re.split(r'(?=Proyecto)', texto, flags=re.IGNORECASE)
-
-    for bloque in bloques:
-
-        bloque_lower = bloque.lower()
-
-        # FILTRAR SOLO BLOQUES REALES
-        if "proyecto" not in bloque_lower:
-            continue
-
-        if len(bloque) < 50:
-            continue
-
-        # =====================
-        # TIPO
-        # =====================
-        if "investigación" in bloque_lower:
-            tipo = "Proyecto de Investigación"
-        elif "cátedra" in bloque_lower:
-            tipo = "Proyecto de Cátedra"
-        elif "informe final" in bloque_lower:
-            tipo = "Informe Final"
-        elif "avance" in bloque_lower:
-            tipo = "Informe de Avance"
-        else:
-            tipo = "Proyecto"
-
-        # =====================
-        # TÍTULO
-        # =====================
-        titulo = "No detectado"
-
-        posibles = re.findall(r'([A-ZÁÉÍÓÚÑ][^\.]{20,120})', bloque)
-
-        for p in posibles:
-            if "acta" not in p.lower() and "san juan" not in p.lower():
-                titulo = p.strip()
-                break
-
-        # =====================
-        # DIRECTOR
-        # =====================
-        director = "No detectado"
-
-        match_dir = re.search(
-            r'(Director|Responsable|Titular)[:\s]+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)',
-            bloque
-        )
-
-        if match_dir:
-            director = match_dir.group(2)
-
-        # =====================
-        # LIMPIEZA FINAL
-        # =====================
-        if titulo.lower().startswith("facultad"):
-            continue
-
-        if titulo.lower().startswith("secretaría"):
-            continue
-
-        items.append((tipo, titulo, director))
-
-    return items
-# =========================
-# APP
-# =========================
-
-st.title("📊 Extractor de Actas - Consejo de Investigación")
-
-files = st.file_uploader("Subí los PDFs", type=["pdf"], accept_multiple_files=True)
-
-if st.button("🚀 Procesar actas"):
-
-    try:
-        hoja1, hoja2 = conectar()
-        st.success("✅ Conectado a Google Sheets")
-
-        for file in files:
-
-            st.write(f"📄 Procesando: {file.name}")
-
-            texto = extraer_texto_pdf(file)
-
-            acta, fecha, anio, unidad = extraer_datos_basicos(texto)
-            items = extraer_items(texto)
-
-            # HOJA 1
-            hoja1.append_row([acta, fecha, anio, unidad])
-
-            if not items:
-                st.warning("⚠️ No se detectaron ítems")
+            if not texto_crudo.strip():
+                st.error("No se pudo extraer texto")
                 continue
 
-            # HOJA 2
-            for tipo, titulo, director in items:
-                hoja2.append_row([
-                    acta,
-                    fecha,
-                    anio,
-                    tipo,
-                    titulo,
-                    director
-                ])
+            texto_limpio = limpiar_texto(texto_crudo)
+            texto_final = estructurar_texto(texto_limpio)
 
-        st.success("🚀 PROCESO COMPLETADO")
+            st.success("✅ Texto normalizado correctamente")
 
-    except Exception as e:
-        st.error("❌ Error")
-        st.write(e)
+            # vista previa
+            with st.expander("👁 Ver texto normalizado"):
+                st.text_area("Resultado", texto_final, height=300)
+
+            # descarga
+            nombre_txt = file.name.replace(".pdf", ".txt")
+
+            st.download_button(
+                label="⬇ Descargar TXT",
+                data=texto_final,
+                file_name=nombre_txt,
+                mime="text/plain"
+            )
+
+        except Exception as e:
+            st.error("❌ Error al procesar")
+            st.write(e)
