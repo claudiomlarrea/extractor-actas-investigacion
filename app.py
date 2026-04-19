@@ -68,20 +68,39 @@ def normalizar_texto(texto):
 # EXTRAER DATOS
 # =========================
 
-def extraer_datos(texto):
-    datos = {}
+def extraer_proyectos(texto):
 
-    texto_norm = normalizar_texto(texto)
+    proyectos = []
 
-    # ACTA
-    match_acta = re.search(r'acta\s*n[º°]?\s*(\d+)', texto_norm)
-    datos["acta"] = match_acta.group(1) if match_acta else "Detectar"
+    bloques = re.split(r'\n(?=Facultad)', texto)
 
-    # FECHA
-    match_fecha = re.search(
-        r'(\d{1,2}).*?mes.*?(\d{2}).*?(20\d{2})',
-        texto_norm
-    )
+    for bloque in bloques:
+
+        if "proyecto" not in bloque.lower():
+            continue
+
+        # UNIDAD
+        match_unidad = re.search(r'(Facultad.*?)(?:\n|$)', bloque)
+        unidad = match_unidad.group(1).strip() if match_unidad else "Detectar"
+
+        # TÍTULO (línea siguiente)
+        lineas = bloque.split("\n")
+        titulo = lineas[1].strip() if len(lineas) > 1 else "Detectar"
+
+        # DIRECTOR
+        match_dir = re.search(r'Director[:\s]+([A-Za-zÁÉÍÓÚÑ\s]+)', bloque, re.IGNORECASE)
+        if not match_dir:
+            match_dir = re.search(r'DIRECTOR[:\s]+([A-Za-zÁÉÍÓÚÑ\s]+)', bloque)
+
+        director = match_dir.group(1).strip() if match_dir else "No detectado"
+
+        proyectos.append({
+            "unidad": unidad,
+            "titulo": titulo,
+            "director": director
+        })
+
+    return proyectos
 
     if match_fecha:
         dia = match_fecha.group(1)
