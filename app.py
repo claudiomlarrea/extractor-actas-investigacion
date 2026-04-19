@@ -38,46 +38,60 @@ def extraer_texto_pdf(file):
 def limpiar_texto(texto):
 
     # =========================
-    # 1. arreglar cortes de OCR (letras separadas)
+    # 1. normalizar espacios base
     # =========================
-    texto = re.sub(r'([A-Za-zÁÉÍÓÚÑ])\s{2,}([A-Za-zÁÉÍÓÚÑ])', r'\1\2', texto)
+    texto = texto.replace("\n", " ")
+    texto = re.sub(r'\s+', ' ', texto)
 
     # =========================
-    # 2. arreglos específicos (clave)
-    # =========================
-    reemplazos = {
-        "DIRECT OR": "DIRECTOR",
-        "PROYECT O": "PROYECTO",
-        "F acultad": "Facultad",
-        "PRESENT ACIÓN": "PRESENTACIÓN",
-        "INFORME FINALF": "INFORME FINAL F",
-        "Facultadde": "Facultad de",
-        "Directora:VillalongaSusana": "Directora: Villalonga Susana",
-        "Enlaciudadde": "En la ciudad de",
-        "daporcomenzada": "da por comenzada",
-        "ConsejodeInvestigación": "Consejo de Investigación"
-    }
-
-    for k, v in reemplazos.items():
-        texto = texto.replace(k, v)
-
-    # =========================
-    # 3. reconstruir espacios entre palabras largas
+    # 2. separar palabras pegadas (clave)
     # =========================
     texto = re.sub(r'([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])', r'\1 \2', texto)
 
     # =========================
-    # 4. normalizar espacios
+    # 3. arreglos específicos OCR (muy importantes)
     # =========================
-    texto = re.sub(r'\s+', ' ', texto)
+    fixes = {
+        "delmes": "del mes",
+        "dela": "de la",
+        "alos": "a los",
+        "lamisma": "la misma",
+        "Setratan": "Se tratan",
+        "Lecturadel": "Lectura del",
+        "actaanterior": "acta anterior",
+        "PRESENTACIÓNDEPROYECTOSDEINVESTIGACIÓN": "PRESENTACIÓN DE PROYECTOS DE INVESTIGACIÓN",
+        "CARGADEDATOS": "CARGA DE DATOS",
+        "INFORMEFINAL": "INFORME FINAL",
+        "CATEGORIZACIÓNEXTRAORDINARIA": "CATEGORIZACIÓN EXTRAORDINARIA",
+        "Consejode": "Consejo de",
+        "Investigacióndela": "Investigación de la",
+        "Católicade": "Católica de",
+        "UniversidadCatólica": "Universidad Católica",
+        "GoogleMeet": "Google Meet",
+    }
+
+    for k, v in fixes.items():
+        texto = texto.replace(k, v)
 
     # =========================
-    # 5. saltos de línea útiles
+    # 4. reconstruir facultades (clave)
     # =========================
+    texto = re.sub(r'Facultad de Filosof\s*===\s*ía', 'Facultad de Filosofía', texto)
+
+    # =========================
+    # 5. saltos estructurales
+    # =========================
+    texto = re.sub(r'(\d+\.)', r'\n\n=== ITEM \1 ===\n', texto)
+
+    texto = re.sub(r'(Facultad de [A-Za-zÁÉÍÓÚÑ ]+)', r'\n\n=== \1 ===\n', texto)
+
+    # =========================
+    # 6. limpieza final
+    # =========================
+    texto = re.sub(r'\s+', ' ', texto)
     texto = re.sub(r'\.\s+', '.\n', texto)
 
     return texto.strip()
-
 
 def estructurar_texto(texto):
 
