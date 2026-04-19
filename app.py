@@ -10,7 +10,6 @@ import io
 # =========================
 
 SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
-CARPETA_DRIVE_ID = "1v1UPHiDF3eimPdCfaGGueKWg9M8jzdMJ"
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -28,7 +27,6 @@ def conectar():
     )
 
     client = gspread.authorize(creds)
-
     sheet = client.open_by_key(SPREADSHEET_ID)
 
     hoja1 = sheet.worksheet("Hoja 1")
@@ -67,7 +65,7 @@ def normalizar_texto(texto):
     return texto
 
 # =========================
-# EXTRAER DATOS (MEJORADO)
+# EXTRAER DATOS
 # =========================
 
 def extraer_datos(texto):
@@ -79,7 +77,7 @@ def extraer_datos(texto):
     match_acta = re.search(r'acta\s*n[º°]?\s*(\d+)', texto_norm)
     datos["acta"] = match_acta.group(1) if match_acta else "Detectar"
 
-    # FECHA REAL
+    # FECHA
     match_fecha = re.search(
         r'(\d{1,2}).*?mes.*?(\d{2}).*?(20\d{2})',
         texto_norm
@@ -127,59 +125,74 @@ def leer_pdf(file_bytes):
     texto = ""
 
     for page in reader.pages:
-        texto += page.extract_text() + "\n"
+        contenido = page.extract_text()
+        if contenido:
+            texto += contenido + "\n"
 
     return texto
 
 # =========================
-# UI
+# INTERFAZ
 # =========================
 
 st.title("📊 Extractor de Actas - Consejo de Investigación")
 
+# 👇 SIEMPRE visible
+archivos = st.file_uploader(
+    "📂 Subí los PDFs",
+    type=["pdf"],
+    accept_multiple_files=True
+)
+
+# 👇 botón independiente
 if st.button("🚀 Procesar actas"):
+
+    if not archivos:
+        st.warning("Primero subí los PDFs")
+        st.stop()
 
     try:
         hoja1, hoja2 = conectar()
-        st.success("Conexión exitosa")
+        st.success("Conexión exitosa a Google Sheets")
 
-        archivos = st.file_uploader(
-            "Subí los PDFs",
-            type=["pdf"],
-            accept_multiple_files=True
-        )
+        for archivo in archivos:
 
-        if archivos:
+            st.write(f"📄 Procesando: {archivo.name}")
 
-            for archivo in archivos:
-                texto = leer_pdf(archivo.read())
-                datos = extraer_datos(texto)
+            texto = leer_pdf(archivo.read())
 
-                # 🚫 evitar basura
-                if datos["acta"] == "Detectar":
-                    continue
+            if not texto.strip():
+                st.warning(f"No se pudo leer el PDF: {archivo.name}")
+                continue
 
-                hoja1.append_row([
-                    datos["acta"],
-                    datos["fecha"],
-                    datos["anio"],
-                    datos["unidad"]
-                ])
+            datos = extraer_datos(texto)
 
-                hoja2.append_row([
-                    datos["acta"],
-                    datos["fecha"],
-                    datos["anio"],
-                    datos["tipo"],
-                    texto[:500],
-                    datos["director"]
-                ])
+            st.write(datos)  # DEBUG visible
 
-            st.success("Procesamiento terminado")
+            if datos["acta"] == "Detectar":
+                st.warning(f"No se detectó acta en {archivo.name}")
+                continue
 
-        else:
-            st.warning("Subí PDFs")
+            # Guardar en Hoja 1
+            hoja1.append_row([
+                datos["acta"],
+                datos["fecha"],
+                datos["anio"],
+                datos["unidad"]
+            ])
+
+            # Guardar en Hoja 2
+            hoja2.append_row([
+                datos["acta"],
+                datos["fecha"],
+                datos["anio"],
+                datos["tipo"],
+                texto[:500],
+                datos["director"]
+            ])
+
+        st.success("🎉 Procesamiento terminado correctamente")
 
     except Exception as e:
-        st.error("Error al procesar")
+        st.error("❌ Error al procesar")
         st.code(str(e))
