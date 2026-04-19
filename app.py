@@ -4,14 +4,10 @@ from PyPDF2 import PdfReader
 import gspread
 from google.oauth2.service_account import Credentials
 
-# =========================
-# CONFIG
-# =========================
-
 SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
 
 # =========================
-# CONEXIÓN GOOGLE SHEETS
+# CONEXIÓN
 # =========================
 
 def conectar():
@@ -28,14 +24,10 @@ def conectar():
     client = gspread.authorize(creds)
     sheet = client.open_by_key(SPREADSHEET_ID)
 
-    hoja1 = sheet.worksheet("Hoja 1")
-    hoja2 = sheet.worksheet("Hoja 2")
-
-    return hoja1, hoja2
-
+    return sheet.worksheet("Hoja 1"), sheet.worksheet("Hoja 2")
 
 # =========================
-# LEER PDF
+# PDF
 # =========================
 
 def extraer_texto_pdf(file):
@@ -43,10 +35,9 @@ def extraer_texto_pdf(file):
     texto = ""
 
     for page in reader.pages:
-        texto += page.extract_text() + "\n"
+        texto += (page.extract_text() or "") + "\n"
 
     return texto
-
 
 # =========================
 # DATOS ACTA
@@ -54,104 +45,95 @@ def extraer_texto_pdf(file):
 
 def extraer_datos_basicos(texto):
 
-    match_acta = re.search(r'ACTA\s*N[º°]?\s*(\d+)', texto)
-    acta = match_acta.group(1) if match_acta else "Detectar"
+    acta = re.search(r'ACTA\s*N[º°]?\s*(\d+)', texto)
+    acta = acta.group(1) if acta else "Detectar"
 
-    match_fecha = re.search(
-        r'(\d{1,2})\s+d[ií]as del mes de\s+([a-zA-Z]+)\s+de\s+dos mil\s+(\w+)',
+    fecha_match = re.search(
+        r'(\d{1,2})\s+d[ií]as del mes de\s+(\w+)\s+de\s+dos mil\s+(\w+)',
         texto,
         re.IGNORECASE
     )
 
-    fecha = "Detectar"
-    anio = "Detectar"
+    meses = {
+        "enero":"01","febrero":"02","marzo":"03","abril":"04",
+        "mayo":"05","junio":"06","julio":"07","agosto":"08",
+        "septiembre":"09","octubre":"10","noviembre":"11","diciembre":"12"
+    }
 
-    if match_fecha:
-        dia = match_fecha.group(1)
-        mes = match_fecha.group(2).lower()
-        anio_txt = match_fecha.group(3).lower()
+    anios = {
+        "veinticinco":"2025",
+        "veinticuatro":"2024"
+    }
 
-        meses = {
-            "enero": "01", "febrero": "02", "marzo": "03", "abril": "04",
-            "mayo": "05", "junio": "06", "julio": "07", "agosto": "08",
-            "septiembre": "09", "octubre": "10", "noviembre": "11", "diciembre": "12"
-        }
+    if fecha_match:
+        dia = fecha_match.group(1)
+        mes = meses.get(fecha_match.group(2).lower(), "00")
+        anio = anios.get(fecha_match.group(3).lower(), "2025")
+        fecha = f"{dia}/{mes}/{anio}"
+    else:
+        fecha = "Detectar"
+        anio = "Detectar"
 
-        anios = {
-            "veinticinco": "2025",
-            "veinticuatro": "2024"
-        }
+    unidad = "UCCuyo" if "universidad católica de cuyo" in texto.lower() else "Detectar"
 
-        fecha = f"{dia}/{meses.get(mes,'00')}/{anios.get(anio_txt,'2025')}"
-        anio = anios.get(anio_txt, "2025")
-
-    return acta, fecha, anio
-
+    return acta, fecha, anio, unidad
 
 # =========================
 # DETECTAR TIPO
 # =========================
 
 def detectar_tipo(texto):
+    t = texto.lower()
 
-    texto = texto.lower()
-
-    if "proyecto" in texto:
-        return "Proyecto"
-    elif "informe final" in texto:
+    if "proyecto de investigación" in t:
+        return "Proyecto de Investigación"
+    elif "proyecto de cátedra" in t:
+        return "Proyecto de Cátedra"
+    elif "informe final" in t:
         return "Informe Final"
-    elif "avance" in texto:
+    elif "informe de avance" in t:
         return "Informe de Avance"
-    elif "categoriz" in texto:
-        return "Categorización"
+    elif "informe de cátedra" in t:
+        return "Informe de Cátedra"
     else:
         return "Otro"
 
-
 # =========================
-# EXTRAER ITEMS
+# EXTRAER ITEMS (VERSIÓN PRO)
 # =========================
 
 def extraer_items(texto):
 
     items = []
 
-    bloques = re.split(r'\n(?=Facultad)', texto)
+    lineas = [l.strip() for l in texto.split("\n") if l.strip()]
 
-    for bloque in bloques:
+    for i, linea in enumerate(lineas):
 
-        if "proyecto" not in bloque.lower():
-            continue
+        tipo = detectar_tipo(linea)
 
-        # TÍTULO
-        lineas = bloque.split("\n")
-        titulo = lineas[1].strip() if len(lineas) > 1 else "Sin título"
+        if tipo != "Otro":
 
-        # DIRECTOR
-        match_dir = re.search(r'Director[:\s]+([A-Za-zÁÉÍÓÚÑ\s]+)', bloque, re.IGNORECASE)
-        director = match_dir.group(1).strip() if match_dir else "No detectado"
+            # TÍTULO = siguiente línea larga coherente
+            titulo = "Sin título"
 
-        tipo = detectar_tipo(bloque)
+            for j in range(i+1, min(i+6, len(lineas))):
+                if len(lineas[j]) > 15 and "acta" not in lineas[j].lower():
+                    titulo = lineas[j]
+                    break
 
-        items.append((tipo, titulo, director))
+            # DIRECTOR
+            director = "No detectado"
+
+            bloque = " ".join(lineas[i:i+10])
+
+            match = re.search(r'Director[:\s]+([A-Za-zÁÉÍÓÚÑ\s]+)', bloque, re.IGNORECASE)
+            if match:
+                director = match.group(1).strip()
+
+            items.append((tipo, titulo, director))
 
     return items
-
-
-# =========================
-# EVITAR DUPLICADOS
-# =========================
-
-def existe(hoja, acta, titulo):
-    datos = hoja.get_all_values()
-
-    for fila in datos:
-        if len(fila) > 4:
-            if fila[0] == acta and fila[4] == titulo:
-                return True
-
-    return False
-
 
 # =========================
 # APP
@@ -165,7 +147,7 @@ if st.button("🚀 Procesar actas"):
 
     try:
         hoja1, hoja2 = conectar()
-        st.success("✅ Conexión a Google Sheets OK")
+        st.success("✅ Conectado a Google Sheets")
 
         for file in files:
 
@@ -173,21 +155,18 @@ if st.button("🚀 Procesar actas"):
 
             texto = extraer_texto_pdf(file)
 
-            acta, fecha, anio = extraer_datos_basicos(texto)
+            acta, fecha, anio, unidad = extraer_datos_basicos(texto)
             items = extraer_items(texto)
 
-            # GUARDAR ACTA
-            hoja1.append_row([acta, fecha, anio, "UCCuyo"])
+            # HOJA 1
+            hoja1.append_row([acta, fecha, anio, unidad])
 
             if not items:
-                st.warning("⚠️ No se detectaron proyectos")
+                st.warning("⚠️ No se detectaron ítems")
                 continue
 
+            # HOJA 2
             for tipo, titulo, director in items:
-
-                if existe(hoja2, acta, titulo):
-                    continue
-
                 hoja2.append_row([
                     acta,
                     fecha,
