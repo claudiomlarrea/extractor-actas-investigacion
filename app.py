@@ -95,8 +95,8 @@ def limpiar_texto(texto):
 
 def estructurar_texto(texto):
 
-    texto = re.sub(r'\n\s*(\d+\.)', r'\n\n=== ITEM \1 ===\n', texto)
-    texto = re.sub(r'(Facultad de [A-Za-zÁÉÍÓÚÑ ]+)', r'\n\n=== \1 ===\n', texto)
+    # SOLO separar ITEMS (no facultades)
+    texto = re.sub(r'ITEM\s*(\d+)', r'\n\n=== ITEM \1 ===\n', texto)
 
     return texto
 
