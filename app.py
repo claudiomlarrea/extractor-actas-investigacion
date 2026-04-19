@@ -38,32 +38,43 @@ def extraer_texto_pdf(file):
 def limpiar_texto(texto):
 
     # =========================
-    # 1. eliminar saltos raros dentro de palabras
+    # 1. arreglar cortes de OCR (letras separadas)
     # =========================
-    texto = re.sub(r'([A-Za-z])\s+([A-Za-z])', r'\1\2', texto)
+    texto = re.sub(r'([A-Za-zÁÉÍÓÚÑ])\s{2,}([A-Za-zÁÉÍÓÚÑ])', r'\1\2', texto)
 
     # =========================
-    # 2. arreglar palabras cortadas comunes
+    # 2. arreglos específicos (clave)
     # =========================
-    texto = texto.replace("DIRECT OR", "DIRECTOR")
-    texto = texto.replace("PROYECT O", "PROYECTO")
-    texto = texto.replace("F acultad", "Facultad")
-    texto = texto.replace("PRESENT ACIÓN", "PRESENTACIÓN")
+    reemplazos = {
+        "DIRECT OR": "DIRECTOR",
+        "PROYECT O": "PROYECTO",
+        "F acultad": "Facultad",
+        "PRESENT ACIÓN": "PRESENTACIÓN",
+        "INFORME FINALF": "INFORME FINAL F",
+        "Facultadde": "Facultad de",
+        "Directora:VillalongaSusana": "Directora: Villalonga Susana",
+        "Enlaciudadde": "En la ciudad de",
+        "daporcomenzada": "da por comenzada",
+        "ConsejodeInvestigación": "Consejo de Investigación"
+    }
+
+    for k, v in reemplazos.items():
+        texto = texto.replace(k, v)
 
     # =========================
-    # 3. normalizar espacios
+    # 3. reconstruir espacios entre palabras largas
+    # =========================
+    texto = re.sub(r'([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])', r'\1 \2', texto)
+
+    # =========================
+    # 4. normalizar espacios
     # =========================
     texto = re.sub(r'\s+', ' ', texto)
 
     # =========================
-    # 4. saltos por puntos
+    # 5. saltos de línea útiles
     # =========================
     texto = re.sub(r'\.\s+', '.\n', texto)
-
-    # =========================
-    # 5. limpiar caracteres raros
-    # =========================
-    texto = texto.replace("�", "")
 
     return texto.strip()
 
