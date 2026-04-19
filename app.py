@@ -41,23 +41,22 @@ def limpiar_texto(texto):
     Limpieza simple (NO rompe palabras)
     """
 
-    # espacios normales
     texto = re.sub(r'\s+', ' ', texto)
 
-    # salto después de punto
     texto = re.sub(r'\.\s+', '.\n', texto)
 
-    # arreglos comunes
+    # arreglos típicos de PDF
     texto = texto.replace("DIRECT OR", "DIRECTOR")
     texto = texto.replace("PROYECT OS", "PROYECTOS")
     texto = texto.replace("PRESENT ACIÓN", "PRESENTACIÓN")
+    texto = texto.replace("F acultad", "Facultad")
 
     return texto.strip()
 
 
 def extraer_items(texto):
     """
-    Extracción simple y robusta basada en ●
+    Extracción robusta basada en ●
     """
 
     items = []
@@ -154,10 +153,27 @@ if st.button("🚀 Procesar"):
 
         texto_limpio = limpiar_texto(texto)
 
-        # vista texto
-        with st.expander("Ver texto limpio"):
+        # =========================
+        # VER TEXTO
+        # =========================
+        with st.expander("👁 Ver texto limpio"):
             st.text_area("", texto_limpio, height=200)
 
+        # =========================
+        # DESCARGAR TXT
+        # =========================
+        nombre_txt = file.name.replace(".pdf", ".txt")
+
+        st.download_button(
+            label="📄 Descargar TXT limpio",
+            data=texto_limpio,
+            file_name=nombre_txt,
+            mime="text/plain"
+        )
+
+        # =========================
+        # EXTRAER DATOS
+        # =========================
         items = extraer_items(texto_limpio)
 
         if items:
@@ -167,7 +183,9 @@ if st.button("🚀 Procesar"):
         else:
             st.warning("No detectó ítems")
 
-    # descarga final
+    # =========================
+    # DESCARGA FINAL CSV
+    # =========================
     if todos:
         df_total = pd.DataFrame(todos)
 
