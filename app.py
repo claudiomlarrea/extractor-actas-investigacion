@@ -62,61 +62,68 @@ def extraer_items(texto):
     items = []
 
     # =========================
-    # BLOQUES POR FACULTAD
+    # DIVIDIR POR PROYECTOS (●)
     # =========================
-    bloques = re.split(r'=== Facultad', texto)
+    bloques = re.split(r'●', texto)
 
     for bloque in bloques:
 
-        if len(bloque.strip()) < 50:
+        if len(bloque.strip()) < 40:
             continue
 
-        facultad_match = re.search(r'^(.*?)===', bloque)
-        facultad = facultad_match.group(1).strip() if facultad_match else "No detectado"
+        bloque = bloque.strip()
 
         # =========================
-        # DETECTAR TIPO
+        # TIPO
         # =========================
-        tipo = "No detectado"
-
-        if "proyecto" in bloque.lower():
-            tipo = "Proyecto de Investigación"
+        tipo = "Proyecto de Investigación"
 
         if "avance" in bloque.lower():
             tipo = "Informe de Avance"
 
-        if "final" in bloque.lower():
+        elif "final" in bloque.lower():
             tipo = "Informe Final"
 
-        if "categorización" in bloque.lower():
+        elif "categoriz" in bloque.lower():
             tipo = "Categorización"
 
         # =========================
-        # EXTRAER TÍTULOS (● ...)
+        # FACULTAD
         # =========================
-        titulos = re.findall(r'●\s*(.+?)(?=●|Director|Directora|$)', bloque, re.DOTALL)
+        facultad_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', bloque)
+        facultad = facultad_match.group(0) if facultad_match else "No detectado"
 
-        for t in titulos:
+        # =========================
+        # DIRECTOR (mejorado)
+        # =========================
+        director_match = re.search(
+            r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)',
+            bloque,
+            re.IGNORECASE
+        )
 
-            titulo = re.sub(r'\s+', ' ', t).strip()
+        director = director_match.group(1).strip() if director_match else "No detectado"
 
-            # =========================
-            # DIRECTOR
-            # =========================
-            director_match = re.search(
-                r'(Director[a]?:?\s*)([A-Za-zÁÉÍÓÚÑ\s\.]+)',
-                bloque,
-                re.IGNORECASE
-            )
+        # limpiar basura tipo "D", "a", "Mg"
+        if len(director) < 5:
+            director = "No detectado"
 
-            director = director_match.group(2).strip() if director_match else "No detectado"
+        # =========================
+        # TITULO (todo antes de Director)
+        # =========================
+        titulo = bloque.split("Director")[0]
+        titulo = re.sub(r'\s+', ' ', titulo).strip()
 
-            items.append({
-                "Tipo": tipo,
-                "Facultad": facultad,
-                "Titulo": titulo,
-                "Director": director
-            })
+        # evitar títulos basura
+        if len(titulo) < 10:
+            continue
+
+        items.append({
+            "Tipo": tipo,
+            "Facultad": facultad,
+            "Titulo": titulo,
+            "Director": director
+        })
 
     return items
 
