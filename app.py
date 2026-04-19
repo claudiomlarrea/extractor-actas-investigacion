@@ -37,9 +37,32 @@ def extraer_texto_pdf(file):
 
 def limpiar_texto(texto):
 
+    # =========================
+    # 1. eliminar saltos raros dentro de palabras
+    # =========================
+    texto = re.sub(r'([A-Za-z])\s+([A-Za-z])', r'\1\2', texto)
+
+    # =========================
+    # 2. arreglar palabras cortadas comunes
+    # =========================
+    texto = texto.replace("DIRECT OR", "DIRECTOR")
+    texto = texto.replace("PROYECT O", "PROYECTO")
+    texto = texto.replace("F acultad", "Facultad")
+    texto = texto.replace("PRESENT ACIÓN", "PRESENTACIÓN")
+
+    # =========================
+    # 3. normalizar espacios
+    # =========================
     texto = re.sub(r'\s+', ' ', texto)
+
+    # =========================
+    # 4. saltos por puntos
+    # =========================
     texto = re.sub(r'\.\s+', '.\n', texto)
-    texto = re.sub(r'([A-ZÁÉÍÓÚÑ ]{8,})', r'\n\1\n', texto)
+
+    # =========================
+    # 5. limpiar caracteres raros
+    # =========================
     texto = texto.replace("�", "")
 
     return texto.strip()
