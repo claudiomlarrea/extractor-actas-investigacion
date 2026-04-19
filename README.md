@@ -1,20 +1,18 @@
-# Extractor de Actas - Consejo de Investigación
+# Normalizador de Actas - Consejo de Investigación
 
-Aplicación desarrollada en Streamlit para:
+Aplicación en Streamlit para:
 
-- Leer actas en PDF desde Google Drive
-- Extraer información automáticamente
-- Cargar datos en Google Sheets
-- Alimentar tableros en Looker Studio
+- Leer PDFs de actas
+- Limpiar el texto
+- Estructurarlo
+- Descargar TXT listo para análisis
 
 ## Uso
 
-1. Presionar "Procesar actas"
-2. El sistema:
-   - Lee PDFs
-   - Extrae datos
-   - Actualiza Sheets
+1. Subir PDFs
+2. Click en "Normalizar actas"
+3. Descargar archivo TXT
 
-## Requisitos
+## Objetivo
 
-Credenciales de Google Cloud cargadas en Streamlit Secrets
+Preparar datos para extracción estructurada (proyectos, informes, etc.)
