@@ -1,166 +1,185 @@
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
 from PyPDF2 import PdfReader
-import io
 import re
+import io
 
 # =========================
 # CONFIG
 # =========================
+
 SPREADSHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
-FOLDER_ID = "1v1UPHiDF3eimPdCfaGGueKWg9M8jzdMJ"
+CARPETA_DRIVE_ID = "1v1UPHiDF3eimPdCfaGGueKWg9M8jzdMJ"
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
 # =========================
-# AUTENTICACIÓN
+# CONEXIÓN GOOGLE
 # =========================
+
 def conectar():
-    creds_dict = st.secrets["gcp_service_account"]
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=SCOPES
+    )
 
-    scopes = [
-        "https://www.googleapis.com/auth/drive",
-        "https://www.googleapis.com/auth/spreadsheets"
-    ]
-
-    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-
-    # Google Sheets
     client = gspread.authorize(creds)
+
     sheet = client.open_by_key(SPREADSHEET_ID)
 
-    sheet_actas = sheet.worksheet("Hoja 1")
-    sheet_detalle = sheet.worksheet("Hoja 2")
+    hoja1 = sheet.worksheet("Hoja 1")
+    hoja2 = sheet.worksheet("Hoja 2")
 
-    # Google Drive
-    drive = build("drive", "v3", credentials=creds)
-
-    return drive, sheet_actas, sheet_detalle
+    return hoja1, hoja2
 
 # =========================
-# EXTRAER TEXTO PDF
+# NORMALIZAR TEXTO
 # =========================
-def extraer_texto_pdf(file_bytes):
-    reader = PdfReader(io.BytesIO(file_bytes))
-    texto = ""
-    for page in reader.pages:
-        texto += page.extract_text() or ""
+
+def normalizar_texto(texto):
+    texto = texto.lower()
+
+    reemplazos = {
+        "dos mil veinticinco": "2025",
+        "dos mil veinticuatro": "2024",
+        "dos mil veintitrés": "2023",
+        "enero": "01",
+        "febrero": "02",
+        "marzo": "03",
+        "abril": "04",
+        "mayo": "05",
+        "junio": "06",
+        "julio": "07",
+        "agosto": "08",
+        "septiembre": "09",
+        "octubre": "10",
+        "noviembre": "11",
+        "diciembre": "12"
+    }
+
+    for k, v in reemplazos.items():
+        texto = texto.replace(k, v)
+
     return texto
 
 # =========================
-# LIMPIEZA TEXTO
+# EXTRAER DATOS (MEJORADO)
 # =========================
-def limpiar_texto(texto):
-    texto = re.sub(r'\s+', ' ', texto)
-    return texto.strip()
 
-# =========================
-# EXTRACCIÓN INTELIGENTE
-# =========================
 def extraer_datos(texto):
     datos = {}
 
+    texto_norm = normalizar_texto(texto)
+
     # ACTA
-    match_acta = re.search(r'ACTA\s*N[º°]\s*(\d+)', texto, re.IGNORECASE)
+    match_acta = re.search(r'acta\s*n[º°]?\s*(\d+)', texto_norm)
     datos["acta"] = match_acta.group(1) if match_acta else "Detectar"
 
-    # FECHA (ej: "15 días del mes de abril de 2025")
+    # FECHA REAL
     match_fecha = re.search(
-        r'(\d{1,2}).*?mes.*?([a-zA-Z]+).*?(\d{4})',
-        texto,
-        re.IGNORECASE
+        r'(\d{1,2}).*?mes.*?(\d{2}).*?(20\d{2})',
+        texto_norm
     )
 
     if match_fecha:
         dia = match_fecha.group(1)
         mes = match_fecha.group(2)
         anio = match_fecha.group(3)
-        datos["fecha"] = f"{dia} {mes} {anio}"
+
+        datos["fecha"] = f"{dia}/{mes}/{anio}"
         datos["anio"] = anio
     else:
         datos["fecha"] = "Detectar"
         datos["anio"] = "Detectar"
 
-    # UNIDAD ACADÉMICA
-    if "Facultad" in texto:
-        datos["unidad"] = "Facultad"
+    # UNIDAD
+    if "universidad católica de cuyo" in texto_norm:
+        datos["unidad"] = "UCCuyo"
     else:
         datos["unidad"] = "Detectar"
 
-    # TIPO (clasificación)
-    if "Proyecto" in texto:
+    # TIPO
+    if "proyecto" in texto_norm:
         datos["tipo"] = "Proyecto"
-    elif "Informe final" in texto:
+    elif "informe final" in texto_norm:
         datos["tipo"] = "Informe final"
-    elif "Informe de avance" in texto:
+    elif "avance" in texto_norm:
         datos["tipo"] = "Informe de avance"
     else:
         datos["tipo"] = "Otro"
 
-    # DIRECTOR (básico)
-    match_dir = re.search(r'Director[:\s]+([A-Za-z\s]+)', texto)
-    datos["director"] = match_dir.group(1).strip() if match_dir else "No detectado"
+    # DIRECTOR
+    match_dir = re.search(r'director[:\s]+([a-zA-Z\s]+)', texto_norm)
+    datos["director"] = match_dir.group(1).strip().title() if match_dir else "No detectado"
 
     return datos
 
 # =========================
-# PROCESAMIENTO
+# LEER PDF
 # =========================
-def procesar_actas():
-    drive, sheet_actas, sheet_detalle = conectar()
 
-    results = drive.files().list(
-        q=f"'{FOLDER_ID}' in parents and mimeType='application/pdf'",
-        fields="files(id, name)"
-    ).execute()
+def leer_pdf(file_bytes):
+    reader = PdfReader(io.BytesIO(file_bytes))
+    texto = ""
 
-    files = results.get("files", [])
+    for page in reader.pages:
+        texto += page.extract_text() + "\n"
 
-    if not files:
-        st.warning("No hay PDFs en la carpeta")
-        return
-
-    st.success(f"{len(files)} PDFs encontrados")
-
-    for file in files:
-        file_id = file["id"]
-        nombre = file["name"]
-
-        st.write(f"📄 Procesando: {nombre}")
-
-        request = drive.files().get_media(fileId=file_id)
-        file_bytes = request.execute()
-
-        texto = extraer_texto_pdf(file_bytes)
-        texto = limpiar_texto(texto)
-
-        datos = extraer_datos(texto)
-
-        # HOJA 1 (RESUMEN)
-        sheet_actas.append_row([
-            datos["acta"],
-            datos["fecha"],
-            datos["anio"],
-            datos["unidad"],
-            datos["tipo"],
-            datos["director"]
-        ])
-
-        # HOJA 2 (DETALLE)
-        sheet_detalle.append_row([
-            datos["acta"],
-            datos["fecha"],
-            datos["anio"],
-            datos["tipo"],
-            texto
-        ])
-
-    st.success("🚀 Procesamiento completo")
+    return texto
 
 # =========================
 # UI
 # =========================
+
 st.title("📊 Extractor de Actas - Consejo de Investigación")
 
 if st.button("🚀 Procesar actas"):
-    procesar_actas()
+
+    try:
+        hoja1, hoja2 = conectar()
+        st.success("Conexión exitosa")
+
+        archivos = st.file_uploader(
+            "Subí los PDFs",
+            type=["pdf"],
+            accept_multiple_files=True
+        )
+
+        if archivos:
+
+            for archivo in archivos:
+                texto = leer_pdf(archivo.read())
+                datos = extraer_datos(texto)
+
+                # 🚫 evitar basura
+                if datos["acta"] == "Detectar":
+                    continue
+
+                hoja1.append_row([
+                    datos["acta"],
+                    datos["fecha"],
+                    datos["anio"],
+                    datos["unidad"]
+                ])
+
+                hoja2.append_row([
+                    datos["acta"],
+                    datos["fecha"],
+                    datos["anio"],
+                    datos["tipo"],
+                    texto[:500],
+                    datos["director"]
+                ])
+
+            st.success("Procesamiento terminado")
+
+        else:
+            st.warning("Subí PDFs")
+
+    except Exception as e:
+        st.error("Error al procesar")
+        st.code(str(e))
