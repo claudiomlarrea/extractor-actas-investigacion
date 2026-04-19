@@ -3,25 +3,12 @@ from PyPDF2 import PdfReader
 import re
 import pandas as pd
 
-# =========================
-# CONFIG
-# =========================
+st.set_page_config(page_title="Sistema de Actas", layout="wide")
 
-st.set_page_config(page_title="Actas - Sistema", layout="wide")
-
-st.title("📊 Sistema de Actas - Consejo de Investigación")
-
-st.markdown("""
-Subí actas en PDF y el sistema:
-
-✔ Limpia el texto  
-✔ Detecta proyectos e informes  
-✔ Extrae títulos y directores  
-✔ Genera base para Excel / Looker  
-""")
+st.title("📊 Sistema Institucional de Actas")
 
 # =========================
-# FUNCIONES
+# PDF
 # =========================
 
 def extraer_texto_pdf(file):
@@ -29,93 +16,95 @@ def extraer_texto_pdf(file):
     texto = ""
 
     for page in reader.pages:
-        contenido = page.extract_text()
-        if contenido:
-            texto += contenido + "\n"
+        t = page.extract_text()
+        if t:
+            texto += t + "\n"
 
     return texto
 
 
+# =========================
+# LIMPIEZA
+# =========================
+
 def limpiar_texto(texto):
-    """
-    Limpieza simple (NO rompe palabras)
-    """
 
     texto = re.sub(r'\s+', ' ', texto)
 
-    texto = re.sub(r'\.\s+', '.\n', texto)
+    fixes = {
+        "DIRECT OR": "DIRECTOR",
+        "PROYECT O": "PROYECTO",
+        "F acultad": "Facultad",
+    }
 
-    # arreglos típicos de PDF
-    texto = texto.replace("DIRECT OR", "DIRECTOR")
-    texto = texto.replace("PROYECT OS", "PROYECTOS")
-    texto = texto.replace("PRESENT ACIÓN", "PRESENTACIÓN")
-    texto = texto.replace("F acultad", "Facultad")
+    for k, v in fixes.items():
+        texto = texto.replace(k, v)
+
+    texto = re.sub(r'\.\s+', '.\n', texto)
 
     return texto.strip()
 
 
-def extraer_items(texto):
-    """
-    Extracción robusta basada en ●
-    """
+# =========================
+# EXTRACTOR 1 (●)
+# =========================
+
+def extraer_por_bullets(texto):
+
+    items = []
+    bloques = re.split(r'[●❖]', texto)
+
+    for b in bloques:
+
+        if len(b) < 50:
+            continue
+
+        tipo = "Proyecto"
+
+        if "avance" in b.lower():
+            tipo = "Informe de Avance"
+        elif "final" in b.lower():
+            tipo = "Informe Final"
+
+        fac = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', b)
+        facultad = fac.group(0) if fac else "No detectado"
+
+        dir_match = re.search(r'Director[a]?:?\s*(.+)', b, re.IGNORECASE)
+        director = dir_match.group(1).strip() if dir_match else "No detectado"
+
+        titulo = b.split("Director")[0].strip()
+
+        if len(titulo) > 15:
+            items.append({
+                "Tipo": tipo,
+                "Facultad": facultad,
+                "Titulo": titulo,
+                "Director": director
+            })
+
+    return items
+
+
+# =========================
+# EXTRACTOR 2 (tabla tipo 178)
+# =========================
+
+def extraer_tabla(texto):
 
     items = []
 
-    bloques = re.split(r'●', texto)
+    patron = r'Facultad.*?Cuyo\s+(.*?)\s+([A-Za-zÁÉÍÓÚÑ\s]+)'
 
-    for bloque in bloques:
+    matches = re.findall(patron, texto)
 
-        if len(bloque.strip()) < 40:
-            continue
+    for m in matches:
 
-        bloque = bloque.strip()
-
-        # =========================
-        # TIPO
-        # =========================
-        tipo = "Proyecto"
-
-        if "avance" in bloque.lower():
-            tipo = "Informe de Avance"
-
-        elif "final" in bloque.lower():
-            tipo = "Informe Final"
-
-        elif "categoriz" in bloque.lower():
-            tipo = "Categorización"
-
-        # =========================
-        # FACULTAD
-        # =========================
-        facultad_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', bloque)
-        facultad = facultad_match.group(0) if facultad_match else "No detectado"
-
-        # =========================
-        # DIRECTOR
-        # =========================
-        director_match = re.search(
-            r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)',
-            bloque,
-            re.IGNORECASE
-        )
-
-        director = director_match.group(1).strip() if director_match else "No detectado"
-
-        if len(director) < 5:
-            director = "No detectado"
-
-        # =========================
-        # TITULO
-        # =========================
-        titulo = bloque.split("Director")[0]
-        titulo = re.sub(r'\s+', ' ', titulo).strip()
-
-        if len(titulo) < 10:
-            continue
+        titulo = m[0].strip()
+        director = m[1].strip()
 
         items.append({
-            "Tipo": tipo,
-            "Facultad": facultad,
+            "Tipo": "Proyecto PRONIS",
+            "Facultad": "Detectado",
             "Titulo": titulo,
             "Director": director
         })
@@ -124,74 +113,57 @@ def extraer_items(texto):
 
 
 # =========================
+# SELECTOR INTELIGENTE
+# =========================
+
+def extraer_items(texto):
+
+    if "●" in texto or "❖" in texto:
+        return extraer_por_bullets(texto)
+
+    elif "Unidad Académica" in texto or "PRONIS" in texto:
+        return extraer_tabla(texto)
+
+    else:
+        return []
+
+
+# =========================
 # UI
 # =========================
 
-files = st.file_uploader(
-    "📄 Subí PDFs",
-    type=["pdf"],
-    accept_multiple_files=True
-)
+files = st.file_uploader("Subí PDFs", type=["pdf"], accept_multiple_files=True)
 
 if st.button("🚀 Procesar"):
-
-    if not files:
-        st.warning("Subí al menos un PDF")
-        st.stop()
 
     todos = []
 
     for file in files:
 
-        st.subheader(f"📄 {file.name}")
+        st.subheader(file.name)
 
         texto = extraer_texto_pdf(file)
+        limpio = limpiar_texto(texto)
 
-        if not texto.strip():
-            st.error("No se pudo leer el PDF")
-            continue
+        with st.expander("Texto"):
+            st.text_area("", limpio, height=200)
 
-        texto_limpio = limpiar_texto(texto)
+        st.download_button("TXT", limpio, file.name.replace(".pdf", ".txt"))
 
-        # =========================
-        # VER TEXTO
-        # =========================
-        with st.expander("👁 Ver texto limpio"):
-            st.text_area("", texto_limpio, height=200)
-
-        # =========================
-        # DESCARGAR TXT
-        # =========================
-        nombre_txt = file.name.replace(".pdf", ".txt")
-
-        st.download_button(
-            label="📄 Descargar TXT limpio",
-            data=texto_limpio,
-            file_name=nombre_txt,
-            mime="text/plain"
-        )
-
-        # =========================
-        # EXTRAER DATOS
-        # =========================
-        items = extraer_items(texto_limpio)
+        items = extraer_items(limpio)
 
         if items:
             df = pd.DataFrame(items)
             st.dataframe(df)
             todos.extend(items)
         else:
-            st.warning("No detectó ítems")
+            st.warning("No detectado")
 
-    # =========================
-    # DESCARGA FINAL CSV
-    # =========================
     if todos:
         df_total = pd.DataFrame(todos)
 
         st.download_button(
-            "📥 Descargar CSV",
+            "📥 CSV FINAL",
             df_total.to_csv(index=False),
-            "actas.csv",
-            "text/csv"
+            "actas_final.csv"
         )
