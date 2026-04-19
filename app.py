@@ -106,34 +106,72 @@ def extraer_items(texto):
 
     items = []
 
-    lineas = [l.strip() for l in texto.split("\n") if l.strip()]
+    # NORMALIZAR TEXTO
+    texto = texto.replace("\n", " ")
 
-    for i, linea in enumerate(lineas):
+    # DIVIDIR POR PROYECTOS (clave)
+    bloques = re.split(r'(?=Proyecto)', texto, flags=re.IGNORECASE)
 
-        texto_lower = linea.lower()
+    for bloque in bloques:
 
-        # DETECTAR SI ES UN ITEM
-        if "proyecto" in texto_lower or "evaluación" in texto_lower:
+        bloque_lower = bloque.lower()
 
+        # FILTRAR SOLO BLOQUES REALES
+        if "proyecto" not in bloque_lower:
+            continue
+
+        if len(bloque) < 50:
+            continue
+
+        # =====================
+        # TIPO
+        # =====================
+        if "investigación" in bloque_lower:
+            tipo = "Proyecto de Investigación"
+        elif "cátedra" in bloque_lower:
+            tipo = "Proyecto de Cátedra"
+        elif "informe final" in bloque_lower:
+            tipo = "Informe Final"
+        elif "avance" in bloque_lower:
+            tipo = "Informe de Avance"
+        else:
             tipo = "Proyecto"
 
-            # BUSCAR TÍTULO (línea larga cercana)
-            titulo = "Sin título"
+        # =====================
+        # TÍTULO
+        # =====================
+        titulo = "No detectado"
 
-            for j in range(i+1, min(i+8, len(lineas))):
-                if len(lineas[j]) > 20 and "san juan" not in lineas[j].lower():
-                    titulo = lineas[j]
-                    break
+        posibles = re.findall(r'([A-ZÁÉÍÓÚÑ][^\.]{20,120})', bloque)
 
-            # BUSCAR DIRECTOR (nombre propio cercano)
-            director = "No detectado"
+        for p in posibles:
+            if "acta" not in p.lower() and "san juan" not in p.lower():
+                titulo = p.strip()
+                break
 
-            for j in range(i, min(i+10, len(lineas))):
-                if re.match(r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', lineas[j]):
-                    director = lineas[j]
-                    break
+        # =====================
+        # DIRECTOR
+        # =====================
+        director = "No detectado"
 
-            items.append((tipo, titulo, director))
+        match_dir = re.search(
+            r'(Director|Responsable|Titular)[:\s]+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)',
+            bloque
+        )
+
+        if match_dir:
+            director = match_dir.group(2)
+
+        # =====================
+        # LIMPIEZA FINAL
+        # =====================
+        if titulo.lower().startswith("facultad"):
+            continue
+
+        if titulo.lower().startswith("secretaría"):
+            continue
+
+        items.append((tipo, titulo, director))
 
     return items
 # =========================
