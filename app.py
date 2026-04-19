@@ -61,85 +61,64 @@ def extraer_items(texto):
 
     items = []
 
-    lineas = texto.split("\n")
+    # =========================
+    # BLOQUES POR FACULTAD
+    # =========================
+    bloques = re.split(r'=== Facultad', texto)
 
-    tipo_actual = "No detectado"
-    facultad_actual = "No detectado"
+    for bloque in bloques:
 
-    titulo = None
-    director = "No detectado"
+        if len(bloque.strip()) < 50:
+            continue
 
-    for linea in lineas:
-
-        l = linea.strip()
-
-        # =========================
-        # TIPO
-        # =========================
-        if "presentación de proyectos" in l.lower():
-            tipo_actual = "Proyecto de Investigación"
-
-        elif "proyectos de investigación" in l.lower():
-            tipo_actual = "Proyecto de Investigación"
-
-        elif "informes finales" in l.lower():
-            tipo_actual = "Informe Final"
-
-        elif "informe final" in l.lower():
-            tipo_actual = "Informe Final"
-
-        elif "informes de avance" in l.lower():
-            tipo_actual = "Informe de Avance"
-
-        elif "avance" in l.lower():
-            tipo_actual = "Informe de Avance"
-
-        elif "categorización" in l.lower():
-            tipo_actual = "Categorización"
+        facultad_match = re.search(r'^(.*?)===', bloque)
+        facultad = facultad_match.group(1).strip() if facultad_match else "No detectado"
 
         # =========================
-        # FACULTAD
+        # DETECTAR TIPO
         # =========================
-        if "facultad" in l.lower():
-            facultad_actual = l.replace("=", "").strip()
+        tipo = "No detectado"
 
-        # =========================
-        # TÍTULO
-        # =========================
-        if l.startswith("●") or l.startswith("❖"):
+        if "proyecto" in bloque.lower():
+            tipo = "Proyecto de Investigación"
 
-            if titulo:
-                items.append({
-                    "Tipo": tipo_actual,
-                    "Facultad": facultad_actual,
-                    "Titulo": titulo,
-                    "Director": director
-                })
+        if "avance" in bloque.lower():
+            tipo = "Informe de Avance"
 
-            titulo = l.replace("●", "").replace("❖", "").strip()
-            director = "No detectado"
+        if "final" in bloque.lower():
+            tipo = "Informe Final"
+
+        if "categorización" in bloque.lower():
+            tipo = "Categorización"
 
         # =========================
-        # DIRECTOR
+        # EXTRAER TÍTULOS (● ...)
         # =========================
-        if "director" in l.lower():
+        titulos = re.findall(r'●\s*(.+?)(?=●|Director|Directora|$)', bloque, re.DOTALL)
 
-            match = re.search(r'director[a]?\s*:?\s*(.+)', l, re.IGNORECASE)
+        for t in titulos:
 
-            if match:
-                director = match.group(1).strip()
+            titulo = re.sub(r'\s+', ' ', t).strip()
 
-    # último
-    if titulo:
-        items.append({
-            "Tipo": tipo_actual,
-            "Facultad": facultad_actual,
-            "Titulo": titulo,
-            "Director": director
-        })
+            # =========================
+            # DIRECTOR
+            # =========================
+            director_match = re.search(
+                r'(Director[a]?:?\s*)([A-Za-zÁÉÍÓÚÑ\s\.]+)',
+                bloque,
+                re.IGNORECASE
+            )
+
+            director = director_match.group(2).strip() if director_match else "No detectado"
+
+            items.append({
+                "Tipo": tipo,
+                "Facultad": facultad,
+                "Titulo": titulo,
+                "Director": director
+            })
 
     return items
-
 
 # =========================
 # UI
