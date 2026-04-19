@@ -110,31 +110,32 @@ def extraer_items(texto):
 
     for i, linea in enumerate(lineas):
 
-        tipo = detectar_tipo(linea)
+        texto_lower = linea.lower()
 
-        if tipo != "Otro":
+        # DETECTAR SI ES UN ITEM
+        if "proyecto" in texto_lower or "evaluación" in texto_lower:
 
-            # TÍTULO = siguiente línea larga coherente
+            tipo = "Proyecto"
+
+            # BUSCAR TÍTULO (línea larga cercana)
             titulo = "Sin título"
 
-            for j in range(i+1, min(i+6, len(lineas))):
-                if len(lineas[j]) > 15 and "acta" not in lineas[j].lower():
+            for j in range(i+1, min(i+8, len(lineas))):
+                if len(lineas[j]) > 20 and "san juan" not in lineas[j].lower():
                     titulo = lineas[j]
                     break
 
-            # DIRECTOR
+            # BUSCAR DIRECTOR (nombre propio cercano)
             director = "No detectado"
 
-            bloque = " ".join(lineas[i:i+10])
-
-            match = re.search(r'Director[:\s]+([A-Za-zÁÉÍÓÚÑ\s]+)', bloque, re.IGNORECASE)
-            if match:
-                director = match.group(1).strip()
+            for j in range(i, min(i+10, len(lineas))):
+                if re.match(r'[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+', lineas[j]):
+                    director = lineas[j]
+                    break
 
             items.append((tipo, titulo, director))
 
     return items
-
 # =========================
 # APP
 # =========================
