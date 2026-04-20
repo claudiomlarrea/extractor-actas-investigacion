@@ -53,12 +53,19 @@ def extraer_bloque(texto, inicio, fin):
 # =========================
 def extraer_items(bloque):
 
+    if not bloque or not isinstance(bloque, str):
+        return []
+
     items = []
-    partes = re.split(r'\d+\.\d+', bloque)
+
+    try:
+        partes = re.split(r'\d+\.\d+', bloque)
+    except:
+        return []
 
     for p in partes:
 
-        if "Título" not in p:
+        if not p or "Título" not in p:
             continue
 
         titulo = re.search(r'Título.*?:\s*(.*?)Director', p)
