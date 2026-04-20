@@ -15,16 +15,100 @@ st.title("📊 Sistema de Actas - Consejo de Investigación")
 # FUNCIONES
 # =========================
 
-def extraer_texto_pdf(file):
-    reader = PdfReader(file)
-    texto = ""
+def extraer_registros(texto):
 
-    for page in reader.pages:
-        contenido = page.extract_text()
-        if contenido:
-            texto += contenido + "\n"
+    registros = []
 
-    return texto
+    acta, fecha, anio = extraer_metadata(texto)
+
+    # dividir por ITEMS
+    bloques = re.split(r'ITEM\s*\d+\.?', texto)
+
+    for bloque in bloques:
+
+        if len(bloque.strip()) < 80:
+            continue
+
+        # detectar facultad dentro del bloque
+        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', bloque)
+        facultad = fac_match.group(0).strip() if fac_match else "No detectado"
+
+        # dividir por viñetas ● (esto es CLAVE en tus actas)
+        subitems = re.split(r'●', bloque)
+
+        for sub in subitems:
+
+            sub = sub.strip()
+
+            if len(sub) < 40:
+                continue
+
+            # =========================
+            # DIRECTOR
+            # =========================
+            dir_match = re.search(
+                r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)',
+                sub,
+                re.IGNORECASE
+            )
+
+            director = dir_match.group(1).strip() if dir_match else "No detectado"
+
+            # =========================
+            # TITULO
+            # =========================
+            titulo = re.split(r'Director[a]?:', sub)[0]
+            titulo = re.sub(r'\s+', ' ', titulo).strip()
+
+            if len(titulo) < 15:
+                continue
+
+            # =========================
+            # TIPO
+            # =========================
+            t = sub.lower()
+
+            if "avance" in t:
+                tipo = "Informe de Avance"
+            elif "final" in t:
+                tipo = "Informe Final"
+            elif "categoriz" in t:
+                tipo = "Categorización"
+            else:
+                tipo = "Proyecto"
+
+            # =========================
+            # REGISTRO FINAL
+            # =========================
+            registros.append({
+                "Año": anio,
+                "Fecha": fecha,
+                "Acta": acta,
+
+                "Informe de Avance": "Sí" if tipo == "Informe de Avance" else "",
+                "Título de Informe de Avance": titulo if tipo == "Informe de Avance" else "",
+                "Director del Informe de Avance": director if tipo == "Informe de Avance" else "",
+                "Puntaje del Informe de Avance": "",
+                "Unidad Académica del Informe de Avance": facultad if tipo == "Informe de Avance" else "",
+
+                "Informe Final": "Sí" if tipo == "Informe Final" else "",
+                "Título del Informe Final": titulo if tipo == "Informe Final" else "",
+                "Director del Informe Final": director if tipo == "Informe Final" else "",
+                "Puntaje del Informe Final": "",
+                "Unidad Académica del Informe de Final": facultad if tipo == "Informe Final" else "",
+
+                "Proyecto de Investigación": "Sí" if tipo == "Proyecto" else "",
+                "Título del Proyecto de investigación": titulo if tipo == "Proyecto" else "",
+                "Director del Proyecto de Investigación": director if tipo == "Proyecto" else "",
+                "Puntaje del Proyecto de Investigación": "",
+                "Unidad Académica del Proyecto de Investigación": facultad if tipo == "Proyecto" else "",
+
+                "Nombre del Docente categorizado": "",
+                "Tipo de Categorización": tipo if tipo == "Categorización" else "",
+                "Unidad Académica del Docente Categorizado": facultad if tipo == "Categorización" else ""
+            })
+
+    return registros
 
 
 def limpiar_texto(texto):
