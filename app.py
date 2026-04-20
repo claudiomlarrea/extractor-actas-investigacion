@@ -9,7 +9,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Sistema de Actas", layout="wide")
 
-st.title("📊 Sistema Institucional de Actas - Consejo de Investigación")
+st.title("📊 Sistema de Actas - Consejo de Investigación")
 
 # =========================
 # FUNCIONES
@@ -29,37 +29,30 @@ def extraer_texto_pdf(file):
 
 def limpiar_texto(texto):
 
+    texto = texto.replace("\n", " ")
     texto = re.sub(r'\s+', ' ', texto)
-    texto = re.sub(r'\.\s+', '.\n', texto)
 
-    # arreglos comunes
+    # correcciones típicas del PDF
     texto = texto.replace("ACT A", "ACTA")
-    texto = texto.replace("miembr os", "miembros")
     texto = texto.replace("DIRECT OR", "DIRECTOR")
+    texto = texto.replace("miembr os", "miembros")
+    texto = texto.replace("F acultad", "Facultad")
 
     return texto.strip()
 
 
 # =========================
-# EXTRACCIÓN DE METADATA
+# METADATA
 # =========================
 
 def extraer_metadata(texto):
 
-    # ACTA
     acta_match = re.search(r'ACTA\s*N[º°]?\s*(\d+)', texto)
     acta = acta_match.group(1) if acta_match else ""
 
-    # FECHA (muy importante)
-    fecha_match = re.search(
-        r'a los (.*?) siendo',
-        texto,
-        re.IGNORECASE
-    )
-
+    fecha_match = re.search(r'a los (.*?) siendo', texto, re.IGNORECASE)
     fecha = fecha_match.group(1) if fecha_match else ""
 
-    # AÑO
     anio_match = re.search(r'dos mil (\w+)', texto)
     anio = anio_match.group(1) if anio_match else ""
 
@@ -67,104 +60,73 @@ def extraer_metadata(texto):
 
 
 # =========================
-# EXTRACCIÓN PRINCIPAL
+# EXTRACCIÓN REAL (NUEVA)
 # =========================
 
-def procesar_acta(texto):
+def extraer_registros(texto):
 
     registros = []
 
     acta, fecha, anio = extraer_metadata(texto)
 
-    # dividir por ITEM
-    bloques = re.split(r'ITEM\s*\d+\.', texto)
+    # patrón: TITULO + Director
+    matches = re.findall(
+        r'([A-ZÁÉÍÓÚÑ][^\.]{20,}?)\.\s*Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s]+)',
+        texto
+    )
 
-    for bloque in bloques:
+    for match in matches:
 
-        bloque_lower = bloque.lower()
+        titulo = match[0].strip()
+        director = match[1].strip()
 
-        tipo = None
+        # =========================
+        # CLASIFICACIÓN
+        # =========================
+        tipo = "Proyecto"
 
-        if "avance" in bloque_lower:
+        t = titulo.lower()
+
+        if "avance" in t:
             tipo = "Informe de Avance"
-        elif "final" in bloque_lower:
+        elif "final" in t:
             tipo = "Informe Final"
-        elif "proyecto" in bloque_lower:
-            tipo = "Proyecto"
-        elif "categoriz" in bloque_lower:
-            tipo = "Categorización"
 
-        if not tipo:
-            continue
+        # =========================
+        # FACULTAD (global)
+        # =========================
+        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
+        facultad = fac_match.group(0) if fac_match else "No detectado"
 
-        # separar por bullets
-        items = re.split(r'●', bloque)
+        registro = {
+            "Año": anio,
+            "Fecha": fecha,
+            "Acta": acta,
 
-        for item in items:
+            "Informe de Avance": "Sí" if tipo == "Informe de Avance" else "",
+            "Título de Informe de Avance": titulo if tipo == "Informe de Avance" else "",
+            "Director del Informe de Avance": director if tipo == "Informe de Avance" else "",
+            "Puntaje del Informe de Avance": "",
+            "Unidad Académica del Informe de Avance": facultad if tipo == "Informe de Avance" else "",
 
-            item = item.strip()
+            "Informe Final": "Sí" if tipo == "Informe Final" else "",
+            "Título del Informe Final": titulo if tipo == "Informe Final" else "",
+            "Director del Informe Final": director if tipo == "Informe Final" else "",
+            "Puntaje del Informe Final": "",
+            "Unidad Académica del Informe de Final": facultad if tipo == "Informe Final" else "",
 
-            if len(item) < 30:
-                continue
+            "Proyecto de Investigación": "Sí" if tipo == "Proyecto" else "",
+            "Título del Proyecto de investigación": titulo if tipo == "Proyecto" else "",
+            "Director del Proyecto de Investigación": director if tipo == "Proyecto" else "",
+            "Puntaje del Proyecto de Investigación": "",
+            "Unidad Académica del Proyecto de Investigación": facultad if tipo == "Proyecto" else "",
 
-            # TITULO
-            titulo = item.split("Director")[0].strip()
-            titulo = re.sub(r'\s+', ' ', titulo)
+            "Nombre del Docente categorizado": "",
+            "Tipo de Categorización": "",
+            "Unidad Académica del Docente Categorizado": ""
+        }
 
-            # DIRECTOR
-            director_match = re.search(
-                r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s]+)',
-                item,
-                re.IGNORECASE
-            )
-
-            director = director_match.group(1).strip() if director_match else ""
-
-            # FACULTAD
-            facultad_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', item)
-            facultad = facultad_match.group(0) if facultad_match else ""
-
-            # CATEGORIZACIÓN (caso especial)
-            docente = ""
-            tipo_cat = ""
-
-            if tipo == "Categorización":
-
-                doc_match = re.search(r'([A-ZÁÉÍÓÚÑ\s]+)\s+DNI', item)
-                docente = doc_match.group(1).strip() if doc_match else ""
-
-                tipo_match = re.search(r'CATEGOR[IÍ]A\s+([A-ZIV]+)', item)
-                tipo_cat = tipo_match.group(1) if tipo_match else ""
-
-            registro = {
-                "Año": anio,
-                "Fecha": fecha,
-                "Acta": acta,
-
-                "Informe de Avance": "Sí" if tipo == "Informe de Avance" else "",
-                "Título de Informe de Avance": titulo if tipo == "Informe de Avance" else "",
-                "Director del Informe de Avance": director if tipo == "Informe de Avance" else "",
-                "Puntaje del Informe de Avance": "",
-                "Unidad Académica del Informe de Avance": facultad if tipo == "Informe de Avance" else "",
-
-                "Informe Final": "Sí" if tipo == "Informe Final" else "",
-                "Título del Informe Final": titulo if tipo == "Informe Final" else "",
-                "Director del Informe Final": director if tipo == "Informe Final" else "",
-                "Puntaje del Informe Final": "",
-                "Unidad Académica del Informe de Final": facultad if tipo == "Informe Final" else "",
-
-                "Proyecto de Investigación": "Sí" if tipo == "Proyecto" else "",
-                "Título del Proyecto de investigación": titulo if tipo == "Proyecto" else "",
-                "Director del Proyecto de Investigación": director if tipo == "Proyecto" else "",
-                "Puntaje del Proyecto de Investigación": "",
-                "Unidad Académica del Proyecto de Investigación": facultad if tipo == "Proyecto" else "",
-
-                "Nombre del Docente categorizado": docente,
-                "Tipo de Categorización": tipo_cat,
-                "Unidad Académica del Docente Categorizado": facultad if tipo == "Categorización" else ""
-            }
-
-            registros.append(registro)
+        registros.append(registro)
 
     return registros
 
@@ -174,18 +136,18 @@ def procesar_acta(texto):
 # =========================
 
 files = st.file_uploader(
-    "📄 Subí actas PDF",
+    "📄 Subí PDFs",
     type=["pdf"],
     accept_multiple_files=True
 )
 
-if st.button("🚀 Procesar Actas"):
+if st.button("🚀 Procesar"):
 
     if not files:
-        st.warning("Subí al menos un archivo")
+        st.warning("Subí al menos un PDF")
         st.stop()
 
-    base_total = []
+    todos = []
 
     for file in files:
 
@@ -194,24 +156,24 @@ if st.button("🚀 Procesar Actas"):
         texto = extraer_texto_pdf(file)
         texto = limpiar_texto(texto)
 
-        with st.expander("Ver texto"):
+        with st.expander("Texto limpio"):
             st.text_area("", texto, height=200)
 
-        registros = procesar_acta(texto)
+        registros = extraer_registros(texto)
 
         if registros:
             df = pd.DataFrame(registros)
             st.dataframe(df)
-            base_total.extend(registros)
+            todos.extend(registros)
         else:
-            st.warning("No se detectaron registros")
+            st.warning("No detectó registros")
 
-    if base_total:
-        df_final = pd.DataFrame(base_total)
+    if todos:
+        df_total = pd.DataFrame(todos)
 
         st.download_button(
-            "📥 Descargar BASE COMPLETA (CSV)",
-            df_final.to_csv(index=False),
+            "📥 Descargar CSV",
+            df_total.to_csv(index=False),
             "base_actas.csv",
             "text/csv"
         )
