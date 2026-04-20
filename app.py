@@ -118,14 +118,73 @@ def extraer_tabla(texto):
 
 def extraer_items(texto):
 
-    if "●" in texto or "❖" in texto:
-        return extraer_por_bullets(texto)
+    items = []
 
-    elif "Unidad Académica" in texto or "PRONIS" in texto:
-        return extraer_tabla(texto)
+    # separar por bullets reales
+    bloques = re.split(r'●', texto)
 
-    else:
-        return []
+    for b in bloques:
+
+        b = b.strip()
+
+        if len(b) < 30:
+            continue
+
+        # =========================
+        # FILTRO CLAVE (esto elimina ruido)
+        # =========================
+        if not re.search(r'Director|Directora', b, re.IGNORECASE):
+            continue
+
+        # =========================
+        # TIPO
+        # =========================
+        tipo = "Proyecto"
+
+        if "avance" in b.lower():
+            tipo = "Informe de Avance"
+        elif "final" in b.lower():
+            tipo = "Informe Final"
+
+        # =========================
+        # FACULTAD (busca hacia atrás en el texto)
+        # =========================
+        facultad = "No detectado"
+
+        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
+        if fac_match:
+            facultad = fac_match.group(0)
+
+        # =========================
+        # DIRECTOR
+        # =========================
+        dir_match = re.search(
+            r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s]+)',
+            b,
+            re.IGNORECASE
+        )
+
+        director = dir_match.group(1).strip() if dir_match else "No detectado"
+
+        # =========================
+        # TITULO (ANTES DE "Director")
+        # =========================
+        titulo = b.split("Director")[0].strip()
+
+        titulo = re.sub(r'\s+', ' ', titulo)
+
+        # filtro final
+        if len(titulo) < 15:
+            continue
+
+        items.append({
+            "Tipo": tipo,
+            "Facultad": facultad,
+            "Titulo": titulo,
+            "Director": director
+        })
+
+    return items
 
 
 # =========================
