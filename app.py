@@ -69,36 +69,50 @@ def extraer_registros(texto):
 
     acta, fecha, anio = extraer_metadata(texto)
 
-    # patrón: TITULO + Director
-    matches = re.findall(
-        r'([A-ZÁÉÍÓÚÑ][^\.]{20,}?)\.\s*Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s]+)',
-        texto
-    )
+    # dividir por cada aparición de Director
+    partes = re.split(r'Director[a]?:', texto)
 
-    for match in matches:
+    for i in range(1, len(partes)):
 
-        titulo = match[0].strip()
-        director = match[1].strip()
+        director = partes[i].split(" ")[0:4]
+        director = " ".join(director).strip()
+
+        # tomar texto anterior como título
+        titulo_raw = partes[i-1]
+
+        # agarrar solo el final del bloque (lo importante)
+        titulo = titulo_raw[-250:]  # recorte clave
+
+        # limpieza fuerte
+        titulo = re.sub(r'\s+', ' ', titulo)
+
+        # eliminar cosas institucionales
+        titulo = re.sub(r'Facultad de .*', '', titulo)
+
+        titulo = titulo.strip()
+
+        if len(titulo) < 20:
+            continue
 
         # =========================
-        # CLASIFICACIÓN
+        # TIPO
         # =========================
-        tipo = "Proyecto"
-
         t = titulo.lower()
 
         if "avance" in t:
             tipo = "Informe de Avance"
         elif "final" in t:
             tipo = "Informe Final"
+        else:
+            tipo = "Proyecto"
 
         # =========================
-        # FACULTAD (global)
+        # FACULTAD (global fallback)
         # =========================
         fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
         facultad = fac_match.group(0) if fac_match else "No detectado"
 
-        registro = {
+        registros.append({
             "Año": anio,
             "Fecha": fecha,
             "Acta": acta,
@@ -124,9 +138,7 @@ def extraer_registros(texto):
             "Nombre del Docente categorizado": "",
             "Tipo de Categorización": "",
             "Unidad Académica del Docente Categorizado": ""
-        }
-
-        registros.append(registro)
+        })
 
     return registros
 
