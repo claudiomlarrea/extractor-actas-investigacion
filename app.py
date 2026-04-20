@@ -3,10 +3,6 @@ from PyPDF2 import PdfReader
 import re
 import pandas as pd
 
-# =========================
-# CONFIG
-# =========================
-
 st.set_page_config(page_title="Sistema de Actas", layout="wide")
 
 st.title("📊 Sistema de Actas - Consejo de Investigación")
@@ -15,100 +11,16 @@ st.title("📊 Sistema de Actas - Consejo de Investigación")
 # FUNCIONES
 # =========================
 
-def extraer_registros(texto):
+def extraer_texto_pdf(file):
+    texto = ""
+    reader = PdfReader(file)
 
-    registros = []
+    for page in reader.pages:
+        contenido = page.extract_text()
+        if contenido:
+            texto += contenido + "\n"
 
-    acta, fecha, anio = extraer_metadata(texto)
-
-    # dividir por ITEMS
-    bloques = re.split(r'ITEM\s*\d+\.?', texto)
-
-    for bloque in bloques:
-
-        if len(bloque.strip()) < 80:
-            continue
-
-        # detectar facultad dentro del bloque
-        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', bloque)
-        facultad = fac_match.group(0).strip() if fac_match else "No detectado"
-
-        # dividir por viñetas ● (esto es CLAVE en tus actas)
-        subitems = re.split(r'●', bloque)
-
-        for sub in subitems:
-
-            sub = sub.strip()
-
-            if len(sub) < 40:
-                continue
-
-            # =========================
-            # DIRECTOR
-            # =========================
-            dir_match = re.search(
-                r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)',
-                sub,
-                re.IGNORECASE
-            )
-
-            director = dir_match.group(1).strip() if dir_match else "No detectado"
-
-            # =========================
-            # TITULO
-            # =========================
-            titulo = re.split(r'Director[a]?:', sub)[0]
-            titulo = re.sub(r'\s+', ' ', titulo).strip()
-
-            if len(titulo) < 15:
-                continue
-
-            # =========================
-            # TIPO
-            # =========================
-            t = sub.lower()
-
-            if "avance" in t:
-                tipo = "Informe de Avance"
-            elif "final" in t:
-                tipo = "Informe Final"
-            elif "categoriz" in t:
-                tipo = "Categorización"
-            else:
-                tipo = "Proyecto"
-
-            # =========================
-            # REGISTRO FINAL
-            # =========================
-            registros.append({
-                "Año": anio,
-                "Fecha": fecha,
-                "Acta": acta,
-
-                "Informe de Avance": "Sí" if tipo == "Informe de Avance" else "",
-                "Título de Informe de Avance": titulo if tipo == "Informe de Avance" else "",
-                "Director del Informe de Avance": director if tipo == "Informe de Avance" else "",
-                "Puntaje del Informe de Avance": "",
-                "Unidad Académica del Informe de Avance": facultad if tipo == "Informe de Avance" else "",
-
-                "Informe Final": "Sí" if tipo == "Informe Final" else "",
-                "Título del Informe Final": titulo if tipo == "Informe Final" else "",
-                "Director del Informe Final": director if tipo == "Informe Final" else "",
-                "Puntaje del Informe Final": "",
-                "Unidad Académica del Informe de Final": facultad if tipo == "Informe Final" else "",
-
-                "Proyecto de Investigación": "Sí" if tipo == "Proyecto" else "",
-                "Título del Proyecto de investigación": titulo if tipo == "Proyecto" else "",
-                "Director del Proyecto de Investigación": director if tipo == "Proyecto" else "",
-                "Puntaje del Proyecto de Investigación": "",
-                "Unidad Académica del Proyecto de Investigación": facultad if tipo == "Proyecto" else "",
-
-                "Nombre del Docente categorizado": "",
-                "Tipo de Categorización": tipo if tipo == "Categorización" else "",
-                "Unidad Académica del Docente Categorizado": facultad if tipo == "Categorización" else ""
-            })
-
-    return registros
+    return texto
 
 
 def limpiar_texto(texto):
@@ -116,7 +28,6 @@ def limpiar_texto(texto):
     texto = texto.replace("\n", " ")
     texto = re.sub(r'\s+', ' ', texto)
 
-    # correcciones típicas del PDF
     texto = texto.replace("ACT A", "ACTA")
     texto = texto.replace("DIRECT OR", "DIRECTOR")
     texto = texto.replace("miembr os", "miembros")
@@ -124,10 +35,6 @@ def limpiar_texto(texto):
 
     return texto.strip()
 
-
-# =========================
-# METADATA
-# =========================
 
 def extraer_metadata(texto):
 
@@ -143,86 +50,65 @@ def extraer_metadata(texto):
     return acta, fecha, anio
 
 
-# =========================
-# EXTRACCIÓN REAL (NUEVA)
-# =========================
-
 def extraer_registros(texto):
 
     registros = []
-
     acta, fecha, anio = extraer_metadata(texto)
 
-    # dividir por cada aparición de Director
-    partes = re.split(r'Director[a]?:', texto)
+    bloques = re.split(r'ITEM\s*\d+\.?', texto)
 
-    for i in range(1, len(partes)):
+    for bloque in bloques:
 
-        director = partes[i].split(" ")[0:4]
-        director = " ".join(director).strip()
-
-        # tomar texto anterior como título
-        titulo_raw = partes[i-1]
-
-        # agarrar solo el final del bloque (lo importante)
-        titulo = titulo_raw[-250:]  # recorte clave
-
-        # limpieza fuerte
-        titulo = re.sub(r'\s+', ' ', titulo)
-
-        # eliminar cosas institucionales
-        titulo = re.sub(r'Facultad de .*', '', titulo)
-
-        titulo = titulo.strip()
-
-        if len(titulo) < 20:
+        if len(bloque.strip()) < 80:
             continue
 
-        # =========================
-        # TIPO
-        # =========================
-        t = titulo.lower()
-
-        if "avance" in t:
-            tipo = "Informe de Avance"
-        elif "final" in t:
-            tipo = "Informe Final"
-        else:
-            tipo = "Proyecto"
-
-        # =========================
-        # FACULTAD (global fallback)
-        # =========================
-        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
+        fac_match = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', bloque)
         facultad = fac_match.group(0) if fac_match else "No detectado"
 
-        registros.append({
-            "Año": anio,
-            "Fecha": fecha,
-            "Acta": acta,
+        subitems = re.split(r'●', bloque)
 
-            "Informe de Avance": "Sí" if tipo == "Informe de Avance" else "",
-            "Título de Informe de Avance": titulo if tipo == "Informe de Avance" else "",
-            "Director del Informe de Avance": director if tipo == "Informe de Avance" else "",
-            "Puntaje del Informe de Avance": "",
-            "Unidad Académica del Informe de Avance": facultad if tipo == "Informe de Avance" else "",
+        for sub in subitems:
 
-            "Informe Final": "Sí" if tipo == "Informe Final" else "",
-            "Título del Informe Final": titulo if tipo == "Informe Final" else "",
-            "Director del Informe Final": director if tipo == "Informe Final" else "",
-            "Puntaje del Informe Final": "",
-            "Unidad Académica del Informe de Final": facultad if tipo == "Informe Final" else "",
+            sub = sub.strip()
 
-            "Proyecto de Investigación": "Sí" if tipo == "Proyecto" else "",
-            "Título del Proyecto de investigación": titulo if tipo == "Proyecto" else "",
-            "Director del Proyecto de Investigación": director if tipo == "Proyecto" else "",
-            "Puntaje del Proyecto de Investigación": "",
-            "Unidad Académica del Proyecto de Investigación": facultad if tipo == "Proyecto" else "",
+            if len(sub) < 40:
+                continue
 
-            "Nombre del Docente categorizado": "",
-            "Tipo de Categorización": "",
-            "Unidad Académica del Docente Categorizado": ""
-        })
+            dir_match = re.search(
+                r'Director[a]?:?\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)',
+                sub,
+                re.IGNORECASE
+            )
+
+            director = dir_match.group(1).strip() if dir_match else "No detectado"
+
+            titulo = re.split(r'Director[a]?:', sub)[0]
+            titulo = re.sub(r'\s+', ' ', titulo).strip()
+
+            if len(titulo) < 15:
+                continue
+
+            t = sub.lower()
+
+            if "avance" in t:
+                tipo = "Informe de Avance"
+            elif "final" in t:
+                tipo = "Informe Final"
+            elif "categoriz" in t:
+                tipo = "Categorización"
+            else:
+                tipo = "Proyecto"
+
+            registros.append({
+                "Año": anio,
+                "Fecha": fecha,
+                "Acta": acta,
+
+                "Tipo": tipo,
+                "Título": titulo,
+                "Director": director,
+                "Facultad": facultad
+            })
 
     return registros
 
@@ -240,7 +126,7 @@ files = st.file_uploader(
 if st.button("🚀 Procesar"):
 
     if not files:
-        st.warning("Subí al menos un PDF")
+        st.warning("Subí PDFs")
         st.stop()
 
     todos = []
@@ -251,9 +137,6 @@ if st.button("🚀 Procesar"):
 
         texto = extraer_texto_pdf(file)
         texto = limpiar_texto(texto)
-
-        with st.expander("Texto limpio"):
-            st.text_area("", texto, height=200)
 
         registros = extraer_registros(texto)
 
