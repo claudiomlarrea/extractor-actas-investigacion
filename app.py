@@ -58,27 +58,43 @@ def extraer_items(bloque):
 
     items = []
 
-    try:
-        partes = re.split(r'\d+\.\d+', bloque)
-    except:
-        return []
+    lineas = bloque.split("\n")
 
-    for p in partes:
+    titulo = ""
+    director = ""
+    unidad = ""
 
-        if not p or "Título" not in p:
+    for linea in lineas:
+
+        l = linea.strip()
+
+        if len(l) < 10:
             continue
 
-        titulo = re.search(r'Título.*?:\s*(.*?)Director', p)
-        director = re.search(r'Director.*?:\s*(.*?)Equipo', p)
-        unidad = re.search(r'(Facultad de .*?|Escuela de .*?|ISFD.*?)Título', p)
-        puntaje = re.search(r'Puntaje:\s*([\d\.]+)', p)
+        # POSIBLE TITULO (mayúsculas largas)
+        if l.isupper() and len(l) > 20:
+            titulo = l
 
-        items.append({
-            "titulo": titulo.group(1).strip() if titulo else "",
-            "director": director.group(1).strip() if director else "",
-            "unidad": unidad.group(1).strip() if unidad else "",
-            "puntaje": puntaje.group(1) if puntaje else ""
-        })
+        # DIRECTOR (nombres propios)
+        elif any(x in l for x in ["Dr", "Dra", "Lic", "Mg", "Ing"]) or len(l.split()) >= 2:
+            if len(l) < 80:
+                director = l
+
+        # UNIDAD
+        elif "Facultad" in l or "Escuela" in l:
+            unidad = l
+
+        # si tenemos título + director → guardamos
+        if titulo and director:
+            items.append({
+                "titulo": titulo,
+                "director": director,
+                "unidad": unidad,
+                "puntaje": ""
+            })
+            titulo = ""
+            director = ""
+            unidad = ""
 
     return items
 
