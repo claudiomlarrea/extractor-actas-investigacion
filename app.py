@@ -3,18 +3,13 @@ from PyPDF2 import PdfReader
 import re
 import pandas as pd
 
-# =========================
-# CONFIG
-# =========================
+st.set_page_config(page_title="Extractor Orden del Día", layout="wide")
 
-st.set_page_config(page_title="Actas - Sistema", layout="wide")
-
-st.title("📊 Sistema de Actas - Consejo de Investigación")
+st.title("📊 Extractor - Orden del Día (Consejo de Investigación)")
 
 # =========================
-# FUNCIONES
+# EXTRAER TEXTO
 # =========================
-
 def extraer_texto_pdf(file):
     reader = PdfReader(file)
     texto = ""
@@ -27,91 +22,82 @@ def extraer_texto_pdf(file):
     return texto
 
 
+# =========================
+# LIMPIEZA
+# =========================
 def limpiar_texto(texto):
+    texto = texto.replace("\n", " ")
     texto = re.sub(r'\s+', ' ', texto)
-
-    # arreglos típicos PDF
-    texto = texto.replace("DIRECT OR", "DIRECTOR")
-    texto = texto.replace("PROYECT OS", "PROYECTOS")
-    texto = texto.replace("INFORME S", "INFORMES")
-    texto = texto.replace("CATEGORIZ ACIÓN", "CATEGORIZACIÓN")
-
     return texto
 
 
-def extraer_metadata(texto):
-    anio = re.search(r'dos mil (\w+)', texto.lower())
-    anio = anio.group(1) if anio else "No detectado"
-
-    fecha = re.search(r'(\d{1,2} días? del mes de .*? dos mil \w+)', texto.lower())
-    fecha = fecha.group(1) if fecha else "No detectado"
-
-    acta = re.search(r'ACTA N[º°]\s*(\d+)', texto.upper())
-    acta = acta.group(1) if acta else "No detectado"
-
-    return anio, fecha, acta
+# =========================
+# EXTRAER FECHA
+# =========================
+def extraer_fecha(texto):
+    m = re.search(r'Día:\s*(.*?)Hora:', texto)
+    return m.group(1).strip() if m else "No detectado"
 
 
-def extraer_bloques(texto):
-    bloques = {}
+# =========================
+# EXTRAER ITEMS
+# =========================
+def extraer_items(texto):
 
-    patrones = {
-        "proyectos": r'Presentación de Proyectos(.*?)ITEM 3',
-        "informes_final": r'Informes Finales(.*?)Informes de Avance',
-        "informes_avance": r'Informes de Avance(.*?)ITEM 5',
-        "categorizacion": r'CATEGORIZACIÓN(.*?)(Siendo las|$)'
-    }
-
-    for k, p in patrones.items():
-        m = re.search(p, texto, re.IGNORECASE | re.DOTALL)
-        bloques[k] = m.group(1) if m else ""
-
-    return bloques
-
-
-def parse_items(texto, tipo):
     resultados = []
 
-    partes = re.split(r'●', texto)
+    # dividir por numeración tipo 1.1, 2.1, etc.
+    bloques = re.split(r'\d+\.\d+', texto)
 
-    for p in partes:
-        if len(p.strip()) < 40:
+    for b in bloques:
+
+        if "Título" not in b:
             continue
 
-        titulo = re.split(r'DIRECTOR|Directora|Director', p)[0].strip()
+        bloque = b.strip()
 
-        director = re.search(r'DIRECTOR[: ]+([A-Za-zÁÉÍÓÚÑ\s]+)', p, re.IGNORECASE)
-        if not director:
-            director = re.search(r'Directora[: ]+([A-Za-zÁÉÍÓÚÑ\s]+)', p)
-        if not director:
-            director = re.search(r'Director[: ]+([A-Za-zÁÉÍÓÚÑ\s]+)', p)
+        # =========================
+        # TIPO
+        # =========================
+        if "PRONIS" in bloque:
+            tipo = "Informe Final PRONIS"
+        elif "INFORMES FINALES" in texto.upper():
+            tipo = "Informe Final"
+        elif "PROYECTO DE INVESTIGACIÓN" in texto.upper():
+            tipo = "Proyecto de Investigación"
+        else:
+            tipo = "No detectado"
 
-        director = director.group(1).strip() if director else "No detectado"
+        # =========================
+        # TITULO
+        # =========================
+        m = re.search(r'Título(?: del Proyecto)?:\s*(.*?)Director', bloque)
+        titulo = m.group(1).strip() if m else "No detectado"
 
-        facultad = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ\s]+', p)
-        facultad = facultad.group(0) if facultad else "No detectado"
+        # =========================
+        # DIRECTOR
+        # =========================
+        m = re.search(r'Director/a?:\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)', bloque)
+        director = m.group(1).strip() if m else "No detectado"
+
+        # =========================
+        # UNIDAD
+        # =========================
+        m = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ\s]+|Escuela de [A-Za-zÁÉÍÓÚÑ\s]+|ISFD.*?', bloque)
+        unidad = m.group(0).strip() if m else "No detectado"
+
+        # =========================
+        # PUNTAJE
+        # =========================
+        m = re.search(r'Puntaje:\s*([\d\.]+)', bloque)
+        puntaje = m.group(1) if m else ""
 
         resultados.append({
             "Tipo": tipo,
-            "Titulo": titulo,
+            "Título": titulo,
             "Director": director,
-            "Unidad": facultad
-        })
-
-    return resultados
-
-
-def parse_categorizacion(texto):
-    resultados = []
-
-    matches = re.findall(r'([A-ZÁÉÍÓÚÑ\s]+) DNI', texto)
-
-    for m in matches:
-        resultados.append({
-            "Tipo": "Categorización",
-            "Titulo": "",
-            "Director": m.strip(),
-            "Unidad": ""
+            "Unidad Académica": unidad,
+            "Puntaje": puntaje
         })
 
     return resultados
@@ -121,55 +107,42 @@ def parse_categorizacion(texto):
 # UI
 # =========================
 
-files = st.file_uploader("📄 Subí PDFs", type=["pdf"], accept_multiple_files=True)
+files = st.file_uploader("Subí Orden del Día (PDF)", type=["pdf"], accept_multiple_files=True)
 
-if st.button("🚀 Procesar"):
+if st.button("Procesar"):
 
     todos = []
 
     for file in files:
 
-        st.subheader(f"📄 {file.name}")
+        st.subheader(file.name)
 
         texto = extraer_texto_pdf(file)
-
-        if not texto.strip():
-            st.error("No se pudo leer el PDF")
-            continue
-
         texto = limpiar_texto(texto)
 
         with st.expander("Ver texto limpio"):
-            st.text_area("", texto, height=200)
+            st.write(texto)
 
-        anio, fecha, acta = extraer_metadata(texto)
+        fecha = extraer_fecha(texto)
 
-        bloques = extraer_bloques(texto)
+        items = extraer_items(texto)
 
-        datos = []
-        datos += parse_items(bloques["proyectos"], "Proyecto de Investigación")
-        datos += parse_items(bloques["informes_final"], "Informe Final")
-        datos += parse_items(bloques["informes_avance"], "Informe de Avance")
-        datos += parse_categorizacion(bloques["categorizacion"])
+        for i in items:
+            i["Fecha"] = fecha
 
-        for d in datos:
-            d["Año"] = anio
-            d["Fecha"] = fecha
-            d["Acta"] = acta
-
-        if datos:
-            df = pd.DataFrame(datos)
+        if items:
+            df = pd.DataFrame(items)
             st.dataframe(df)
-            todos.extend(datos)
+            todos.extend(items)
         else:
-            st.warning("No detectó registros")
+            st.warning("No se detectaron registros")
 
     if todos:
         df_total = pd.DataFrame(todos)
 
         st.download_button(
-            "📥 Descargar CSV FINAL",
+            "📥 Descargar CSV",
             df_total.to_csv(index=False),
-            "actas.csv",
+            "orden_dia.csv",
             "text/csv"
         )
