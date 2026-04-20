@@ -5,7 +5,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Extractor Orden del Día", layout="wide")
 
-st.title("📊 Extractor - Orden del Día (Consejo de Investigación)")
+st.title("📊 Extractor Completo - Consejo de Investigación")
 
 # =========================
 # EXTRAER TEXTO
@@ -13,136 +13,140 @@ st.title("📊 Extractor - Orden del Día (Consejo de Investigación)")
 def extraer_texto_pdf(file):
     reader = PdfReader(file)
     texto = ""
-
     for page in reader.pages:
         contenido = page.extract_text()
         if contenido:
             texto += contenido + "\n"
-
     return texto
 
 
 # =========================
-# LIMPIEZA
+# LIMPIAR TEXTO
 # =========================
-def limpiar_texto(texto):
+def limpiar(texto):
     texto = texto.replace("\n", " ")
     texto = re.sub(r'\s+', ' ', texto)
     return texto
 
 
 # =========================
-# EXTRAER FECHA
+# FECHA Y ACTA
 # =========================
 def extraer_fecha(texto):
     m = re.search(r'Día:\s*(.*?)Hora:', texto)
-    return m.group(1).strip() if m else "No detectado"
+    return m.group(1) if m else ""
+
+def extraer_acta(texto):
+    return "Orden del Día"
 
 
 # =========================
-# EXTRAER ITEMS
+# BLOQUES
 # =========================
-def extraer_items(texto):
+def extraer_bloque(texto, inicio, fin):
+    m = re.search(inicio + r'(.*?)' + fin, texto, re.IGNORECASE)
+    return m.group(1) if m else ""
 
-    resultados = []
 
-    # dividir por numeración tipo 1.1, 2.1, etc.
-    bloques = re.split(r'\d+\.\d+', texto)
+# =========================
+# EXTRAER ITEMS GENERALES
+# =========================
+def extraer_items(bloque):
 
-    for b in bloques:
+    items = []
+    partes = re.split(r'\d+\.\d+', bloque)
 
-        if "Título" not in b:
+    for p in partes:
+
+        if "Título" not in p:
             continue
 
-        bloque = b.strip()
+        titulo = re.search(r'Título.*?:\s*(.*?)Director', p)
+        director = re.search(r'Director.*?:\s*(.*?)Equipo', p)
+        unidad = re.search(r'(Facultad de .*?|Escuela de .*?|ISFD.*?)Título', p)
+        puntaje = re.search(r'Puntaje:\s*([\d\.]+)', p)
 
-        # =========================
-        # TIPO
-        # =========================
-        if "PRONIS" in bloque:
-            tipo = "Informe Final PRONIS"
-        elif "INFORMES FINALES" in texto.upper():
-            tipo = "Informe Final"
-        elif "PROYECTO DE INVESTIGACIÓN" in texto.upper():
-            tipo = "Proyecto de Investigación"
-        else:
-            tipo = "No detectado"
-
-        # =========================
-        # TITULO
-        # =========================
-        m = re.search(r'Título(?: del Proyecto)?:\s*(.*?)Director', bloque)
-        titulo = m.group(1).strip() if m else "No detectado"
-
-        # =========================
-        # DIRECTOR
-        # =========================
-        m = re.search(r'Director/a?:\s*([A-Za-zÁÉÍÓÚÑ\s\.]+)', bloque)
-        director = m.group(1).strip() if m else "No detectado"
-
-        # =========================
-        # UNIDAD
-        # =========================
-        m = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ\s]+|Escuela de [A-Za-zÁÉÍÓÚÑ\s]+|ISFD.*?', bloque)
-        unidad = m.group(0).strip() if m else "No detectado"
-
-        # =========================
-        # PUNTAJE
-        # =========================
-        m = re.search(r'Puntaje:\s*([\d\.]+)', bloque)
-        puntaje = m.group(1) if m else ""
-
-        resultados.append({
-            "Tipo": tipo,
-            "Título": titulo,
-            "Director": director,
-            "Unidad Académica": unidad,
-            "Puntaje": puntaje
+        items.append({
+            "titulo": titulo.group(1).strip() if titulo else "",
+            "director": director.group(1).strip() if director else "",
+            "unidad": unidad.group(1).strip() if unidad else "",
+            "puntaje": puntaje.group(1) if puntaje else ""
         })
 
-    return resultados
+    return items
+
+
+# =========================
+# CATEGORIZACIÓN
+# =========================
+def extraer_categorizacion(texto):
+
+    nombres = re.findall(r'([A-ZÁÉÍÓÚÑ]+ [A-ZÁÉÍÓÚÑ]+)', texto)
+
+    return nombres[0] if nombres else ""
 
 
 # =========================
 # UI
 # =========================
-
-files = st.file_uploader("Subí Orden del Día (PDF)", type=["pdf"], accept_multiple_files=True)
+files = st.file_uploader("Subí Orden del Día", type=["pdf"], accept_multiple_files=True)
 
 if st.button("Procesar"):
 
-    todos = []
+    filas = []
 
     for file in files:
 
-        st.subheader(file.name)
-
         texto = extraer_texto_pdf(file)
-        texto = limpiar_texto(texto)
-
-        with st.expander("Ver texto limpio"):
-            st.write(texto)
+        texto = limpiar(texto)
 
         fecha = extraer_fecha(texto)
+        acta = extraer_acta(texto)
 
-        items = extraer_items(texto)
+        # BLOQUES
+        finales = extraer_bloque(texto, "INFORMES FINALES", "INFORMES FINALES PRONIS|PRESENTACIÓN")
+        avance = extraer_bloque(texto, "INFORMES DE AVANCE", "PRESENTACIÓN")
+        proyectos = extraer_bloque(texto, "PRESENTACIÓN DE PROYECTO", "$")
 
-        for i in items:
-            i["Fecha"] = fecha
+        inf_final = extraer_items(finales)
+        inf_avance = extraer_items(avance)
+        proy = extraer_items(proyectos)
 
-        if items:
-            df = pd.DataFrame(items)
-            st.dataframe(df)
-            todos.extend(items)
-        else:
-            st.warning("No se detectaron registros")
+        categ = extraer_categorizacion(texto)
 
-    if todos:
-        df_total = pd.DataFrame(todos)
+        fila = {
+            "Año": "2026",
+            "Fecha": fecha,
+            "Acta": acta,
 
-        st.download_button(
-            "📥 Descargar CSV",
-            df_total.to_csv(index=False),
-            "orden_dia.csv",
-            "text/csv"
-        )
+            "Título Informe Final": inf_final[0]["titulo"] if inf_final else "",
+            "Director Informe Final": inf_final[0]["director"] if inf_final else "",
+            "Unidad Académica Informe Final": inf_final[0]["unidad"] if inf_final else "",
+            "Puntaje Informe Final": inf_final[0]["puntaje"] if inf_final else "",
+
+            "Título Informe de Avance": inf_avance[0]["titulo"] if inf_avance else "",
+            "Director Informe de Avance": inf_avance[0]["director"] if inf_avance else "",
+            "Unidad Académica Informe de Avance": inf_avance[0]["unidad"] if inf_avance else "",
+            "Puntaje Informe de Avance": inf_avance[0]["puntaje"] if inf_avance else "",
+
+            "Título Proyecto de Investigación": proy[0]["titulo"] if proy else "",
+            "Director Proyecto de Investigación": proy[0]["director"] if proy else "",
+            "Unidad Académica Proyecto de Investigación": proy[0]["unidad"] if proy else "",
+            "Puntaje Proyecto de Investigación": proy[0]["puntaje"] if proy else "",
+
+            "Categorización Docente": "Sí" if categ else "",
+            "Docente Categorizado": categ,
+            "Categoría del Docente": ""
+        }
+
+        filas.append(fila)
+
+    df = pd.DataFrame(filas)
+    st.dataframe(df)
+
+    st.download_button(
+        "📥 Descargar CSV FINAL",
+        df.to_csv(index=False),
+        "base_final.csv",
+        "text/csv"
+    )
