@@ -39,9 +39,9 @@ except Exception as e:
 # 📝 FORMULARIO
 # =========================
 
-anio = st.text_input("Año")
-fecha = st.text_input("Fecha")
-acta = st.text_input("Acta")
+anio = st.text_input("Año", key="anio")
+fecha = st.text_input("Fecha", key="fecha")
+acta = st.text_input("Acta", key="acta")
 
 tipo = st.selectbox(
     "Tipo",
@@ -64,13 +64,17 @@ descripcion = st.text_area("Descripción")
 
 if st.button("Guardar en Google Sheets"):
 
-    if not acta or acta.strip() == "":
+    acta_val = st.session_state.get("acta", "").strip()
+    fecha_val = st.session_state.get("fecha", "").strip()
+    anio_val = st.session_state.get("anio", "").strip()
+
+    if acta_val == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
         fila = [
-            acta.strip(),
-            fecha.strip(),
-            anio.strip(),
+            acta_val,
+            fecha_val,
+            anio_val,
             tipo.strip(),
             descripcion.strip()
         ]
@@ -97,20 +101,22 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        # 🔍 FILTRO CORREGIDO (CLAVE)
+        # 🔴 FILTRO CORREGIDO (CLAVE)
         filas = [
             f for f in data
             if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
         ]
 
-        # DEBUG
         st.write("📊 Registros encontrados:", len(filas))
 
         if not filas:
             st.warning("No hay datos para esa acta")
             st.stop()
 
-        # 📊 AGRUPAR
+        # =========================
+        # 📊 AGRUPAR POR TIPO
+        # =========================
+
         agrupado = {}
 
         for fila in filas:
@@ -123,47 +129,33 @@ if st.button("Generar Orden del Día"):
             agrupado[tipo_f].append(desc)
 
         # =========================
-        # 📄 CREAR WORD INSTITUCIONAL
+        # 📄 CREAR WORD
         # =========================
 
         doc = Document()
 
         doc.add_heading("ORDEN DEL DÍA", 0)
-        doc.add_paragraph("Consejo de Investigación")
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
 
         fecha_doc = str(filas[0].get("Fecha", "")).strip()
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
-        orden_general = 1
+        orden = 1
 
-        orden_tipos = [
-            "Proyecto de Investigación",
-            "Proyecto de Cátedra",
-            "Jornada de Investigación",
-            "Convocatoria de Investigación",
-            "Informe de Avance",
-            "Informe Final",
-            "Categorización Docente"
-        ]
+        for tipo_f, items in agrupado.items():
+            doc.add_paragraph(f"{orden}. {tipo_f}")
 
-        for tipo_f in orden_tipos:
-            if tipo_f in agrupado:
+            sub = 1
+            for item in items:
+                doc.add_paragraph(f"    {orden}.{sub} {item}")
+                sub += 1
 
-                doc.add_paragraph(f"{orden_general}. {tipo_f}s")
-
-                suborden = 1
-
-                for item in agrupado[tipo_f]:
-                    doc.add_paragraph(f"    {orden_general}.{suborden} {item}")
-                    suborden += 1
-
-                doc.add_paragraph("")
-                orden_general += 1
+            doc.add_paragraph("")
+            orden += 1
 
         # =========================
-        # 📥 DESCARGA SIN ARCHIVO TEMPORAL
+        # 📥 DESCARGA
         # =========================
 
         buffer = BytesIO()
