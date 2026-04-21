@@ -64,15 +64,15 @@ descripcion = st.text_area("Descripción")
 
 if st.button("Guardar en Google Sheets"):
 
-    if acta.strip() == "":
+    if not acta or acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
         fila = [
-            acta,
-            fecha,
-            anio,
-            tipo,
-            descripcion
+            acta.strip(),
+            fecha.strip(),
+            anio.strip(),
+            tipo.strip(),
+            descripcion.strip()
         ]
 
         try:
@@ -90,25 +90,32 @@ if st.button("Guardar en Google Sheets"):
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día")
 
-acta_buscar = st.text_input("Número de Acta")
+acta_buscar = st.text_input("Número de Acta para generar informe")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
-        # FILTRAR POR ACTA
-        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
+        # 🔍 FILTRO CORREGIDO (CLAVE)
+        filas = [
+            f for f in data
+            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
+        ]
+
+        # DEBUG
+        st.write("📊 Registros encontrados:", len(filas))
 
         if not filas:
             st.warning("No hay datos para esa acta")
             st.stop()
 
-        # AGRUPAR POR TIPO
+        # 📊 AGRUPAR
         agrupado = {}
+
         for fila in filas:
-            tipo_f = fila["Tipo"]
-            desc = fila["Descripción"]
+            tipo_f = str(fila.get("Tipo", "")).strip()
+            desc = str(fila.get("Descripción", "")).strip()
 
             if tipo_f not in agrupado:
                 agrupado[tipo_f] = []
@@ -125,7 +132,7 @@ if st.button("Generar Orden del Día"):
         doc.add_paragraph("Consejo de Investigación")
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
 
-        fecha_doc = filas[0].get("Fecha", "")
+        fecha_doc = str(filas[0].get("Fecha", "")).strip()
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
@@ -156,7 +163,7 @@ if st.button("Generar Orden del Día"):
                 orden_general += 1
 
         # =========================
-        # 📥 DESCARGA
+        # 📥 DESCARGA SIN ARCHIVO TEMPORAL
         # =========================
 
         buffer = BytesIO()
@@ -173,5 +180,5 @@ if st.button("Generar Orden del Día"):
         st.success("✅ Orden del Día generado correctamente")
 
     except Exception as e:
-        st.error("Error al generar Word")
+        st.error("❌ Error al generar Word")
         st.text(str(e))
