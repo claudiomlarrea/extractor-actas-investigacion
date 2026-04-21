@@ -7,6 +7,7 @@ st.set_page_config(page_title="Extractor Orden del Día", layout="wide")
 
 st.title("📊 Extractor Orden del Día - Consejo de Investigación")
 
+
 # =========================
 # 📄 EXTRAER TEXTO PDF
 # =========================
@@ -24,66 +25,106 @@ def extraer_texto_pdf(file):
 
 
 # =========================
-# 🧠 EXTRAER ORDEN DEL DÍA
+# 🧠 EXTRACTOR REAL (NO INVENTA)
 # =========================
-def extraer_orden_dia(texto):
+def extraer_datos(texto):
 
     if not texto:
         return []
 
-    # Normalizar
     texto = texto.replace("\r", "\n")
 
-    # Separar por numeración tipo "1.", "2.", etc.
-    bloques = re.split(r"\n\s*\d+\.\s+", texto)
+    datos = {
+        "Año": "",
+        "Fecha": "",
+        "Acta": "",
+        "Título Informe Final": "",
+        "Director Informe Final": "",
+        "Unidad Académica Informe Final": "",
+        "Puntaje Informe Final": "",
+        "Título Informe de Avance": "",
+        "Director Informe de Avance": "",
+        "Unidad Académica Informe de Avance": "",
+        "Puntaje Informe de Avance": "",
+        "Título Proyecto de Investigación": "",
+        "Director Proyecto de Investigación": "",
+        "Unidad Académica Proyecto de Investigación": "",
+        "Puntaje Proyecto de Investigación": "",
+        "Categorización Docente": "",
+        "Docente Categorizado": "",
+        "Categoría del Docente": ""
+    }
 
-    resultados = []
+    # =========================
+    # ACTA
+    # =========================
+    acta = re.search(r'ACTA\s*N[°º]?\s*(\d+)', texto, re.IGNORECASE)
+    if acta:
+        datos["Acta"] = acta.group(1)
 
-    for b in bloques:
-        b = b.strip()
+    # =========================
+    # FECHA
+    # =========================
+    fecha = re.search(r'(\d+\s+d[ií]as.*?dos mil \w+)', texto.lower())
+    if fecha:
+        datos["Fecha"] = fecha.group(1)
 
-        if len(b) < 20:
-            continue
+    # =========================
+    # AÑO
+    # =========================
+    anio = re.search(r'dos mil (\w+)', texto.lower())
+    if anio:
+        datos["Año"] = anio.group(1)
 
-        lineas = b.split("\n")
+    # =========================
+    # INFORME FINAL
+    # =========================
+    inf_final = re.search(r'INFORME FINAL[:\s]*(.*?)\n', texto, re.IGNORECASE)
+    if inf_final:
+        datos["Título Informe Final"] = inf_final.group(1).strip()
 
-        titulo = ""
-        director = ""
-        unidad = ""
+    dir_final = re.search(r'DIRECTOR[:\s]*([A-Za-zÁÉÍÓÚÑ ]+)', texto)
+    if dir_final:
+        datos["Director Informe Final"] = dir_final.group(1).strip()
 
-        for l in lineas:
-            l = l.strip()
+    unidad = re.search(r'(Facultad de [A-Za-zÁÉÍÓÚÑ ]+)', texto)
+    if unidad:
+        datos["Unidad Académica Informe Final"] = unidad.group(1)
 
-            if not l:
-                continue
+    # =========================
+    # INFORME DE AVANCE
+    # =========================
+    inf_avance = re.search(r'INFORME DE AVANCE[:\s]*(.*?)\n', texto, re.IGNORECASE)
+    if inf_avance:
+        datos["Título Informe de Avance"] = inf_avance.group(1).strip()
 
-            # TITULO (línea larga)
-            if not titulo and len(l) > 25:
-                titulo = l
+    # =========================
+    # PROYECTO
+    # =========================
+    proyecto = re.search(r'PROYECTO[:\s]*(.*?)\n', texto, re.IGNORECASE)
+    if proyecto:
+        datos["Título Proyecto de Investigación"] = proyecto.group(1).strip()
 
-            # DIRECTOR (nombre corto probable)
-            elif not director and 2 <= len(l.split()) <= 5:
-                director = l
+    # =========================
+    # CATEGORIZACIÓN
+    # =========================
+    cat = re.search(r'CATEGORIZACI[ÓO]N[:\s]*(.*?)\n', texto, re.IGNORECASE)
+    if cat:
+        datos["Docente Categorizado"] = cat.group(1).strip()
+        datos["Categorización Docente"] = "Sí"
 
-            # UNIDAD
-            elif "Facultad" in l or "Escuela" in l:
-                unidad = l
-
-        resultados.append({
-            "Tipo": "Orden del Día",
-            "Titulo": titulo,
-            "Director": director if director else "No detectado",
-            "Unidad": unidad if unidad else "No detectado"
-        })
-
-    return resultados
+    return [datos]
 
 
 # =========================
 # 📤 UI
 # =========================
 
-files = st.file_uploader("Subí Orden del Día (PDF)", type=["pdf"], accept_multiple_files=True)
+files = st.file_uploader(
+    "Subí Orden del Día (PDF)",
+    type=["pdf"],
+    accept_multiple_files=True
+)
 
 if st.button("Procesar"):
 
@@ -99,7 +140,7 @@ if st.button("Procesar"):
             st.error("No se pudo leer el PDF")
             continue
 
-        datos = extraer_orden_dia(texto)
+        datos = extraer_datos(texto)
 
         if datos:
             df = pd.DataFrame(datos)
