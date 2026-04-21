@@ -142,45 +142,56 @@ if st.button("Generar Word"):
 # 📄 GENERAR INFORME WORD
 # =========================
 
+from docx import Document
+
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día por Acta")
 
-acta_busqueda = st.text_input("Ingrese número de Acta para generar informe")
+acta_buscar = st.text_input("Ingrese número de Acta")
 
-if st.button("Generar Word"):
+if st.button("Generar Orden del Día"):
 
     try:
-        data = sheet.get_all_values()
-        encabezado = data[0]
-        filas = data[1:]
+        data = sheet.get_all_records()
 
-        # Filtrar por acta
-        filtradas = [f for f in filas if f[0] == acta_busqueda]
+        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
 
-        if not filtradas:
+        if not filas:
             st.warning("No hay datos para esa acta")
-        else:
-            doc = Document()
+            st.stop()
 
-            doc.add_heading(f"Orden del Día - Acta {acta_busqueda}", 0)
+        # Agrupar por tipo
+        agrupado = {}
+        for fila in filas:
+            tipo = fila["Tipo"]
+            desc = fila["Descripción"]
 
-            for f in filtradas:
-                tipo = f[3]
-                descripcion = f[4]
+            if tipo not in agrupado:
+                agrupado[tipo] = []
 
-                doc.add_heading(tipo, level=2)
-                doc.add_paragraph(descripcion)
+            agrupado[tipo].append(desc)
 
-            buffer = BytesIO()
-            doc.save(buffer)
-            buffer.seek(0)
+        # Crear Word
+        doc = Document()
+        doc.add_heading(f"Orden del Día - Acta {acta_buscar}", 0)
 
+        for tipo, items in agrupado.items():
+            doc.add_heading(tipo, level=1)
+
+            for item in items:
+                doc.add_paragraph(f"- {item}")
+
+        file_path = f"Acta_{acta_buscar}.docx"
+        doc.save(file_path)
+
+        with open(file_path, "rb") as f:
             st.download_button(
-                label="📥 Descargar Informe Word",
-                data=buffer,
-                file_name=f"Acta_{acta_busqueda}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                label="⬇️ Descargar Word",
+                data=f,
+                file_name=file_path
             )
+
+        st.success("✅ Orden del Día generado correctamente")
 
     except Exception as e:
         st.error("Error al generar Word")
