@@ -31,36 +31,61 @@ def extraer_datos(texto):
 
     texto = texto.replace("\r", "\n")
 
+    # 🔥 separar por puntos del orden del día
+    bloques = re.split(r'\n\s*\d+\.\s+', texto)
+
     resultados = []
 
-    # ACTA
+    # ACTA y FECHA (una sola vez)
     acta = ""
+    fecha = ""
+
     m = re.search(r'ACTA\s*N[°º]?\s*(\d+)', texto, re.IGNORECASE)
     if m:
         acta = m.group(1)
 
-    # FECHA
-    fecha = ""
     m = re.search(r'\d+\s+d[ií]as.*?dos mil \w+', texto.lower())
     if m:
         fecha = m.group(0)
 
-    # UNIDAD
-    unidad = ""
-    m = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
-    if m:
-        unidad = m.group(0)
+    for b in bloques:
 
-    # ITEMS (orden del día)
-    items = re.findall(r'\n\s*\d+\.\s+(.*)', texto)
+        b = b.strip()
 
-    for i in items:
+        if len(b) < 30:
+            continue
+
+        titulo = ""
+        director = ""
+        unidad = ""
+
+        lineas = b.split("\n")
+
+        for l in lineas:
+            l = l.strip()
+
+            if not l:
+                continue
+
+            # TITULO = línea larga
+            if not titulo and len(l) > 40:
+                titulo = l
+
+            # DIRECTOR
+            if "director" in l.lower():
+                director = l.split(":")[-1].strip()
+
+            # UNIDAD
+            if "Facultad" in l:
+                unidad = l
+
         resultados.append({
             "Año": "",
             "Fecha": fecha,
             "Acta": acta,
-            "Título": i.strip(),
-            "Unidad": unidad
+            "Título Informe Final": titulo,
+            "Director Informe Final": director if director else "No detectado",
+            "Unidad Académica Informe Final": unidad if unidad else "No detectado"
         })
 
     return resultados
