@@ -25,7 +25,6 @@ try:
 
     SHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
     sh = client.open_by_key(SHEET_ID)
-
     sheet = sh.worksheet("Hoja 2")
 
     st.success("✅ Conectado a Google Sheets")
@@ -65,53 +64,41 @@ descripcion = st.text_area("Descripción")
 
 if st.button("Guardar en Google Sheets"):
 
-    if not acta:
+    if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
-        st.stop()
+    else:
+        fila = [
+            acta,
+            fecha,
+            anio,
+            tipo,
+            descripcion
+        ]
 
-    if not descripcion:
-        st.warning("⚠️ Debe ingresar una descripción")
-        st.stop()
+        try:
+            sheet.append_row(fila)
+            st.success("✅ Guardado correctamente")
 
-    fila = [
-        acta.strip(),
-        fecha.strip(),
-        anio.strip(),
-        tipo.strip(),
-        descripcion.strip()
-    ]
-
-    try:
-        sheet.append_row(fila)
-        st.success("✅ Guardado en Google Sheets")
-
-    except Exception as e:
-        st.error("❌ Error al guardar")
-        st.text(str(e))
-
+        except Exception as e:
+            st.error("❌ Error al guardar")
+            st.text(str(e))
 
 # =========================
-# 📄 GENERAR ORDEN DEL DÍA
+# 📄 GENERAR WORD
 # =========================
 
 st.markdown("---")
-st.subheader("📄 Generar Orden del Día por Acta")
+st.subheader("📄 Generar Orden del Día")
 
-acta_buscar = st.text_input("Ingrese número de Acta para generar Word")
+acta_buscar = st.text_input("Número de Acta")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
-        # FILTRO CORREGIDO (clave)
-        filas = [
-            f for f in data
-            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
-        ]
-
-        # eliminar filas vacías
-        filas = [f for f in filas if f.get("Descripción")]
+        # FILTRAR POR ACTA
+        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
 
         if not filas:
             st.warning("No hay datos para esa acta")
@@ -120,60 +107,71 @@ if st.button("Generar Orden del Día"):
         # AGRUPAR POR TIPO
         agrupado = {}
         for fila in filas:
-            tipo = fila.get("Tipo", "Sin tipo")
-            desc = fila.get("Descripción", "")
+            tipo_f = fila["Tipo"]
+            desc = fila["Descripción"]
 
-            if tipo not in agrupado:
-                agrupado[tipo] = []
+            if tipo_f not in agrupado:
+                agrupado[tipo_f] = []
 
-            agrupado[tipo].append(desc)
+            agrupado[tipo_f].append(desc)
 
-       # =========================
-# 📄 WORD INSTITUCIONAL
-# =========================
+        # =========================
+        # 📄 CREAR WORD INSTITUCIONAL
+        # =========================
 
-doc = Document()
+        doc = Document()
 
-# TÍTULO PRINCIPAL
-doc.add_heading("ORDEN DEL DÍA", 0)
+        doc.add_heading("ORDEN DEL DÍA", 0)
+        doc.add_paragraph("Consejo de Investigación")
+        doc.add_paragraph(f"Acta Nº {acta_buscar}")
 
-doc.add_paragraph("Consejo de Investigación")
-doc.add_paragraph(f"Acta Nº {acta_buscar}")
-
-# FECHA (toma la primera que encuentre)
-fecha_doc = filas[0].get("Fecha", "")
-doc.add_paragraph(f"Fecha: {fecha_doc}")
-
-doc.add_paragraph("")  # espacio
-
-# =========================
-# ORDEN NUMERADO
-# =========================
-
-orden_general = 1
-
-# ORDEN INSTITUCIONAL DE SECCIONES
-orden_tipos = [
-    "Proyecto de Investigación",
-    "Proyecto de Cátedra",
-    "Jornada de Investigación",
-    "Convocatoria de Investigación",
-    "Informe de Avance",
-    "Informe Final",
-    "Categorización Docente"
-]
-
-for tipo in orden_tipos:
-    if tipo in agrupado:
-
-        # TÍTULO DE SECCIÓN
-        doc.add_paragraph(f"{orden_general}. {tipo}s")
-
-        suborden = 1
-
-        for item in agrupado[tipo]:
-            doc.add_paragraph(f"    {orden_general}.{suborden} {item}")
-            suborden += 1
-
+        fecha_doc = filas[0].get("Fecha", "")
+        doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
-        orden_general += 1
+
+        orden_general = 1
+
+        orden_tipos = [
+            "Proyecto de Investigación",
+            "Proyecto de Cátedra",
+            "Jornada de Investigación",
+            "Convocatoria de Investigación",
+            "Informe de Avance",
+            "Informe Final",
+            "Categorización Docente"
+        ]
+
+        for tipo_f in orden_tipos:
+            if tipo_f in agrupado:
+
+                doc.add_paragraph(f"{orden_general}. {tipo_f}s")
+
+                suborden = 1
+
+                for item in agrupado[tipo_f]:
+                    doc.add_paragraph(f"    {orden_general}.{suborden} {item}")
+                    suborden += 1
+
+                doc.add_paragraph("")
+                orden_general += 1
+
+        # =========================
+        # 📥 DESCARGA
+        # =========================
+
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            label="⬇️ Descargar Orden del Día",
+            data=buffer,
+            file_name=f"Acta_{acta_buscar}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+        st.success("✅ Orden del Día generado correctamente")
+
+    except Exception as e:
+        st.error("Error al generar Word")
+        st.text(str(e))
