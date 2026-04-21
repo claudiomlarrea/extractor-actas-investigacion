@@ -21,8 +21,12 @@ try:
 
     client = gspread.authorize(creds)
 
-    SHEET_NAME = "Datos Consejo Investigación"
-    sheet = client.open(SHEET_NAME).sheet1
+    SHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
+
+sh = client.open_by_key(SHEET_ID)
+
+# Elegís la hoja correcta:
+sheet = sh.worksheet("Hoja 1")  # o "Hoja 2"
 
     st.success("✅ Conectado a Google Sheets")
 
