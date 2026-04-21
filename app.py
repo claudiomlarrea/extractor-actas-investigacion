@@ -11,17 +11,46 @@ st.title("📊 Extractor Orden del Día - Consejo de Investigación")
 # =========================
 # 📄 EXTRAER TEXTO PDF
 # =========================
-def extraer_texto_pdf(file):
-    texto = ""
-    try:
-        with pdfplumber.open(file) as pdf:
-            for page in pdf.pages:
-                t = page.extract_text()
-                if t:
-                    texto += t + "\n"
-    except:
-        return ""
-    return texto
+def extraer_datos(texto):
+
+    if not texto:
+        return []
+
+    texto = texto.replace("\r", "\n")
+
+    resultados = []
+
+    # ACTA
+    acta = ""
+    m = re.search(r'ACTA\s*N[°º]?\s*(\d+)', texto, re.IGNORECASE)
+    if m:
+        acta = m.group(1)
+
+    # FECHA
+    fecha = ""
+    m = re.search(r'\d+\s+d[ií]as.*?dos mil \w+', texto.lower())
+    if m:
+        fecha = m.group(0)
+
+    # UNIDAD
+    unidad = ""
+    m = re.search(r'Facultad de [A-Za-zÁÉÍÓÚÑ ]+', texto)
+    if m:
+        unidad = m.group(0)
+
+    # ITEMS (orden del día)
+    items = re.findall(r'\n\s*\d+\.\s+(.*)', texto)
+
+    for i in items:
+        resultados.append({
+            "Año": "",
+            "Fecha": fecha,
+            "Acta": acta,
+            "Título": i.strip(),
+            "Unidad": unidad
+        })
+
+    return resultados
 
 
 # =========================
