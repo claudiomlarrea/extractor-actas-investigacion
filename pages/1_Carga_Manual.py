@@ -21,14 +21,16 @@ try:
 
     client = gspread.authorize(creds)
 
+    # 👉 ID REAL de tu Google Sheets
     SHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
 
-sh = client.open_by_key(SHEET_ID)
+    sh = client.open_by_key(SHEET_ID)
 
-# Elegís la hoja correcta:
-sheet = sh.worksheet("Hoja 1")  # o "Hoja 2"
+    # 👉 HOJA DONDE VA A GUARDAR (CAMBIAR SI QUERÉS)
+    sheet = sh.worksheet("Hoja 2")
 
     st.success("✅ Conectado a Google Sheets")
+    st.write("📍 Archivo:", sh.url)
 
 except Exception as e:
     st.error("❌ ERROR de conexión con Google Sheets")
@@ -43,24 +45,9 @@ anio = st.text_input("Año")
 fecha = st.text_input("Fecha")
 acta = st.text_input("Acta")
 
-titulo_final = st.text_input("Título Informe Final")
-director_final = st.text_input("Director Informe Final")
-unidad_final = st.text_input("Unidad Académica Informe Final")
-puntaje_final = st.text_input("Puntaje Informe Final")
+tipo = st.selectbox("Tipo", ["Informe Final", "Informe de Avance", "Proyecto"])
 
-titulo_avance = st.text_input("Título Informe de Avance")
-director_avance = st.text_input("Director Informe de Avance")
-unidad_avance = st.text_input("Unidad Académica Informe de Avance")
-puntaje_avance = st.text_input("Puntaje Informe de Avance")
-
-titulo_proy = st.text_input("Título Proyecto")
-director_proy = st.text_input("Director Proyecto")
-unidad_proy = st.text_input("Unidad Académica Proyecto")
-puntaje_proy = st.text_input("Puntaje Proyecto")
-
-categ_doc = st.text_input("Categorización Docente")
-docente = st.text_input("Docente")
-categoria = st.text_input("Categoría")
+descripcion = st.text_area("Descripción")
 
 # =========================
 # 💾 GUARDAR
@@ -69,24 +56,11 @@ categoria = st.text_input("Categoría")
 if st.button("Guardar en Google Sheets"):
 
     fila = [
-        anio,
-        fecha,
         acta,
-        titulo_final,
-        director_final,
-        unidad_final,
-        puntaje_final,
-        titulo_avance,
-        director_avance,
-        unidad_avance,
-        puntaje_avance,
-        titulo_proy,
-        director_proy,
-        unidad_proy,
-        puntaje_proy,
-        categ_doc,
-        docente,
-        categoria
+        fecha,
+        anio,
+        tipo,
+        descripcion
     ]
 
     try:
