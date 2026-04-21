@@ -80,7 +80,64 @@ if st.button("Guardar en Google Sheets"):
     except Exception as e:
         st.error("❌ Error al guardar")
         st.text(str(e))
+from docx import Document
 
+st.markdown("---")
+st.subheader("📄 Generar Orden del Día")
+
+acta_buscar = st.text_input("Número de Acta para generar Word")
+
+if st.button("Generar Word"):
+
+    try:
+        data = sheet.get_all_records()
+
+        # Filtrar por acta
+        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
+
+        if not filas:
+            st.warning("No hay datos para esa acta")
+            st.stop()
+
+        # Agrupar por tipo
+        agrupado = {}
+        for fila in filas:
+            tipo = fila["Tipo"]
+            desc = fila["Descripción"]
+
+            if tipo not in agrupado:
+                agrupado[tipo] = []
+
+            agrupado[tipo].append(desc)
+
+        # Crear Word
+        doc = Document()
+        doc.add_heading(f"Orden del Día - Acta {acta_buscar}", 0)
+
+        for tipo, items in agrupado.items():
+            doc.add_heading(tipo, level=1)
+
+            for item in items:
+                doc.add_paragraph(f"- {item}")
+
+        # Guardar archivo
+        file_path = f"Acta_{acta_buscar}.docx"
+        doc.save(file_path)
+
+        # Descargar
+        with open(file_path, "rb") as f:
+            st.download_button(
+                label="⬇️ Descargar Word",
+                data=f,
+                file_name=file_path
+            )
+
+        st.success("✅ Word generado correctamente")
+
+    except Exception as e:
+        st.error("Error al generar Word")
+        st.text(str(e))
+        
 # =========================
 # 📄 GENERAR INFORME WORD
 # =========================
