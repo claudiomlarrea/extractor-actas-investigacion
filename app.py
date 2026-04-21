@@ -11,6 +11,19 @@ st.title("📊 Extractor Orden del Día - Consejo de Investigación")
 # =========================
 # 📄 EXTRAER TEXTO PDF
 # =========================
+def extraer_texto_pdf(file):
+    texto = ""
+    try:
+        import pdfplumber
+        with pdfplumber.open(file) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    texto += t + "\n"
+    except:
+        return ""
+    return texto
+
 def extraer_datos(texto):
 
     if not texto:
