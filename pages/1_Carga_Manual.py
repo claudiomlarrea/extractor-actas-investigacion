@@ -128,29 +128,52 @@ if st.button("Generar Orden del Día"):
 
             agrupado[tipo].append(desc)
 
-        # CREAR WORD
-        doc = Document()
-        doc.add_heading(f"Orden del Día - Acta {acta_buscar}", 0)
+       # =========================
+# 📄 WORD INSTITUCIONAL
+# =========================
 
-        for tipo, items in agrupado.items():
-            doc.add_heading(tipo, level=1)
+doc = Document()
 
-            for item in items:
-                doc.add_paragraph(f"- {item}")
+# TÍTULO PRINCIPAL
+doc.add_heading("ORDEN DEL DÍA", 0)
 
-        # Guardar en memoria (mejor que archivo físico)
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+doc.add_paragraph("Consejo de Investigación")
+doc.add_paragraph(f"Acta Nº {acta_buscar}")
 
-        st.download_button(
-            label="⬇️ Descargar Word",
-            data=buffer,
-            file_name=f"Acta_{acta_buscar}.docx"
-        )
+# FECHA (toma la primera que encuentre)
+fecha_doc = filas[0].get("Fecha", "")
+doc.add_paragraph(f"Fecha: {fecha_doc}")
 
-        st.success("✅ Orden del Día generado correctamente")
+doc.add_paragraph("")  # espacio
 
-    except Exception as e:
-        st.error("❌ Error al generar Word")
-        st.text(str(e))
+# =========================
+# ORDEN NUMERADO
+# =========================
+
+orden_general = 1
+
+# ORDEN INSTITUCIONAL DE SECCIONES
+orden_tipos = [
+    "Proyecto de Investigación",
+    "Proyecto de Cátedra",
+    "Jornada de Investigación",
+    "Convocatoria de Investigación",
+    "Informe de Avance",
+    "Informe Final",
+    "Categorización Docente"
+]
+
+for tipo in orden_tipos:
+    if tipo in agrupado:
+
+        # TÍTULO DE SECCIÓN
+        doc.add_paragraph(f"{orden_general}. {tipo}s")
+
+        suborden = 1
+
+        for item in agrupado[tipo]:
+            doc.add_paragraph(f"    {orden_general}.{suborden} {item}")
+            suborden += 1
+
+        doc.add_paragraph("")
+        orden_general += 1
