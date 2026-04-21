@@ -47,6 +47,8 @@ acta = st.text_input("Acta")
 tipo = st.selectbox(
     "Tipo",
     [
+        "Informe Final",
+        "Informe de Avance",
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Jornada de Investigación",
