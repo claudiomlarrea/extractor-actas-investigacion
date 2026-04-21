@@ -65,12 +65,20 @@ descripcion = st.text_area("Descripción")
 
 if st.button("Guardar en Google Sheets"):
 
+    if not acta:
+        st.warning("⚠️ Debe ingresar número de acta")
+        st.stop()
+
+    if not descripcion:
+        st.warning("⚠️ Debe ingresar una descripción")
+        st.stop()
+
     fila = [
-        acta,
-        fecha,
-        anio,
-        tipo,
-        descripcion
+        acta.strip(),
+        fecha.strip(),
+        anio.strip(),
+        tipo.strip(),
+        descripcion.strip()
     ]
 
     try:
@@ -80,98 +88,47 @@ if st.button("Guardar en Google Sheets"):
     except Exception as e:
         st.error("❌ Error al guardar")
         st.text(str(e))
-from docx import Document
 
-st.markdown("---")
-st.subheader("📄 Generar Orden del Día")
 
-acta_buscar = st.text_input("Número de Acta para generar Word")
-
-if st.button("Generar Word"):
-
-    try:
-        data = sheet.get_all_records()
-
-        # Filtrar por acta
-        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
-
-        if not filas:
-            st.warning("No hay datos para esa acta")
-            st.stop()
-
-        # Agrupar por tipo
-        agrupado = {}
-        for fila in filas:
-            tipo = fila["Tipo"]
-            desc = fila["Descripción"]
-
-            if tipo not in agrupado:
-                agrupado[tipo] = []
-
-            agrupado[tipo].append(desc)
-
-        # Crear Word
-        doc = Document()
-        doc.add_heading(f"Orden del Día - Acta {acta_buscar}", 0)
-
-        for tipo, items in agrupado.items():
-            doc.add_heading(tipo, level=1)
-
-            for item in items:
-                doc.add_paragraph(f"- {item}")
-
-        # Guardar archivo
-        file_path = f"Acta_{acta_buscar}.docx"
-        doc.save(file_path)
-
-        # Descargar
-        with open(file_path, "rb") as f:
-            st.download_button(
-                label="⬇️ Descargar Word",
-                data=f,
-                file_name=file_path
-            )
-
-        st.success("✅ Word generado correctamente")
-
-    except Exception as e:
-        st.error("Error al generar Word")
-        st.text(str(e))
-        
 # =========================
-# 📄 GENERAR INFORME WORD
+# 📄 GENERAR ORDEN DEL DÍA
 # =========================
-
-from docx import Document
 
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día por Acta")
 
-acta_buscar = st.text_input("Ingrese número de Acta")
+acta_buscar = st.text_input("Ingrese número de Acta para generar Word")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
-        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
+        # FILTRO CORREGIDO (clave)
+        filas = [
+            f for f in data
+            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
+        ]
+
+        # eliminar filas vacías
+        filas = [f for f in filas if f.get("Descripción")]
 
         if not filas:
             st.warning("No hay datos para esa acta")
             st.stop()
 
-        # Agrupar por tipo
+        # AGRUPAR POR TIPO
         agrupado = {}
         for fila in filas:
-            tipo = fila["Tipo"]
-            desc = fila["Descripción"]
+            tipo = fila.get("Tipo", "Sin tipo")
+            desc = fila.get("Descripción", "")
 
             if tipo not in agrupado:
                 agrupado[tipo] = []
 
             agrupado[tipo].append(desc)
 
-        # Crear Word
+        # CREAR WORD
         doc = Document()
         doc.add_heading(f"Orden del Día - Acta {acta_buscar}", 0)
 
@@ -181,18 +138,19 @@ if st.button("Generar Orden del Día"):
             for item in items:
                 doc.add_paragraph(f"- {item}")
 
-        file_path = f"Acta_{acta_buscar}.docx"
-        doc.save(file_path)
+        # Guardar en memoria (mejor que archivo físico)
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
 
-        with open(file_path, "rb") as f:
-            st.download_button(
-                label="⬇️ Descargar Word",
-                data=f,
-                file_name=file_path
-            )
+        st.download_button(
+            label="⬇️ Descargar Word",
+            data=buffer,
+            file_name=f"Acta_{acta_buscar}.docx"
+        )
 
         st.success("✅ Orden del Día generado correctamente")
 
     except Exception as e:
-        st.error("Error al generar Word")
+        st.error("❌ Error al generar Word")
         st.text(str(e))
