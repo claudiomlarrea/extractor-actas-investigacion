@@ -2,12 +2,14 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
+from docx.shared import Pt
 from io import BytesIO
+from collections import defaultdict
 
-st.title("📥 Carga Manual de Actas")
+st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
-# 🔐 CONEXIÓN GOOGLE
+# 🔐 CONEXIÓN GOOGLE SHEETS
 # =========================
 
 try:
@@ -31,7 +33,7 @@ try:
     st.write("📍 Archivo:", sh.url)
 
 except Exception as e:
-    st.error("❌ ERROR de conexión con Google Sheets")
+    st.error("❌ Error de conexión")
     st.text(str(e))
     st.stop()
 
@@ -39,17 +41,20 @@ except Exception as e:
 # 📝 FORMULARIO
 # =========================
 
-anio = st.text_input("Año", key="anio")
-fecha = st.text_input("Fecha", key="fecha")
-acta = st.text_input("Acta", key="acta")
+st.subheader("📋 Carga de Actas")
+
+anio = st.text_input("Año", "2026")
+fecha = st.text_input("Fecha", "18/08/2026")
+acta = st.text_input("Número de Acta")
 
 tipo = st.selectbox(
     "Tipo",
     [
-        "Informe Final",
-        "Informe de Avance",
+        "Proyecto",
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
         "Jornada de Investigación",
         "Convocatoria de Investigación",
         "Categorización Docente"
@@ -64,95 +69,90 @@ descripcion = st.text_area("Descripción")
 
 if st.button("Guardar en Google Sheets"):
 
-    acta_val = st.session_state.get("acta", "").strip()
-    fecha_val = st.session_state.get("fecha", "").strip()
-    anio_val = st.session_state.get("anio", "").strip()
-
-    if acta_val == "":
+    if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
-        fila = [
-            acta_val,
-            fecha_val,
-            anio_val,
-            tipo.strip(),
-            descripcion.strip()
-        ]
+        fila = [acta, fecha, anio, tipo, descripcion]
 
         try:
             sheet.append_row(fila)
-            st.success("✅ Guardado correctamente")
+            st.success("✅ Registro guardado correctamente")
 
         except Exception as e:
             st.error("❌ Error al guardar")
             st.text(str(e))
 
 # =========================
-# 📄 GENERAR WORD
+# 📄 GENERAR ORDEN DEL DÍA
 # =========================
 
 st.markdown("---")
-st.subheader("📄 Generar Orden del Día")
+st.subheader("📄 Generar Orden del Día Oficial")
 
-acta_buscar = st.text_input("Número de Acta para generar informe")
+acta_buscar = st.text_input("Ingrese número de Acta a generar")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
-        # 🔴 FILTRO CORREGIDO (CLAVE)
-        filas = [
-            f for f in data
-            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
-        ]
-
-        st.write("📊 Registros encontrados:", len(filas))
+        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
 
         if not filas:
-            st.warning("No hay datos para esa acta")
+            st.warning("No hay registros para esa acta")
             st.stop()
 
-        # =========================
-        # 📊 AGRUPAR POR TIPO
-        # =========================
+        fecha_doc = filas[0]["Fecha"]
 
-        agrupado = {}
-
+        # Agrupar
+        agrupado = defaultdict(list)
         for fila in filas:
-            tipo_f = str(fila.get("Tipo", "")).strip()
-            desc = str(fila.get("Descripción", "")).strip()
-
-            if tipo_f not in agrupado:
-                agrupado[tipo_f] = []
-
-            agrupado[tipo_f].append(desc)
+            agrupado[fila["Tipo"]].append(fila["Descripción"])
 
         # =========================
-        # 📄 CREAR WORD
+        # 🧾 CREAR DOCUMENTO WORD
         # =========================
 
         doc = Document()
 
-        doc.add_heading("ORDEN DEL DÍA", 0)
-        doc.add_paragraph(f"Acta Nº {acta_buscar}")
+        # --- ENCABEZADO INSTITUCIONAL ---
+        p = doc.add_paragraph()
+        run = p.add_run("UNIVERSIDAD CATÓLICA DE CUYO\n")
+        run.bold = True
 
-        fecha_doc = str(filas[0].get("Fecha", "")).strip()
+        p.add_run("Consejo de Investigación\n")
+        p.add_run("\n")
+
+        # --- TÍTULO ---
+        titulo = doc.add_paragraph()
+        run = titulo.add_run(f"ORDEN DEL DÍA\nActa Nº {acta_buscar}")
+        run.bold = True
+        titulo.runs[0].font.size = Pt(16)
+
+        # --- FECHA ---
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
-        orden = 1
+        # --- CUERPO ---
+        contador = 1
 
-        for tipo_f, items in agrupado.items():
-            doc.add_paragraph(f"{orden}. {tipo_f}")
+        for tipo, items in agrupado.items():
+
+            doc.add_paragraph(f"{contador}. {tipo}", style='List Number')
 
             sub = 1
             for item in items:
-                doc.add_paragraph(f"    {orden}.{sub} {item}")
+                doc.add_paragraph(f"{contador}.{sub} {item}")
                 sub += 1
 
+            contador += 1
             doc.add_paragraph("")
-            orden += 1
+
+        # --- CIERRE ---
+        doc.add_paragraph("\n")
+        doc.add_paragraph("____________________________________")
+        doc.add_paragraph("Secretaría de Investigación")
+        doc.add_paragraph("Universidad Católica de Cuyo")
 
         # =========================
         # 📥 DESCARGA
@@ -163,14 +163,13 @@ if st.button("Generar Orden del Día"):
         buffer.seek(0)
 
         st.download_button(
-            label="⬇️ Descargar Orden del Día",
+            label="⬇️ Descargar Orden del Día (Word)",
             data=buffer,
-            file_name=f"Acta_{acta_buscar}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
         )
 
-        st.success("✅ Orden del Día generado correctamente")
+        st.success("✅ Documento generado correctamente")
 
     except Exception as e:
-        st.error("❌ Error al generar Word")
+        st.error("❌ Error al generar documento")
         st.text(str(e))
