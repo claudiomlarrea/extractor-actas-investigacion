@@ -1,1 +1,5 @@
+import streamlit as st
 
+st.title("🧹 Normalizador de Actas")
+
+st.info("Acá después vamos a procesar PDFs automáticamente.")
