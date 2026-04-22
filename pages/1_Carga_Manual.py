@@ -8,7 +8,7 @@ from collections import defaultdict
 st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
-# 🔐 CONEXIÓN
+# 🔐 CONEXIÓN GOOGLE SHEETS
 # =========================
 
 try:
@@ -29,6 +29,7 @@ try:
     sheet = sh.worksheet("Hoja 2")
 
     st.success("✅ Conectado a Google Sheets")
+    st.write("📍 Archivo:", sh.url)
 
 except Exception as e:
     st.error("❌ Error de conexión")
@@ -41,8 +42,8 @@ except Exception as e:
 
 st.subheader("📋 Carga de Actas")
 
-anio = st.text_input("Año")
-fecha = st.text_input("Fecha")
+anio = st.text_input("Año", "2026")
+fecha = st.text_input("Fecha", "18/08/2026")
 acta = st.text_input("Número de Acta")
 
 tipo = st.selectbox(
@@ -54,7 +55,7 @@ tipo = st.selectbox(
         "Informe de Avance",
         "Jornada de Investigación",
         "Convocatoria de Investigación",
-        "Convocatoria a Proyectos de Investigación",
+        "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación",
         "Categorización Docente"
     ]
@@ -64,6 +65,7 @@ titulo = st.text_input("Título")
 descripcion = st.text_input("Descripción")
 director = st.text_input("Director")
 unidad = st.text_input("Unidad Académica")
+
 docente_categorizado = st.text_input("Docente categorizado")
 categoria_docente = st.text_input("Categoría Docente")
 
@@ -75,6 +77,7 @@ if st.button("Guardar en Google Sheets"):
 
     if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
+
     else:
         fila = [
             acta.strip(),
@@ -82,7 +85,7 @@ if st.button("Guardar en Google Sheets"):
             anio.strip(),
             tipo.strip(),
             titulo.strip(),
-            descripcion.strip(),   # 👈 CORRECTO ORDEN
+            descripcion.strip(),
             director.strip(),
             docente_categorizado.strip(),
             categoria_docente.strip(),
@@ -92,14 +95,13 @@ if st.button("Guardar en Google Sheets"):
         try:
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
-            st.rerun()
 
         except Exception as e:
             st.error("❌ Error al guardar")
             st.text(str(e))
 
 # =========================
-# 📄 GENERAR WORD
+# 📄 GENERAR ORDEN DEL DÍA
 # =========================
 
 st.markdown("---")
@@ -114,20 +116,19 @@ if st.button("Generar Orden del Día"):
 
         filas = [
             f for f in data
-            if str(f.get("ACTA", f.get("Acta", ""))).strip() == acta_buscar.strip()
+            if str(f.get("ACTA", "")).strip() == str(acta_buscar).strip()
         ]
 
         if not filas:
             st.warning("No hay registros para esa acta")
             st.stop()
 
-        fecha_doc = filas[0].get("FECHA", filas[0].get("Fecha", ""))
+        fecha_doc = filas[0]["FECHA"]
 
         agrupado = defaultdict(list)
 
         for fila in filas:
-            tipo_fila = fila.get("TIPO", fila.get("Tipo", ""))
-            agrupado[tipo_fila].append(fila)
+            agrupado[fila["TIPO"]].append(fila)
 
         doc = Document()
 
@@ -147,7 +148,7 @@ if st.button("Generar Orden del Día"):
             "Informe de Avance",
             "Jornada de Investigación",
             "Convocatoria de Investigación",
-            "Convocatoria a Proyectos de Investigación",
+            "Convocatoria a Proyectos de investigación",
             "Creación de Semillero de Investigación",
             "Categorización Docente"
         ]
@@ -164,33 +165,29 @@ if st.button("Generar Orden del Día"):
                 for item in agrupado[tipo]:
 
                     titulo_item = item.get("TITULO", "")
-                    descripcion_item = item.get("DESCRIPCION", "")
+                    descripcion_item = item.get("DESCRIPCIÓN", "")
                     director_item = item.get("DIRECTOR", "")
                     unidad_item = item.get("UNIDAD ACADÉMICA", "")
-                    docente_cat = item.get("Docente categorizado", "")
-                    categoria_doc = item.get("Categoría Docente", "")
+                    docente_item = item.get("Docente categorizado", "")
+                    categoria_item = item.get("Categoría Docente", "")
 
-                    # TITULO
-                    if titulo_item:
-                        doc.add_paragraph(titulo_item)
+                    # 🔹 CASO NORMAL
+                    if tipo != "Categorización Docente":
 
-                    # DESCRIPCIÓN
-                    if descripcion_item:
-                        doc.add_paragraph(descripcion_item)
+                        if titulo_item:
+                            doc.add_paragraph(titulo_item)
 
-                    if tipo == "Categorización Docente":
-                        if docente_cat:
-                            doc.add_paragraph(f"    {contador}.{sub} {docente_cat}")
-                        if categoria_doc:
-                            doc.add_paragraph(f"    Categoría: {categoria_doc}")
-                        if unidad_item:
-                            doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
+                        if descripcion_item:
+                            doc.add_paragraph(descripcion_item)
 
+                        doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
+                        doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
+
+                    # 🔹 CATEGORIZACIÓN DOCENTE
                     else:
-                        if director_item:
-                            doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
-                        if unidad_item:
-                            doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
+                        doc.add_paragraph(f"    {contador}.{sub} {docente_item}")
+                        doc.add_paragraph(f"    Categoría: {categoria_item}")
+                        doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
 
                     sub += 1
 
