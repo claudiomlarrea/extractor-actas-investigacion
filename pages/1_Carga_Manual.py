@@ -72,7 +72,7 @@ if st.button("Guardar en Google Sheets"):
     if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
-        fila = [acta, fecha, anio, tipo, descripcion]
+        fila = [acta.strip(), fecha.strip(), anio.strip(), tipo.strip(), descripcion.strip()]
 
         try:
             sheet.append_row(fila)
@@ -96,7 +96,11 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        filas = [f for f in data if str(f["Acta"]) == str(acta_buscar)]
+        # FILTRO ROBUSTO (no se rompe)
+        filas = [
+            f for f in data
+            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
+        ]
 
         if not filas:
             st.warning("No hay registros para esa acta")
@@ -104,60 +108,80 @@ if st.button("Generar Orden del Día"):
 
         fecha_doc = filas[0]["Fecha"]
 
-        # Agrupar
+        # AGRUPAR (sin perder nada)
         agrupado = defaultdict(list)
         for fila in filas:
-            agrupado[fila["Tipo"]].append(fila["Descripción"])
+            tipo_f = str(fila.get("Tipo", "")).strip()
+            desc = str(fila.get("Descripción", "")).strip()
+            agrupado[tipo_f].append(desc)
 
         # =========================
-        # 🧾 CREAR DOCUMENTO WORD
+        # 🧾 DOCUMENTO WORD INSTITUCIONAL
         # =========================
 
         doc = Document()
 
-        # --- ENCABEZADO INSTITUCIONAL ---
+        # Fuente institucional
+        style = doc.styles['Normal']
+        font = style.font
+        font.name = 'Times New Roman'
+        font.size = Pt(12)
+
+        # ENCABEZADO
         p = doc.add_paragraph()
         run = p.add_run("UNIVERSIDAD CATÓLICA DE CUYO\n")
         run.bold = True
+        p.add_run("Consejo de Investigación\n\n")
 
-        p.add_run("Consejo de Investigación\n")
-        p.add_run("\n")
-
-        # --- TÍTULO ---
+        # TÍTULO
         titulo = doc.add_paragraph()
-        run = titulo.add_run(f"ORDEN DEL DÍA\nActa Nº {acta_buscar}")
+        run = titulo.add_run("ORDEN DEL DÍA")
         run.bold = True
-        titulo.runs[0].font.size = Pt(16)
+        run.font.size = Pt(16)
+        titulo.alignment = 1  # centrado
 
-        # --- FECHA ---
+        # DATOS
+        doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
-        # --- CUERPO ---
+        # ORDEN INSTITUCIONAL (IMPORTANTE)
+        orden_tipos = [
+            "Proyecto",
+            "Proyecto de Investigación",
+            "Proyecto de Cátedra",
+            "Jornada de Investigación",
+            "Convocatoria de Investigación",
+            "Informe de Avance",
+            "Informe Final",
+            "Categorización Docente"
+        ]
+
         contador = 1
 
-        for tipo, items in agrupado.items():
+        for tipo in orden_tipos:
+            if tipo in agrupado:
 
-            doc.add_paragraph(f"{contador}. {tipo}", style='List Number')
+                p = doc.add_paragraph()
+                run = p.add_run(f"{contador}. {tipo}")
+                run.bold = True
 
-            sub = 1
-            for item in items:
-                doc.add_paragraph(f"{contador}.{sub} {item}")
-                sub += 1
+                sub = 1
 
-            contador += 1
-            doc.add_paragraph("")
+                for item in agrupado[tipo]:
+                    doc.add_paragraph(f"    {contador}.{sub} {item}")
+                    sub += 1
 
-        # --- CIERRE ---
+                doc.add_paragraph("")
+                contador += 1
+
+        # CIERRE
         doc.add_paragraph("\n")
         doc.add_paragraph("____________________________________")
         doc.add_paragraph("Secretaría de Investigación")
         doc.add_paragraph("Universidad Católica de Cuyo")
 
-        # =========================
-        # 📥 DESCARGA
-        # =========================
-
+        # DESCARGA SIN ARCHIVO TEMPORAL
         buffer = BytesIO()
         doc.save(buffer)
         buffer.seek(0)
@@ -165,7 +189,8 @@ if st.button("Generar Orden del Día"):
         st.download_button(
             label="⬇️ Descargar Orden del Día (Word)",
             data=buffer,
-            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
+            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
         st.success("✅ Documento generado correctamente")
