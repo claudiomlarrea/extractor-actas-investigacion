@@ -114,7 +114,7 @@ if st.button("Generar Orden del Día"):
         filas = []
 
         for f in data:
-            acta_sheet = str(f.get("Acta", "")).strip()
+            acta_sheet = str(f.get("ACTA", "")).strip()
             acta_input = str(acta_buscar).strip()
 
             try:
