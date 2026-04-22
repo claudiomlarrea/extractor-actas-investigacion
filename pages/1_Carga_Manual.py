@@ -127,12 +127,12 @@ if st.button("Generar Orden del Día"):
             st.warning("No hay registros para esa acta")
             st.stop()
 
-        fecha_doc = str(filas[0].get("Fecha", "")).strip()
+       fecha_doc = str(filas[0].get("FECHA", "")).strip()
 
         agrupado = defaultdict(list)
 
         for fila in filas:
-            tipo_fila = str(fila.get("Tipo", "")).strip()
+            tipo_fila = str(fila.get("TIPO", "")).strip()
             agrupado[tipo_fila].append(fila)
 
         # =========================
@@ -190,9 +190,9 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
-                    titulo_item = str(item.get("Título", "")).strip()
-                    director_item = str(item.get("Director", "")).strip()
-                    unidad_item = str(item.get("Unidad Académica", "")).strip()
+                    titulo_item = str(item.get("TITULO", "")).strip()
+                    director_item = str(item.get("DIRECTOR", "")).strip()
+                    unidad_item = str(item.get("UNIDAD ACADÉMICA", "")).strip()
 
                     doc.add_paragraph(f"   {titulo_item}")
                     doc.add_paragraph(f"      {contador}.{sub} Director {director_item}")
