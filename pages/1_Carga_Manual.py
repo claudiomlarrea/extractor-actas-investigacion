@@ -29,7 +29,8 @@ try:
     sheet = sh.worksheet("Hoja 2")
 
     st.success("✅ Conectado a Google Sheets")
-    st.write("📍 Archivo:", sh.url)
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit#gid={sheet.id}"
+    st.write("📍 Archivo:", sheet_url)
 
 except Exception as e:
     st.error("❌ Error de conexión")
