@@ -216,3 +216,11 @@ if st.button("Generar Orden del Día"):
     except Exception as e:
         st.error("❌ Error al generar documento")
         st.text(str(e))
+
+# 🔄 LIMPIAR CAMPOS DESPUÉS DE GUARDAR
+st.session_state.titulo = ""
+st.session_state.descripcion = ""
+st.session_state.director = ""
+st.session_state.unidad = ""
+st.session_state.docente = ""
+st.session_state.categoria = ""
