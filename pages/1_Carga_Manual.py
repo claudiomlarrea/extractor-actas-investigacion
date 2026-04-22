@@ -93,7 +93,7 @@ if st.button("Guardar en Google Sheets"):
             st.text(str(e))
 
 # =========================
-# 📄 GENERAR ORDEN DEL DÍA
+# 📄 GENERAR ORDEN DEL DÍA (FORMATO INSTITUCIONAL REAL)
 # =========================
 
 st.markdown("---")
@@ -117,14 +117,106 @@ if st.button("Generar Orden del Día"):
 
         fecha_doc = filas[0]["Fecha"]
 
-        # AGRUPAR
         agrupado = defaultdict(list)
-        for fila in filas:
-            tipo_f = fila.get("Tipo", "")
-            desc = fila.get("Descripción", "")
-            unidad_f = fila.get("Unidad Académica", "")
 
-            agrupado[tipo_f].append((desc, unidad_f))
+        for fila in filas:
+            tipo = fila.get("Tipo", "")
+            descripcion = fila.get("Descripción", "")
+            unidad = fila.get("Unidad Académica", "")
+
+            nombre = ""
+            director = ""
+
+            # 🧠 PARSEO SIMPLE
+            if "Nombre:" in descripcion:
+                partes = descripcion.split("\n")
+                for p in partes:
+                    if "Nombre:" in p:
+                        nombre = p.replace("Nombre:", "").strip()
+                    if "Director:" in p:
+                        director = p.replace("Director:", "").strip()
+            else:
+                nombre = descripcion
+
+            agrupado[tipo].append({
+                "nombre": nombre,
+                "director": director,
+                "unidad": unidad
+            })
+
+        # =========================
+        # 🧾 CREAR WORD
+        # =========================
+
+        doc = Document()
+
+        # ENCABEZADO
+        doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
+        doc.add_paragraph("Consejo de Investigación")
+        doc.add_paragraph("")
+
+        # TITULO
+        titulo = doc.add_paragraph("ORDEN DEL DÍA")
+        titulo.runs[0].bold = True
+
+        doc.add_paragraph(f"Acta Nº {acta_buscar}")
+        doc.add_paragraph(f"Fecha: {fecha_doc}")
+        doc.add_paragraph("")
+
+        orden_tipos = [
+            "Proyecto de Cátedra",
+            "Proyecto de Investigación",
+            "Informe Final",
+            "Informe de Avance",
+            "Jornada de Investigación",
+            "Convocatoria de Investigación",
+            "Categorización Docente"
+        ]
+
+        contador = 1
+
+        for tipo in orden_tipos:
+            if tipo in agrupado:
+
+                # TITULO SECCIÓN
+                doc.add_paragraph(f"{contador}. {tipo}")
+
+                for i, item in enumerate(agrupado[tipo], start=1):
+
+                    # NOMBRE
+                    if item["nombre"]:
+                        doc.add_paragraph(item["nombre"])
+
+                    # DIRECTOR
+                    if item["director"]:
+                        doc.add_paragraph(f"    {contador}.{i} Director {item['director']}")
+
+                    # UNIDAD
+                    if item["unidad"]:
+                        doc.add_paragraph(f"    ({item['unidad']})")
+
+                doc.add_paragraph("")
+                contador += 1
+
+        # =========================
+        # 📥 DESCARGA
+        # =========================
+
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            label="⬇️ Descargar Orden del Día (Word)",
+            data=buffer,
+            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
+        )
+
+        st.success("✅ Documento generado correctamente")
+
+    except Exception as e:
+        st.error("❌ Error al generar documento")
+        st.text(str(e))
 
         # =========================
         # 🧾 DOCUMENTO WORD
