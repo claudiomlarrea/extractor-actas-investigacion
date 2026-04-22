@@ -63,6 +63,9 @@ tipo = st.selectbox(
 
 descripcion = st.text_area("Descripción")
 
+# 🆕 NUEVO CAMPO
+unidad = st.text_input("Unidad Académica")
+
 # =========================
 # 💾 GUARDAR
 # =========================
@@ -72,7 +75,14 @@ if st.button("Guardar en Google Sheets"):
     if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
-        fila = [acta.strip(), fecha.strip(), anio.strip(), tipo.strip(), descripcion.strip()]
+        fila = [
+            acta.strip(),
+            fecha.strip(),
+            anio.strip(),
+            tipo.strip(),
+            descripcion.strip(),
+            unidad.strip()   # 🆕 SE AGREGA
+        ]
 
         try:
             sheet.append_row(fila)
@@ -96,7 +106,6 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        # FILTRO ROBUSTO (no se rompe)
         filas = [
             f for f in data
             if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
@@ -108,20 +117,21 @@ if st.button("Generar Orden del Día"):
 
         fecha_doc = filas[0]["Fecha"]
 
-        # AGRUPAR (sin perder nada)
+        # AGRUPAR
         agrupado = defaultdict(list)
         for fila in filas:
-            tipo_f = str(fila.get("Tipo", "")).strip()
-            desc = str(fila.get("Descripción", "")).strip()
-            agrupado[tipo_f].append(desc)
+            tipo_f = fila.get("Tipo", "")
+            desc = fila.get("Descripción", "")
+            unidad_f = fila.get("Unidad Académica", "")
+
+            agrupado[tipo_f].append((desc, unidad_f))
 
         # =========================
-        # 🧾 DOCUMENTO WORD INSTITUCIONAL
+        # 🧾 DOCUMENTO WORD
         # =========================
 
         doc = Document()
 
-        # Fuente institucional
         style = doc.styles['Normal']
         font = style.font
         font.name = 'Times New Roman'
@@ -138,14 +148,12 @@ if st.button("Generar Orden del Día"):
         run = titulo.add_run("ORDEN DEL DÍA")
         run.bold = True
         run.font.size = Pt(16)
-        titulo.alignment = 1  # centrado
+        titulo.alignment = 1
 
-        # DATOS
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
-        # ORDEN INSTITUCIONAL (IMPORTANTE)
         orden_tipos = [
             "Proyecto",
             "Proyecto de Investigación",
@@ -168,8 +176,14 @@ if st.button("Generar Orden del Día"):
 
                 sub = 1
 
-                for item in agrupado[tipo]:
-                    doc.add_paragraph(f"    {contador}.{sub} {item}")
+                for desc, unidad_f in agrupado[tipo]:
+                    texto = f"    {contador}.{sub} {desc}"
+
+                    # 🆕 AGREGA UNIDAD
+                    if unidad_f:
+                        texto += f" ({unidad_f})"
+
+                    doc.add_paragraph(texto)
                     sub += 1
 
                 doc.add_paragraph("")
@@ -181,7 +195,6 @@ if st.button("Generar Orden del Día"):
         doc.add_paragraph("Secretaría de Investigación")
         doc.add_paragraph("Universidad Católica de Cuyo")
 
-        # DESCARGA SIN ARCHIVO TEMPORAL
         buffer = BytesIO()
         doc.save(buffer)
         buffer.seek(0)
@@ -189,8 +202,7 @@ if st.button("Generar Orden del Día"):
         st.download_button(
             label="⬇️ Descargar Orden del Día (Word)",
             data=buffer,
-            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
         )
 
         st.success("✅ Documento generado correctamente")
