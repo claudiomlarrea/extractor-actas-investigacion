@@ -29,7 +29,6 @@ try:
     sheet = sh.worksheet("Hoja 2")
 
     st.success("✅ Conectado a Google Sheets")
-    st.write("📍 Archivo:", sh.url)
 
 except Exception as e:
     st.error("❌ Error de conexión")
@@ -55,11 +54,14 @@ tipo = st.selectbox(
         "Informe de Avance",
         "Jornada de Investigación",
         "Convocatoria de Investigación",
+        "Convocatoria a Proyectos de Investigación",
+        "Creación de Semillero de Investigación",
         "Categorización Docente"
     ]
 )
 
 titulo = st.text_input("Título")
+descripcion = st.text_input("Descripción")
 director = st.text_input("Director")
 unidad = st.text_input("Unidad Académica")
 docente_categorizado = st.text_input("Docente categorizado")
@@ -80,6 +82,7 @@ if st.button("Guardar en Google Sheets"):
             anio.strip(),
             tipo.strip(),
             titulo.strip(),
+            descripcion.strip(),   # 👈 CORRECTO ORDEN
             director.strip(),
             docente_categorizado.strip(),
             categoria_docente.strip(),
@@ -89,8 +92,6 @@ if st.button("Guardar en Google Sheets"):
         try:
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
-
-            # 🔄 LIMPIAR FORMULARIO
             st.rerun()
 
         except Exception as e:
@@ -98,7 +99,7 @@ if st.button("Guardar en Google Sheets"):
             st.text(str(e))
 
 # =========================
-# 📄 GENERAR ORDEN DEL DÍA
+# 📄 GENERAR WORD
 # =========================
 
 st.markdown("---")
@@ -120,22 +121,20 @@ if st.button("Generar Orden del Día"):
             st.warning("No hay registros para esa acta")
             st.stop()
 
-        fecha_doc = str(filas[0].get("FECHA", filas[0].get("Fecha", ""))).strip()
+        fecha_doc = filas[0].get("FECHA", filas[0].get("Fecha", ""))
 
         agrupado = defaultdict(list)
 
         for fila in filas:
-            tipo_fila = str(fila.get("TIPO", fila.get("Tipo", ""))).strip()
+            tipo_fila = fila.get("TIPO", fila.get("Tipo", ""))
             agrupado[tipo_fila].append(fila)
 
         doc = Document()
 
-        # ENCABEZADO
         doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
         doc.add_paragraph("Consejo de Investigación")
         doc.add_paragraph("")
 
-        # TITULO
         doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
@@ -148,6 +147,8 @@ if st.button("Generar Orden del Día"):
             "Informe de Avance",
             "Jornada de Investigación",
             "Convocatoria de Investigación",
+            "Convocatoria a Proyectos de Investigación",
+            "Creación de Semillero de Investigación",
             "Categorización Docente"
         ]
 
@@ -162,17 +163,21 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
-                    titulo_item = item.get("TITULO", item.get("Titulo", "")).strip()
-                    director_item = item.get("DIRECTOR", item.get("Director", "")).strip()
-                    unidad_item = item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", "")).strip()
-                    docente_cat = item.get("Docente categorizado", "").strip()
-                    categoria_doc = item.get("Categoría Docente", "").strip()
+                    titulo_item = item.get("TITULO", "")
+                    descripcion_item = item.get("DESCRIPCION", "")
+                    director_item = item.get("DIRECTOR", "")
+                    unidad_item = item.get("UNIDAD ACADÉMICA", "")
+                    docente_cat = item.get("Docente categorizado", "")
+                    categoria_doc = item.get("Categoría Docente", "")
 
-                    # 🔹 TITULO
+                    # TITULO
                     if titulo_item:
                         doc.add_paragraph(titulo_item)
 
-                    # 🔹 CATEGORIZACIÓN DOCENTE
+                    # DESCRIPCIÓN
+                    if descripcion_item:
+                        doc.add_paragraph(descripcion_item)
+
                     if tipo == "Categorización Docente":
                         if docente_cat:
                             doc.add_paragraph(f"    {contador}.{sub} {docente_cat}")
@@ -181,7 +186,6 @@ if st.button("Generar Orden del Día"):
                         if unidad_item:
                             doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
 
-                    # 🔹 RESTO
                     else:
                         if director_item:
                             doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
