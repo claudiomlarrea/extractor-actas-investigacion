@@ -42,9 +42,9 @@ except Exception as e:
 
 st.subheader("📋 Carga de Actas")
 
-anio = st.text_input("Año", "2026")
-fecha = st.text_input("Fecha", "18/08/2026")
-acta = st.text_input("Número de Acta")
+anio = st.text_input("Año", key="anio")
+fecha = st.text_input("Fecha", key="fecha")
+acta = st.text_input("Número de Acta", key="acta")
 
 tipo = st.selectbox(
     "Tipo",
@@ -59,9 +59,11 @@ tipo = st.selectbox(
     ]
 )
 
-titulo = st.text_input("Título")
-director = st.text_input("Director")
-unidad = st.text_input("Unidad Académica")
+titulo = st.text_input("Título", key="titulo")
+director = st.text_input("Director", key="director")
+unidad = st.text_input("Unidad Académica", key="unidad")
+docente_categorizado = st.text_input("Docente categorizado", key="docente")
+categoria_docente = st.text_input("Categoría Docente", key="categoria")
 
 # 🆕 NUEVOS CAMPOS
 docente_categorizado = st.text_input("Docente categorizado")
@@ -90,7 +92,17 @@ if st.button("Guardar en Google Sheets"):
 
         try:
             sheet.append_row(fila)
-            st.success("✅ Registro guardado correctamente")
+                st.success("✅ Registro guardado correctamente")
+
+            # 🔄 LIMPIAR FORMULARIO
+            st.session_state["acta"] = ""
+            st.session_state["fecha"] = ""
+            st.session_state["anio"] = ""
+            st.session_state["titulo"] = ""
+            st.session_state["director"] = ""
+            st.session_state["unidad"] = ""
+            st.session_state["docente"] = ""
+            st.session_state["categoria"] = ""
 
         except Exception as e:
             st.error("❌ Error al guardar")
