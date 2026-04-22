@@ -71,34 +71,30 @@ categoria_docente = st.text_input("Categoría Docente", key="categoria")
 
 if st.button("Guardar en Google Sheets"):
 
-    if acta.strip() == "":
+    acta_val = st.session_state.get("acta", "").strip()
+
+    if acta_val == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
         fila = [
-            acta.strip(),
-            fecha.strip(),
-            anio.strip(),
+            acta_val,
+            st.session_state.get("fecha", "").strip(),
+            st.session_state.get("anio", "").strip(),
             tipo.strip(),
-            titulo.strip(),
-            director.strip(),
-            docente_categorizado.strip(),
-            categoria_docente.strip(),
-            unidad.strip()
+            st.session_state.get("titulo", "").strip(),
+            st.session_state.get("director", "").strip(),
+            st.session_state.get("docente", "").strip(),
+            st.session_state.get("categoria", "").strip(),
+            st.session_state.get("unidad", "").strip()
         ]
 
         try:
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
 
-            # 🔄 LIMPIAR FORMULARIO
-            st.session_state["acta"] = ""
-            st.session_state["fecha"] = ""
-            st.session_state["anio"] = ""
-            st.session_state["titulo"] = ""
-            st.session_state["director"] = ""
-            st.session_state["unidad"] = ""
-            st.session_state["docente"] = ""
-            st.session_state["categoria"] = ""
+            # LIMPIAR CAMPOS
+            for key in ["acta","fecha","anio","titulo","director","unidad","docente","categoria"]:
+                st.session_state[key] = ""
 
         except Exception as e:
             st.error("❌ Error al guardar")
@@ -111,28 +107,29 @@ if st.button("Guardar en Google Sheets"):
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día Oficial")
 
-acta_buscar = st.text_input("Ingrese número de Acta")
+acta_buscar = st.text_input("Ingrese número de Acta", key="acta_buscar")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
+        # 🔥 CORRECCIÓN CLAVE: soporta ACTA o Acta
         filas = [
             f for f in data
-            if str(f.get("ACTA", "")).strip() == str(acta_buscar).strip()
+            if str(f.get("ACTA", f.get("Acta", ""))).strip() == str(acta_buscar).strip()
         ]
 
         if not filas:
             st.warning("No hay registros para esa acta")
             st.stop()
 
-        fecha_doc = str(filas[0].get("FECHA", "")).strip()
+        fecha_doc = str(filas[0].get("FECHA", filas[0].get("Fecha", ""))).strip()
 
         agrupado = defaultdict(list)
 
         for fila in filas:
-            tipo_fila = str(fila.get("TIPO", "")).strip()
+            tipo_fila = str(fila.get("TIPO", fila.get("Tipo", ""))).strip()
             agrupado[tipo_fila].append(fila)
 
         # =========================
@@ -172,13 +169,13 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
-                    titulo_item = str(item.get("TITULO", "")).strip()
-                    director_item = str(item.get("DIRECTOR", "")).strip()
-                    unidad_item = str(item.get("UNIDAD ACADÉMICA", "")).strip()
+                    titulo_item = str(item.get("TITULO", item.get("Titulo", ""))).strip()
+                    director_item = str(item.get("DIRECTOR", item.get("Director", ""))).strip()
+                    unidad_item = str(item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", ""))).strip()
                     docente_cat = str(item.get("Docente categorizado", "")).strip()
                     categoria_doc = str(item.get("Categoría Docente", "")).strip()
 
-                    # TÍTULO
+                    # TITULO
                     doc.add_paragraph(titulo_item)
 
                     if tipo == "Categorización Docente":
