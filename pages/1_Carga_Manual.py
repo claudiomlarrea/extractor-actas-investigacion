@@ -97,6 +97,14 @@ if st.button("Guardar en Google Sheets"):
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
 
+            # ✅ LIMPIAR CAMPOS (ACÁ ES DONDE VA)
+            st.session_state.titulo = ""
+            st.session_state.descripcion = ""
+            st.session_state.director = ""
+            st.session_state.unidad = ""
+            st.session_state.docente = ""
+            st.session_state.categoria = ""
+
         except Exception as e:
             st.error("❌ Error al guardar")
             st.text(str(e))
@@ -170,15 +178,9 @@ if st.button("Generar Orden del Día"):
                     director_item = item.get("DIRECTOR", "")
                     unidad_item = item.get("UNIDAD ACADÉMICA", "")
 
-                    docente_item = (
-                        item.get("Docente categorizado") or
-                        item.get("Docente categizado") or
-                        ""
-                    )
-
+                    docente_item = item.get("Docente categorizado", "")
                     categoria_item = item.get("Categoría Docente", "")
 
-                    # 🔹 CASO NORMAL
                     if tipo != "Categorización Docente":
 
                         if titulo_item:
@@ -190,7 +192,6 @@ if st.button("Generar Orden del Día"):
                         doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
                         doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
 
-                    # 🔹 CATEGORIZACIÓN DOCENTE
                     else:
                         doc.add_paragraph(f"    {contador}.{sub} {docente_item}")
                         doc.add_paragraph(f"    Categoría: {categoria_item}")
@@ -216,11 +217,3 @@ if st.button("Generar Orden del Día"):
     except Exception as e:
         st.error("❌ Error al generar documento")
         st.text(str(e))
-
-# 🔄 LIMPIAR CAMPOS DESPUÉS DE GUARDAR
-st.session_state.titulo = ""
-st.session_state.descripcion = ""
-st.session_state.director = ""
-st.session_state.unidad = ""
-st.session_state.docente = ""
-st.session_state.categoria = ""
