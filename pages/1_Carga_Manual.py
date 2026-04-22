@@ -59,7 +59,6 @@ tipo = st.selectbox(
     ]
 )
 
-# 🆕 CAMPOS CORRECTOS
 titulo = st.text_input("Título")
 director = st.text_input("Director")
 unidad = st.text_input("Unidad Académica")
@@ -72,6 +71,10 @@ if st.button("Guardar en Google Sheets"):
 
     if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
+
+    elif titulo.strip() == "":
+        st.warning("⚠️ Debe ingresar el título")
+
     else:
         fila = [
             acta.strip(),
@@ -105,29 +108,37 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        filas = [
-            f for f in data
-            if str(f.get("Acta", "")).strip() == str(acta_buscar).strip()
-        ]
+        # 🔴 FILTRO ROBUSTO (SOLUCIÓN CLAVE)
+        filas = []
+
+        for f in data:
+            acta_sheet = str(f.get("Acta", "")).strip()
+            acta_input = str(acta_buscar).strip()
+
+            if acta_sheet == acta_input:
+                filas.append(f)
 
         if not filas:
             st.warning("No hay registros para esa acta")
             st.stop()
 
-        fecha_doc = filas[0]["Fecha"]
+        fecha_doc = str(filas[0].get("Fecha", "")).strip()
 
         agrupado = defaultdict(list)
 
         for fila in filas:
-            agrupado[fila["Tipo"]].append(fila)
+            tipo_fila = str(fila.get("Tipo", "")).strip()
+            agrupado[tipo_fila].append(fila)
 
         doc = Document()
 
+        # ENCABEZADO
         doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
         doc.add_paragraph("Consejo de Investigación")
         doc.add_paragraph("")
 
-        doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
+        titulo_doc = doc.add_paragraph("ORDEN DEL DÍA")
+        titulo_doc.runs[0].bold = True
 
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
@@ -154,14 +165,18 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
+                    titulo_item = str(item.get("Título", "")).strip()
+                    director_item = str(item.get("Director", "")).strip()
+                    unidad_item = str(item.get("Unidad Académica", "")).strip()
+
                     # TITULO
-                    doc.add_paragraph(item["Título"])
+                    doc.add_paragraph(titulo_item)
 
                     # DIRECTOR
-                    doc.add_paragraph(f"    {contador}.{sub} Director {item['Director']}")
+                    doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
 
                     # UNIDAD
-                    doc.add_paragraph(f"    ({item['Unidad Académica']})")
+                    doc.add_paragraph(f"    ({unidad_item})")
 
                     sub += 1
 
