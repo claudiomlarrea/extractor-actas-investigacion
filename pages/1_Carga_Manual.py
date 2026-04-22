@@ -8,7 +8,7 @@ from collections import defaultdict
 st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
-# 🔐 CONEXIÓN GOOGLE SHEETS
+# 🔐 CONEXIÓN
 # =========================
 
 try:
@@ -63,6 +63,10 @@ titulo = st.text_input("Título")
 director = st.text_input("Director")
 unidad = st.text_input("Unidad Académica")
 
+# 🆕 NUEVOS CAMPOS
+docente_categorizado = st.text_input("Docente categorizado")
+categoria_docente = st.text_input("Categoría Docente")
+
 # =========================
 # 💾 GUARDAR
 # =========================
@@ -79,6 +83,8 @@ if st.button("Guardar en Google Sheets"):
             tipo.strip(),
             titulo.strip(),
             director.strip(),
+            docente_categorizado.strip(),
+            categoria_docente.strip(),
             unidad.strip()
         ]
 
@@ -122,7 +128,7 @@ if st.button("Generar Orden del Día"):
             agrupado[tipo_fila].append(fila)
 
         # =========================
-        # 🧾 DOCUMENTO WORD
+        # 🧾 WORD
         # =========================
 
         doc = Document()
@@ -161,15 +167,19 @@ if st.button("Generar Orden del Día"):
                     titulo_item = str(item.get("TITULO", "")).strip()
                     director_item = str(item.get("DIRECTOR", "")).strip()
                     unidad_item = str(item.get("UNIDAD ACADÉMICA", "")).strip()
+                    docente_cat = str(item.get("Docente categorizado", "")).strip()
+                    categoria_doc = str(item.get("Categoría Docente", "")).strip()
 
                     # TÍTULO
                     doc.add_paragraph(titulo_item)
 
-                    # DIRECTOR
-                    doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
-
-                    # UNIDAD ACADÉMICA
-                    doc.add_paragraph(f"    ({unidad_item})")
+                    if tipo == "Categorización Docente":
+                        doc.add_paragraph(f"    {contador}.{sub} {docente_cat}")
+                        doc.add_paragraph(f"    Categoría: {categoria_doc}")
+                        doc.add_paragraph(f"    ({unidad_item})")
+                    else:
+                        doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
+                        doc.add_paragraph(f"    ({unidad_item})")
 
                     sub += 1
 
