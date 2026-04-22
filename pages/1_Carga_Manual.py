@@ -42,9 +42,9 @@ except Exception as e:
 
 st.subheader("📋 Carga de Actas")
 
-anio = st.text_input("Año", key="anio")
-fecha = st.text_input("Fecha", key="fecha")
-acta = st.text_input("Número de Acta", key="acta")
+anio = st.text_input("Año")
+fecha = st.text_input("Fecha")
+acta = st.text_input("Número de Acta")
 
 tipo = st.selectbox(
     "Tipo",
@@ -59,11 +59,11 @@ tipo = st.selectbox(
     ]
 )
 
-titulo = st.text_input("Título", key="titulo")
-director = st.text_input("Director", key="director")
-unidad = st.text_input("Unidad Académica", key="unidad")
-docente_categorizado = st.text_input("Docente categorizado", key="docente")
-categoria_docente = st.text_input("Categoría Docente", key="categoria")
+titulo = st.text_input("Título")
+director = st.text_input("Director")
+unidad = st.text_input("Unidad Académica")
+docente_categorizado = st.text_input("Docente categorizado")
+categoria_docente = st.text_input("Categoría Docente")
 
 # =========================
 # 💾 GUARDAR
@@ -71,30 +71,27 @@ categoria_docente = st.text_input("Categoría Docente", key="categoria")
 
 if st.button("Guardar en Google Sheets"):
 
-    acta_val = st.session_state.get("acta", "").strip()
-
-    if acta_val == "":
+    if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
     else:
         fila = [
-            acta_val,
-            st.session_state.get("fecha", "").strip(),
-            st.session_state.get("anio", "").strip(),
+            acta.strip(),
+            fecha.strip(),
+            anio.strip(),
             tipo.strip(),
-            st.session_state.get("titulo", "").strip(),
-            st.session_state.get("director", "").strip(),
-            st.session_state.get("docente", "").strip(),
-            st.session_state.get("categoria", "").strip(),
-            st.session_state.get("unidad", "").strip()
+            titulo.strip(),
+            director.strip(),
+            docente_categorizado.strip(),
+            categoria_docente.strip(),
+            unidad.strip()
         ]
 
         try:
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
 
-            # LIMPIAR CAMPOS
-            for key in ["acta","fecha","anio","titulo","director","unidad","docente","categoria"]:
-                st.session_state[key] = ""
+            # 🔄 LIMPIAR FORMULARIO (FORMA CORRECTA)
+            st.rerun()
 
         except Exception as e:
             st.error("❌ Error al guardar")
@@ -107,17 +104,16 @@ if st.button("Guardar en Google Sheets"):
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día Oficial")
 
-acta_buscar = st.text_input("Ingrese número de Acta", key="acta_buscar")
+acta_buscar = st.text_input("Ingrese número de Acta")
 
 if st.button("Generar Orden del Día"):
 
     try:
         data = sheet.get_all_records()
 
-        # 🔥 CORRECCIÓN CLAVE: soporta ACTA o Acta
         filas = [
             f for f in data
-            if str(f.get("ACTA", f.get("Acta", ""))).strip() == str(acta_buscar).strip()
+            if str(f.get("ACTA", f.get("Acta", ""))).strip() == acta_buscar.strip()
         ]
 
         if not filas:
@@ -132,10 +128,6 @@ if st.button("Generar Orden del Día"):
             tipo_fila = str(fila.get("TIPO", fila.get("Tipo", ""))).strip()
             agrupado[tipo_fila].append(fila)
 
-        # =========================
-        # 🧾 WORD
-        # =========================
-
         doc = Document()
 
         doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
@@ -143,7 +135,6 @@ if st.button("Generar Orden del Día"):
         doc.add_paragraph("")
 
         doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
-
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
@@ -169,13 +160,12 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
-                    titulo_item = str(item.get("TITULO", item.get("Titulo", ""))).strip()
-                    director_item = str(item.get("DIRECTOR", item.get("Director", ""))).strip()
-                    unidad_item = str(item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", ""))).strip()
-                    docente_cat = str(item.get("Docente categorizado", "")).strip()
-                    categoria_doc = str(item.get("Categoría Docente", "")).strip()
+                    titulo_item = item.get("TITULO", item.get("Titulo", ""))
+                    director_item = item.get("DIRECTOR", item.get("Director", ""))
+                    unidad_item = item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", ""))
+                    docente_cat = item.get("Docente categorizado", "")
+                    categoria_doc = item.get("Categoría Docente", "")
 
-                    # TITULO
                     doc.add_paragraph(titulo_item)
 
                     if tipo == "Categorización Docente":
