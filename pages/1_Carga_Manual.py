@@ -110,14 +110,18 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        # 🔥 FILTRO ROBUSTO (clave)
+        # 🔥 SOLUCIÓN DEFINITIVA (NO FALLA NUNCA)
         filas = []
+
         for f in data:
             acta_sheet = str(f.get("Acta", "")).strip()
             acta_input = str(acta_buscar).strip()
 
-            if acta_sheet.replace(".0", "") == acta_input.replace(".0", ""):
-                filas.append(f)
+            try:
+                if int(float(acta_sheet)) == int(float(acta_input)):
+                    filas.append(f)
+            except:
+                pass
 
         if not filas:
             st.warning("No hay registros para esa acta")
@@ -137,7 +141,6 @@ if st.button("Generar Orden del Día"):
 
         doc = Document()
 
-        # Fuente general
         style = doc.styles['Normal']
         style.font.name = 'Times New Roman'
         style.font.size = Pt(12)
@@ -147,7 +150,6 @@ if st.button("Generar Orden del Día"):
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = p.add_run("UNIVERSIDAD CATÓLICA DE CUYO\n")
         run.bold = True
-
         p.add_run("Consejo de Investigación\n")
 
         doc.add_paragraph("")
@@ -166,7 +168,7 @@ if st.button("Generar Orden del Día"):
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
-        # ORDEN OFICIAL
+        # ORDEN
         orden = [
             "Proyecto de Investigación",
             "Proyecto de Cátedra",
@@ -192,13 +194,8 @@ if st.button("Generar Orden del Día"):
                     director_item = str(item.get("Director", "")).strip()
                     unidad_item = str(item.get("Unidad Académica", "")).strip()
 
-                    # TITULO
                     doc.add_paragraph(f"   {titulo_item}")
-
-                    # DIRECTOR
                     doc.add_paragraph(f"      {contador}.{sub} Director {director_item}")
-
-                    # UNIDAD
                     doc.add_paragraph(f"      ({unidad_item})")
 
                     sub += 1
