@@ -8,6 +8,14 @@ from collections import defaultdict
 st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
+# 🔄 LIMPIEZA FORZADA DE FORMULARIO
+# =========================
+
+if "reset_form" not in st.session_state:
+    st.session_state.reset_form = True
+    st.experimental_rerun()
+
+# =========================
 # 🔐 CONEXIÓN
 # =========================
 
@@ -72,6 +80,11 @@ with st.form("form_acta", clear_on_submit=True):
     categoria_docente = st.text_input("Categoría Docente")
 
     submit = st.form_submit_button("Guardar en Google Sheets")
+
+if st.button("🧹 Limpiar formulario manualmente"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.experimental_rerun()
 
 # =========================
 # 💾 GUARDAR
