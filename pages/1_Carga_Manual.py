@@ -179,14 +179,14 @@ if st.button("Generar Orden del Día"):
                         if categoria_doc:
                             doc.add_paragraph(f"    Categoría: {categoria_doc}")
                         if unidad_item:
-                            doc.add_paragraph(f"    ({unidad_item})")
+                            doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
 
                     # 🔹 RESTO
                     else:
                         if director_item:
                             doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
                         if unidad_item:
-                            doc.add_paragraph(f"    ({unidad_item})")
+                            doc.add_paragraph(f"    Unidad Académica ({unidad_item})")
 
                     sub += 1
 
