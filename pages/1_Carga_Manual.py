@@ -168,7 +168,13 @@ if st.button("Generar Orden del Día"):
                     descripcion_item = item.get("DESCRIPCIÓN", "")
                     director_item = item.get("DIRECTOR", "")
                     unidad_item = item.get("UNIDAD ACADÉMICA", "")
-                    docente_item = item.get("Docente categorizado", "")
+
+                    docente_item = (
+                        item.get("Docente categorizado") or
+                        item.get("Docente categizado") or
+                        ""
+                    )
+
                     categoria_item = item.get("Categoría Docente", "")
 
                     # 🔹 CASO NORMAL
