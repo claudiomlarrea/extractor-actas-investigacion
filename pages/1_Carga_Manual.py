@@ -42,9 +42,9 @@ except Exception as e:
 
 st.subheader("📋 Carga de Actas")
 
-anio = st.text_input("Año", "2026")
-fecha = st.text_input("Fecha", "18/08/2026")
-acta = st.text_input("Número de Acta")
+anio = st.text_input("Año", "2026", key="anio")
+fecha = st.text_input("Fecha", "18/08/2026", key="fecha")
+acta = st.text_input("Número de Acta", key="acta")
 
 tipo = st.selectbox(
     "Tipo",
@@ -58,16 +58,17 @@ tipo = st.selectbox(
         "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación",
         "Categorización Docente"
-    ]
+    ],
+    key="tipo"
 )
 
-titulo = st.text_input("Título")
-descripcion = st.text_input("Descripción")
-director = st.text_input("Director")
-unidad = st.text_input("Unidad Académica")
+titulo = st.text_input("Título", key="titulo")
+descripcion = st.text_input("Descripción", key="descripcion")
+director = st.text_input("Director", key="director")
+unidad = st.text_input("Unidad Académica", key="unidad")
 
-docente_categorizado = st.text_input("Docente categorizado")
-categoria_docente = st.text_input("Categoría Docente")
+docente_categorizado = st.text_input("Docente categorizado", key="docente")
+categoria_docente = st.text_input("Categoría Docente", key="categoria")
 
 # =========================
 # 💾 GUARDAR
