@@ -94,20 +94,22 @@ if st.button("Guardar en Google Sheets"):
         ]
 
         try:
-    sheet.append_row(fila)
-    st.success("✅ Registro guardado correctamente")
+            sheet.append_row(fila)
+            st.success("✅ Registro guardado correctamente")
 
-    # 🔄 LIMPIAR CAMPULARIO + REFRESCAR
-    st.session_state.titulo = ""
-    st.session_state.descripcion = ""
-    st.session_state.director = ""
-    st.session_state.unidad = ""
-    st.session_state.docente = ""
-    st.session_state.categoria = ""
+            # 🔄 LIMPIAR + REFRESCAR
+            st.session_state.titulo = ""
+            st.session_state.descripcion = ""
+            st.session_state.director = ""
+            st.session_state.unidad = ""
+            st.session_state.docente = ""
+            st.session_state.categoria = ""
 
-    st.rerun()   # 👈 ESTA ES LA CLAVE
+            st.rerun()
 
-    except Exception as e:
+        except Exception as e:
+            st.error("❌ Error al guardar")
+            st.text(str(e))
 
 # =========================
 # 📄 GENERAR ORDEN DEL DÍA
