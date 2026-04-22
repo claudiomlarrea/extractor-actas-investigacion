@@ -65,10 +65,6 @@ unidad = st.text_input("Unidad Académica", key="unidad")
 docente_categorizado = st.text_input("Docente categorizado", key="docente")
 categoria_docente = st.text_input("Categoría Docente", key="categoria")
 
-# 🆕 NUEVOS CAMPOS
-docente_categorizado = st.text_input("Docente categorizado")
-categoria_docente = st.text_input("Categoría Docente")
-
 # =========================
 # 💾 GUARDAR
 # =========================
@@ -92,7 +88,7 @@ if st.button("Guardar en Google Sheets"):
 
         try:
             sheet.append_row(fila)
-                st.success("✅ Registro guardado correctamente")
+            st.success("✅ Registro guardado correctamente")
 
             # 🔄 LIMPIAR FORMULARIO
             st.session_state["acta"] = ""
@@ -115,7 +111,7 @@ if st.button("Guardar en Google Sheets"):
 st.markdown("---")
 st.subheader("📄 Generar Orden del Día Oficial")
 
-acta_buscar = st.text_input("Ingrese número de Acta a generar")
+acta_buscar = st.text_input("Ingrese número de Acta")
 
 if st.button("Generar Orden del Día"):
 
