@@ -2,13 +2,15 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from io import BytesIO
 from collections import defaultdict
 
 st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
-# 🔐 CONEXIÓN
+# 🔐 CONEXIÓN GOOGLE SHEETS
 # =========================
 
 try:
@@ -108,14 +110,13 @@ if st.button("Generar Orden del Día"):
     try:
         data = sheet.get_all_records()
 
-        # 🔴 FILTRO ROBUSTO (SOLUCIÓN CLAVE)
+        # 🔥 FILTRO ROBUSTO (clave)
         filas = []
-
         for f in data:
             acta_sheet = str(f.get("Acta", "")).strip()
             acta_input = str(acta_buscar).strip()
 
-            if acta_sheet == acta_input:
+            if acta_sheet.replace(".0", "") == acta_input.replace(".0", ""):
                 filas.append(f)
 
         if not filas:
@@ -130,20 +131,42 @@ if st.button("Generar Orden del Día"):
             tipo_fila = str(fila.get("Tipo", "")).strip()
             agrupado[tipo_fila].append(fila)
 
+        # =========================
+        # 🧾 DOCUMENTO WORD FORMAL
+        # =========================
+
         doc = Document()
 
+        # Fuente general
+        style = doc.styles['Normal']
+        style.font.name = 'Times New Roman'
+        style.font.size = Pt(12)
+
         # ENCABEZADO
-        doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
-        doc.add_paragraph("Consejo de Investigación")
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run("UNIVERSIDAD CATÓLICA DE CUYO\n")
+        run.bold = True
+
+        p.add_run("Consejo de Investigación\n")
+
         doc.add_paragraph("")
 
-        titulo_doc = doc.add_paragraph("ORDEN DEL DÍA")
-        titulo_doc.runs[0].bold = True
+        # TÍTULO
+        titulo_doc = doc.add_paragraph()
+        titulo_doc.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = titulo_doc.add_run("ORDEN DEL DÍA")
+        run.bold = True
+        run.font.size = Pt(14)
 
+        doc.add_paragraph("")
+
+        # ACTA Y FECHA
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
 
+        # ORDEN OFICIAL
         orden = [
             "Proyecto de Investigación",
             "Proyecto de Cátedra",
@@ -170,30 +193,37 @@ if st.button("Generar Orden del Día"):
                     unidad_item = str(item.get("Unidad Académica", "")).strip()
 
                     # TITULO
-                    doc.add_paragraph(titulo_item)
+                    doc.add_paragraph(f"   {titulo_item}")
 
                     # DIRECTOR
-                    doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
+                    doc.add_paragraph(f"      {contador}.{sub} Director {director_item}")
 
                     # UNIDAD
-                    doc.add_paragraph(f"    ({unidad_item})")
+                    doc.add_paragraph(f"      ({unidad_item})")
 
                     sub += 1
 
                 doc.add_paragraph("")
                 contador += 1
 
+        # FIRMA
+        doc.add_paragraph("\n")
+        doc.add_paragraph("________________________________________")
+        doc.add_paragraph("Secretaría de Investigación")
+        doc.add_paragraph("Universidad Católica de Cuyo")
+
+        # DESCARGA
         buffer = BytesIO()
         doc.save(buffer)
         buffer.seek(0)
 
         st.download_button(
-            "⬇️ Descargar Orden del Día",
+            "⬇️ Descargar Orden del Día (Formato Oficial)",
             buffer,
             file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
         )
 
-        st.success("✅ Documento generado correctamente")
+        st.success("✅ Documento institucional generado correctamente")
 
     except Exception as e:
         st.error("❌ Error al generar documento")
