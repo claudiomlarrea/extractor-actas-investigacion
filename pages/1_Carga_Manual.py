@@ -90,7 +90,7 @@ if st.button("Guardar en Google Sheets"):
             sheet.append_row(fila)
             st.success("✅ Registro guardado correctamente")
 
-            # 🔄 LIMPIAR FORMULARIO (FORMA CORRECTA)
+            # 🔄 LIMPIAR FORMULARIO
             st.rerun()
 
         except Exception as e:
@@ -130,10 +130,12 @@ if st.button("Generar Orden del Día"):
 
         doc = Document()
 
+        # ENCABEZADO
         doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
         doc.add_paragraph("Consejo de Investigación")
         doc.add_paragraph("")
 
+        # TITULO
         doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
@@ -160,21 +162,31 @@ if st.button("Generar Orden del Día"):
 
                 for item in agrupado[tipo]:
 
-                    titulo_item = item.get("TITULO", item.get("Titulo", ""))
-                    director_item = item.get("DIRECTOR", item.get("Director", ""))
-                    unidad_item = item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", ""))
-                    docente_cat = item.get("Docente categorizado", "")
-                    categoria_doc = item.get("Categoría Docente", "")
+                    titulo_item = item.get("TITULO", item.get("Titulo", "")).strip()
+                    director_item = item.get("DIRECTOR", item.get("Director", "")).strip()
+                    unidad_item = item.get("UNIDAD ACADÉMICA", item.get("Unidad Académica", "")).strip()
+                    docente_cat = item.get("Docente categorizado", "").strip()
+                    categoria_doc = item.get("Categoría Docente", "").strip()
 
-                    doc.add_paragraph(titulo_item)
+                    # 🔹 TITULO
+                    if titulo_item:
+                        doc.add_paragraph(titulo_item)
 
+                    # 🔹 CATEGORIZACIÓN DOCENTE
                     if tipo == "Categorización Docente":
-                        doc.add_paragraph(f"    {contador}.{sub} {docente_cat}")
-                        doc.add_paragraph(f"    Categoría: {categoria_doc}")
-                        doc.add_paragraph(f"    ({unidad_item})")
+                        if docente_cat:
+                            doc.add_paragraph(f"    {contador}.{sub} {docente_cat}")
+                        if categoria_doc:
+                            doc.add_paragraph(f"    Categoría: {categoria_doc}")
+                        if unidad_item:
+                            doc.add_paragraph(f"    ({unidad_item})")
+
+                    # 🔹 RESTO
                     else:
-                        doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
-                        doc.add_paragraph(f"    ({unidad_item})")
+                        if director_item:
+                            doc.add_paragraph(f"    {contador}.{sub} Director {director_item}")
+                        if unidad_item:
+                            doc.add_paragraph(f"    ({unidad_item})")
 
                     sub += 1
 
