@@ -8,14 +8,6 @@ from collections import defaultdict
 st.title("📥 Sistema de Actas - Consejo de Investigación")
 
 # =========================
-# 🔄 LIMPIEZA FORZADA DE FORMULARIO
-# =========================
-
-if "reset_form" not in st.session_state:
-    st.session_state.reset_form = True
-    st.experimental_rerun()
-
-# =========================
 # 🔐 CONEXIÓN
 # =========================
 
@@ -81,10 +73,12 @@ with st.form("form_acta", clear_on_submit=True):
 
     submit = st.form_submit_button("Guardar en Google Sheets")
 
+# =========================
+# 🧹 BOTÓN LIMPIAR
+# =========================
+
 if st.button("🧹 Limpiar formulario manualmente"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.experimental_rerun()
+    st.rerun()
 
 # =========================
 # 💾 GUARDAR
@@ -154,7 +148,6 @@ if st.button("Generar Orden del Día"):
         doc.add_paragraph("")
 
         doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
-
         doc.add_paragraph(f"Acta Nº {acta_buscar}")
         doc.add_paragraph(f"Fecha: {fecha_doc}")
         doc.add_paragraph("")
