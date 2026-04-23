@@ -67,52 +67,43 @@ with st.form("form_acta", clear_on_submit=True):
     titulo = st.text_input("Título")
     descripcion = st.text_input("Descripción")
     director = st.text_input("Director")
+
     unidad = st.selectbox(
-    "Unidad Académica",
-    [
-        "FDCSSL - Facultad de Derecho y Ciencias Sociales Sede San Luis",
-        "FCMSL - Facultad de Ciencias Médicas Sede San Luis",
-        "FCVSL - Facultad de Veterinaria Sede San Luis",
-        "FCEESL - Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-        "FBOSCO - Facultad Don Bosco de Enología y Ciencias de la Alimentación - Sede Rodeo del Medio",
-        "FCEESJ - Facultad de Ciencias Económicas y Empresariales Sede San Juan",
-        "FFyHSJ - Facultad de Filosofía y Humanidades",
-        "ISDSM - Instituto Universitario Santa María",
-        "ECRyPSJ - Escuela de Cultura Religiosa y Pastoral",
-        "FDCSSJ - Facultad de Derecho y Ciencias Sociales Sede San Juan",
-        "FCMSJ - Facultad de Ciencias Médicas San Juan",
-        "FEDSJ - Facultad de Educación San Juan",
-        "ESEGSJ - Escuela de Seguridad",
-        "FCQyTSJ - Facultad de Ciencias Químicas y Tecnológicas San Juan"
-    ]
-)
+        "Unidad Académica",
+        [
+            "FDCSSL - Facultad de Derecho y Ciencias Sociales Sede San Luis",
+            "FCMSL - Facultad de Ciencias Médicas Sede San Luis",
+            "FCVSL - Facultad de Veterinaria Sede San Luis",
+            "FCEESL - Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+            "FBOSCO - Facultad Don Bosco de Enología y Ciencias de la Alimentación - Sede Rodeo del Medio",
+            "FCEESJ - Facultad de Ciencias Económicas y Empresariales Sede San Juan",
+            "FFyHSJ - Facultad de Filosofía y Humanidades",
+            "ISDSM - Instituto Universitario Santa María",
+            "ECRyPSJ - Escuela de Cultura Religiosa y Pastoral",
+            "FDCSSJ - Facultad de Derecho y Ciencias Sociales Sede San Juan",
+            "FCMSJ - Facultad de Ciencias Médicas San Juan",
+            "FEDSJ - Facultad de Educación San Juan",
+            "ESEGSJ - Escuela de Seguridad",
+            "FCQyTSJ - Facultad de Ciencias Químicas y Tecnológicas San Juan"
+        ]
+    )
 
     docente_categorizado = st.text_input("Docente categorizado")
-    # =========================
-# 🎓 CATEGORÍA DOCENTE
-# =========================
 
-categoria_docente = st.selectbox(
-    "Categoría Docente",
-    [
-        "Investigador Superior I",
-        "Investigador Principal II",
-        "Investigador Independiente III",
-        "Investigador Asistente IV",
-        "Investigador Adjunto V",
-        "Becario/a de Iniciación VI",
-        "Sin categorización / Externo"
-    ]
-)
+    categoria_docente = st.selectbox(
+        "Categoría Docente",
+        [
+            "Investigador Superior I",
+            "Investigador Principal II",
+            "Investigador Independiente III",
+            "Investigador Asistente IV",
+            "Investigador Adjunto V",
+            "Becario/a de Iniciación VI",
+            "Sin categorización / Externo"
+        ]
+    )
 
     submit = st.form_submit_button("Guardar en Google Sheets")
-
-# =========================
-# 🧹 BOTÓN LIMPIAR
-# =========================
-
-if st.button("🧹 Limpiar formulario manualmente"):
-    st.rerun()
 
 # =========================
 # 💾 GUARDAR
@@ -156,101 +147,85 @@ acta_buscar = st.text_input("Ingrese número de Acta")
 
 if st.button("Generar Orden del Día"):
 
-    try:
-        data = sheet.get_all_records()
+    data = sheet.get_all_records()
 
-        filas = [
-            f for f in data
-            if str(f.get("ACTA", "")).strip() == str(acta_buscar).strip()
-        ]
+    filas = [
+        f for f in data
+        if str(f.get("ACTA", "")).strip() == str(acta_buscar).strip()
+    ]
 
-        if not filas:
-            st.warning("No hay registros para esa acta")
-            st.stop()
+    if not filas:
+        st.warning("No hay registros para esa acta")
+        st.stop()
 
-        fecha_doc = filas[0]["FECHA"]
+    fecha_doc = filas[0]["FECHA"]
 
-        agrupado = defaultdict(list)
+    agrupado = defaultdict(list)
 
-        for fila in filas:
-            agrupado[fila["TIPO"]].append(fila)
+    for fila in filas:
+        agrupado[fila["TIPO"]].append(fila)
 
-        doc = Document()
+    doc = Document()
 
-        doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
-        doc.add_paragraph("Consejo de Investigación")
+    doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
+    doc.add_paragraph("Consejo de Investigación")
+    doc.add_paragraph("")
+
+    doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
+    doc.add_paragraph(f"Acta Nº {acta_buscar}")
+    doc.add_paragraph(f"Fecha: {fecha_doc}")
+    doc.add_paragraph("")
+
+    orden = list(agrupado.keys())
+
+    contador = 1
+
+    for tipo in orden:
+
+        doc.add_paragraph(f"{contador}. {tipo}")
+        sub = 1
+
+        for item in agrupado[tipo]:
+
+            if tipo == "Categorización Docente":
+
+                docente = item.get("Docente categorizado", "")
+                categoria = item.get("Categoría Docente", "")
+                unidad = item.get("UNIDAD ACADÉMICA", "")
+
+                doc.add_paragraph(f"    {contador}.{sub} {docente}")
+                doc.add_paragraph(f"    Categoría: {categoria}")
+                doc.add_paragraph(f"    Unidad Académica ({unidad})")
+
+            else:
+
+                titulo = item.get("TITULO", "")
+                descripcion = item.get("DESCRIPCIÓN", "")
+                director = item.get("DIRECTOR", "")
+                unidad = item.get("UNIDAD ACADÉMICA", "")
+
+                if titulo:
+                    doc.add_paragraph(titulo)
+
+                if descripcion:
+                    doc.add_paragraph(descripcion)
+
+                doc.add_paragraph(f"    {contador}.{sub} Director {director}")
+                doc.add_paragraph(f"    Unidad Académica ({unidad})")
+
+            sub += 1
+
         doc.add_paragraph("")
+        contador += 1
 
-        doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
-        doc.add_paragraph(f"Acta Nº {acta_buscar}")
-        doc.add_paragraph(f"Fecha: {fecha_doc}")
-        doc.add_paragraph("")
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
 
-        orden = [
-            "Proyecto de Investigación",
-            "Proyecto de Cátedra",
-            "Informe Final",
-            "Informe de Avance",
-            "Jornada de Investigación",
-            "Convocatoria de Investigación",
-            "Convocatoria a Proyectos de investigación",
-            "Creación de Semillero de Investigación",
-            "Categorización Docente"
-        ]
+    st.download_button(
+        "⬇️ Descargar Orden del Día",
+        buffer,
+        file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
+    )
 
-        contador = 1
-
-        for tipo in orden:
-            if tipo in agrupado:
-
-                doc.add_paragraph(f"{contador}. {tipo}")
-                sub = 1
-
-                for item in agrupado[tipo]:
-
-                    if tipo == "Categorización Docente":
-
-                        docente = item.get("Docente categorizado", "")
-                        categoria = item.get("Categoría Docente", "")
-                        unidad = item.get("UNIDAD ACADÉMICA", "")
-
-                        doc.add_paragraph(f"    {contador}.{sub} {docente}")
-                        doc.add_paragraph(f"    Categoría: {categoria}")
-                        doc.add_paragraph(f"    Unidad Académica ({unidad})")
-
-                    else:
-
-                        titulo = item.get("TITULO", "")
-                        descripcion = item.get("DESCRIPCIÓN", "")
-                        director = item.get("DIRECTOR", "")
-                        unidad = item.get("UNIDAD ACADÉMICA", "")
-
-                        if titulo:
-                            doc.add_paragraph(titulo)
-
-                        if descripcion:
-                            doc.add_paragraph(descripcion)
-
-                        doc.add_paragraph(f"    {contador}.{sub} Director {director}")
-                        doc.add_paragraph(f"    Unidad Académica ({unidad})")
-
-                    sub += 1
-
-                doc.add_paragraph("")
-                contador += 1
-
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
-
-        st.download_button(
-            "⬇️ Descargar Orden del Día",
-            buffer,
-            file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
-        )
-
-        st.success("✅ Documento generado correctamente")
-
-    except Exception as e:
-        st.error("❌ Error al generar documento")
-        st.text(str(e))
+    st.success("✅ Documento generado correctamente")
