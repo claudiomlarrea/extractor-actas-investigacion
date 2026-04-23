@@ -45,9 +45,25 @@ st.subheader("📋 Carga de Actas")
 
 with st.form("form_acta", clear_on_submit=True):
 
-    anio = st.text_input("Año", "2026")
-    fecha = st.text_input("Fecha", "18/08/2026")
-    acta = st.text_input("Número de Acta")
+ # =========================
+# 🧠 CONTROL DE ESTADO
+# =========================
+
+if "fecha" not in st.session_state:
+    st.session_state.fecha = ""
+
+if "acta" not in st.session_state:
+    st.session_state.acta = ""
+
+# =========================
+# 📝 CAMPOS
+# =========================
+
+anio = st.text_input("Año", "2026")  # fijo
+
+fecha = st.text_input("Fecha", key="fecha")
+
+acta = st.text_input("Número de Acta", key="acta")
 
     tipo = st.selectbox(
         "Tipo",
