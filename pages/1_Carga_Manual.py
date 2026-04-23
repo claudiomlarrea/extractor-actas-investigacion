@@ -84,7 +84,7 @@ with st.form("form_acta", clear_on_submit=True):
             "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
             "FCVSL- Facultad de Veterinaria Sede San Luis",
             "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-            "FBOSCO- Facultad Don Bosco de Enología y Ciencias de la Alimentación - Sede Rodeo del Medio",
+            "FBOSCO- Facultad Don Bosco de Enología y Ciencias de la Alimentación",
             "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
             "FFyHSJ- Facultad de Filosofía y Humanidades",
             "ISDSM- Instituto Universitario Santa María",
@@ -148,12 +148,8 @@ if submit:
         alumnos
     ]
 
-    try:
-        sheet.append_row(fila)
-        st.success("Registro guardado correctamente")
-    except Exception as e:
-        st.error("Error al guardar")
-        st.text(str(e))
+    sheet.append_row(fila)
+    st.success("Registro guardado correctamente")
 
 # =========================
 # 📄 ORDEN DEL DÍA
@@ -166,12 +162,7 @@ acta_buscar = st.text_input("Ingrese número de Acta")
 
 if st.button("Generar Orden del Día"):
 
-    try:
-        data = sheet.get_all_records()
-    except Exception as e:
-        st.error("Error leyendo datos")
-        st.text(str(e))
-        st.stop()
+    data = sheet.get_all_records()
 
     filas = [
         f for f in data
@@ -194,51 +185,65 @@ if st.button("Generar Orden del Día"):
 
     contador = 1
 
-for f in filas:
+    for f in filas:
 
-    doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-    doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
+        doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
+        doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
 
-    if f.get("DESCRIPCIÓN"):
-        doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
+        if f.get("DESCRIPCIÓN"):
+            doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
 
-    if f.get("DIRECTOR"):
-        director = f.get("DIRECTOR")
-        cat_dir = f.get("CAT_DIRECTOR", "")
-        doc.add_paragraph(f"   Director: {director} ({cat_dir})" if cat_dir else f"   Director: {director}")
+        if f.get("DIRECTOR"):
+            director = f.get("DIRECTOR")
+            cat_dir = f.get("CAT_DIRECTOR", "")
+            doc.add_paragraph(
+                f"   Director: {director} ({cat_dir})" if cat_dir else f"   Director: {director}"
+            )
 
-    if f.get("CODIRECTOR"):
-        codir = f.get("CODIRECTOR")
-        cat_codir = f.get("CAT_CODIRECTOR", "")
-        doc.add_paragraph(f"   Codirector: {codir} ({cat_codir})" if cat_codir else f"   Codirector: {codir}")
+        if f.get("CODIRECTOR"):
+            codir = f.get("CODIRECTOR")
+            cat_codir = f.get("CAT_CODIRECTOR", "")
+            doc.add_paragraph(
+                f"   Codirector: {codir} ({cat_codir})" if cat_codir else f"   Codirector: {codir}"
+            )
 
-    if f.get("EQUIPO"):
-        doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
+        if f.get("EQUIPO"):
+            doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
 
-    if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
-        doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
+        if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
+            doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
 
-    if f.get("INSTITUTO DE INVESTIGACIÓN"):
-        doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
+        if f.get("INSTITUTO DE INVESTIGACIÓN"):
+            doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
 
-    if f.get("CÁTEDRA"):
-        doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
+        if f.get("CÁTEDRA"):
+            doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
 
-    # 🔥 FINANCIAMIENTO CORRECTO
-    fin = f.get("FINANCIAMIENTO")
-    if fin:
-        try:
-            fin = int(float(fin))
-            fin = f"{fin:,}".replace(",", ".")
-        except:
-            pass
-        doc.add_paragraph(f"   Financiamiento: {fin}")
+        # ✅ FINANCIAMIENTO CORREGIDO
+        fin = f.get("FINANCIAMIENTO")
+        if fin:
+            try:
+                fin = int(float(fin))
+                fin = f"{fin:,}".replace(",", ".")
+            except:
+                pass
+            doc.add_paragraph(f"   Financiamiento: {fin}")
 
-    if f.get("ALUMNOS"):
-        doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
+        if f.get("ALUMNOS"):
+            doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
 
-    if f.get("UNIDAD ACADÉMICA"):
-        doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
+        if f.get("UNIDAD ACADÉMICA"):
+            doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
 
-    doc.add_paragraph("")
-    contador += 1
+        doc.add_paragraph("")
+        contador += 1
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    st.download_button(
+        "Descargar Orden del Día",
+        buffer,
+        file_name=f"Orden_{acta_buscar}.docx"
+    )
