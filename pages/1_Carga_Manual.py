@@ -67,6 +67,7 @@ with st.form("form_acta", clear_on_submit=True):
     titulo = st.text_input("Título")
     descripcion = st.text_input("Descripción")
     director = st.text_input("Director")
+    codirector = st.text_input("Codirector")  # ✅ NUEVO
 
     unidad = st.selectbox(
         "Unidad Académica",
@@ -75,16 +76,16 @@ with st.form("form_acta", clear_on_submit=True):
             "FCMSL - Facultad de Ciencias Médicas Sede San Luis",
             "FCVSL - Facultad de Veterinaria Sede San Luis",
             "FCEESL - Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-            "FBOSCO - Facultad Don Bosco de Enología y Ciencias de la Alimentación - Sede Rodeo del Medio",
-            "FCEESJ - Facultad de Ciencias Económicas y Empresariales Sede San Juan",
-            "FFyHSJ - Facultad de Filosofía y Humanidades",
-            "ISDSM - Instituto Universitario Santa María",
-            "ECRyPSJ - Escuela de Cultura Religiosa y Pastoral",
-            "FDCSSJ - Facultad de Derecho y Ciencias Sociales Sede San Juan",
-            "FCMSJ - Facultad de Ciencias Médicas San Juan",
-            "FEDSJ - Facultad de Educación San Juan",
-            "ESEGSJ - Escuela de Seguridad",
-            "FCQyTSJ - Facultad de Ciencias Químicas y Tecnológicas San Juan"
+            "FBOSCO - Facultad Don Bosco",
+            "FCEESJ - Facultad de Ciencias Económicas SJ",
+            "FFyHSJ - Filosofía y Humanidades",
+            "ISDSM - Instituto Santa María",
+            "ECRyPSJ - Cultura Religiosa",
+            "FDCSSJ - Derecho SJ",
+            "FCMSJ - Medicina SJ",
+            "FEDSJ - Educación SJ",
+            "ESEGSJ - Seguridad",
+            "FCQyTSJ - Químicas SJ"
         ]
     )
 
@@ -123,6 +124,7 @@ if submit:
             titulo.strip(),
             descripcion.strip(),
             director.strip(),
+            codirector.strip(),  # ✅ agregado
             docente_categorizado.strip(),
             categoria_docente.strip(),
             unidad.strip()
@@ -176,18 +178,14 @@ if st.button("Generar Orden del Día"):
     doc.add_paragraph(f"Fecha: {fecha_doc}")
     doc.add_paragraph("")
 
-    orden = list(agrupado.keys())
-
     contador = 1
 
-    for tipo in orden:
-
-    if tipo in agrupado:
+    for tipo, items in agrupado.items():
 
         doc.add_paragraph(f"{contador}. {tipo}")
         sub = 1
 
-        for item in agrupado[tipo]:
+        for item in items:
 
             if tipo == "Categorización Docente":
 
