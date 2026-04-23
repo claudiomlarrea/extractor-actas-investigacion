@@ -46,11 +46,8 @@ except Exception as e:
 # 🧠 SESSION STATE
 # =========================
 
-if "fecha" not in st.session_state:
-    st.session_state.fecha = ""
-
-if "acta" not in st.session_state:
-    st.session_state.acta = ""
+fecha = st.text_input("Fecha")
+acta = st.text_input("Número de Acta")
 
 # =========================
 # 📝 FORMULARIO
