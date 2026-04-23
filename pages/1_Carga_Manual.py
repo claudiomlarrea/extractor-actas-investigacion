@@ -90,23 +90,22 @@ with st.form("form_acta", clear_on_submit=True):
         ]
     )
 
-    # 🔴 CLAVE: valores por defecto
+    # 👇 CAMPOS SIEMPRE VISIBLES
     docente_categorizado = st.text_input("Docente categorizado")
-categoria_docente = st.selectbox(
-    "Categoría Docente",
-    [
-        "Seleccionar",
-        "Investigador Superior I",
-        "Investigador Principal II",
-        "Investigador Independiente III",
-        "Investigador Asistente IV",
-        "Investigador Adjunto V",
-        "Becario/a de Iniciación VI",
-        "Sin categorización / Externo"
-    ]
-)
+    categoria_docente = st.selectbox(
+        "Categoría Docente",
+        [
+            "Seleccionar",
+            "Investigador Superior I",
+            "Investigador Principal II",
+            "Investigador Independiente III",
+            "Investigador Asistente IV",
+            "Investigador Adjunto V",
+            "Becario/a de Iniciación VI",
+            "Sin categorización / Externo"
+        ]
+    )
 
-    # ✅ SIEMPRE FUERA DEL IF
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
@@ -117,29 +116,34 @@ if submit:
 
     if acta.strip() == "":
         st.warning("⚠️ Debe ingresar número de acta")
+        st.stop()
 
-    else:
-        fila = [
-            acta.strip(),
-            fecha.strip(),
-            anio.strip(),
-            tipo.strip(),
-            titulo.strip(),
-            descripcion.strip(),
-            director.strip(),
-            codirector.strip(),
-            docente_categorizado.strip(),
-            categoria_docente.strip(),
-            unidad.strip()
-        ]
+    if tipo == "Categorización Docente":
+        if docente_categorizado.strip() == "" or categoria_docente == "Seleccionar":
+            st.warning("⚠️ Debe completar docente y categoría")
+            st.stop()
 
-        try:
-            sheet.append_row(fila)
-            st.success("✅ Registro guardado correctamente")
+    fila = [
+        acta.strip(),
+        fecha.strip(),
+        anio.strip(),
+        tipo.strip(),
+        titulo.strip(),
+        descripcion.strip(),
+        director.strip(),
+        codirector.strip(),
+        docente_categorizado.strip() if tipo == "Categorización Docente" else "",
+        categoria_docente.strip() if tipo == "Categorización Docente" else "",
+        unidad.strip()
+    ]
 
-        except Exception as e:
-            st.error("❌ Error al guardar")
-            st.text(str(e))
+    try:
+        sheet.append_row(fila)
+        st.success("✅ Registro guardado correctamente")
+
+    except Exception as e:
+        st.error("❌ Error al guardar")
+        st.text(str(e))
 
 # =========================
 # 📄 GENERAR ORDEN DEL DÍA
