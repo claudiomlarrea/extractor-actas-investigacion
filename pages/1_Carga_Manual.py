@@ -194,29 +194,56 @@ if st.button("Generar Orden del Día"):
         st.text(str(e))
         st.stop()
 
-    filas = [
-        f for f in data
-        if str(f.get("ACTA", "")).strip() == acta_buscar.strip()
-    ]
+   filas = [
+    f for f in data
+    if str(f.get("ACTA", "")).strip() == acta_buscar.strip()
+]
 
-    if not filas:
-        st.warning("No hay registros")
-        st.stop()
+if not filas:
+    st.warning("No hay registros")
+    st.stop()
 
-    doc = Document()
+doc = Document()
 
-    doc.add_paragraph("ORDEN DEL DÍA")
-    doc.add_paragraph(f"Acta Nº {acta_buscar}")
+# ENCABEZADO
+doc.add_paragraph("CONSEJO DE INVESTIGACIÓN")
+doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO")
+doc.add_paragraph("")
 
-    for f in filas:
-        doc.add_paragraph(f"- {f.get('TITULO', '')}")
+doc.add_paragraph("ORDEN DEL DÍA")
+doc.add_paragraph(f"Acta Nº {acta_buscar}")
+doc.add_paragraph(f"Fecha: {filas[0].get('FECHA', '')}")
+doc.add_paragraph("")
 
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+# CONTENIDO
+contador = 1
 
-    st.download_button(
-        "Descargar Orden del Día",
-        buffer,
-        file_name=f"Orden_{acta_buscar}.docx"
-    )
+for f in filas:
+
+    doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
+
+    doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
+
+    if f.get("DIRECTOR"):
+        doc.add_paragraph(f"   Director: {f.get('DIRECTOR')}")
+
+    if f.get("CODIRECTOR"):
+        doc.add_paragraph(f"   Codirector: {f.get('CODIRECTOR')}")
+
+    if f.get("UNIDAD ACADÉMICA"):
+        doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
+
+    doc.add_paragraph("")
+
+    contador += 1
+
+# EXPORTAR
+buffer = BytesIO()
+doc.save(buffer)
+buffer.seek(0)
+
+st.download_button(
+    "Descargar Orden del Día",
+    buffer,
+    file_name=f"Orden_{acta_buscar}.docx"
+)
