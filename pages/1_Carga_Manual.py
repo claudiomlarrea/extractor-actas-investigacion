@@ -219,18 +219,18 @@ if st.button("Generar Orden del Día"):
         if f.get("CÁTEDRA"):
             doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
 
-        # ✅ FINANCIAMIENTO CORREGIDO
+        # ===== FINANCIAMIENTO =====
         fin = f.get("FINANCIAMIENTO")
 
         if fin:
-            fin = str(fin).replace(".", "")  # elimina puntos de miles
+            fin = str(fin).replace(".", "")
             try:
                 fin = int(fin)
-                fin = f"{fin:,}".replace(",", ".")
-        except:
-            pass
+                fin = "{:,}".format(fin).replace(",", ".")
+            except Exception:
+                pass
 
-    doc.add_paragraph(f"   Financiamiento: {fin}")
+            doc.add_paragraph("   Financiamiento: " + str(fin))
 
         if f.get("ALUMNOS"):
             doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
