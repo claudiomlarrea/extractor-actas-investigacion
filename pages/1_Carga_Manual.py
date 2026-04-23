@@ -182,6 +182,8 @@ if st.button("Generar Orden del Día"):
 
     for tipo in orden:
 
+    if tipo in agrupado:
+
         doc.add_paragraph(f"{contador}. {tipo}")
         sub = 1
 
@@ -194,14 +196,20 @@ if st.button("Generar Orden del Día"):
                 unidad = item.get("UNIDAD ACADÉMICA", "")
 
                 doc.add_paragraph(f"    {contador}.{sub} {docente}")
-                doc.add_paragraph(f"    Categoría: {categoria}")
-                doc.add_paragraph(f"    Unidad Académica ({unidad})")
+
+                if categoria:
+                    doc.add_paragraph(f"       Categoría: {categoria}")
+
+                if unidad:
+                    unidad_cod = unidad.split(" - ")[0]
+                    doc.add_paragraph(f"       Unidad Académica: {unidad_cod}")
 
             else:
 
                 titulo = item.get("TITULO", "")
                 descripcion = item.get("DESCRIPCIÓN", "")
                 director = item.get("DIRECTOR", "")
+                codirector = item.get("CODIRECTOR", "")
                 unidad = item.get("UNIDAD ACADÉMICA", "")
 
                 if titulo:
@@ -210,8 +218,15 @@ if st.button("Generar Orden del Día"):
                 if descripcion:
                     doc.add_paragraph(descripcion)
 
-                doc.add_paragraph(f"    {contador}.{sub} Director {director}")
-                doc.add_paragraph(f"    Unidad Académica ({unidad})")
+                if director:
+                    doc.add_paragraph(f"    {contador}.{sub} Director: {director}")
+
+                if codirector:
+                    doc.add_paragraph(f"       Codirector: {codirector}")
+
+                if unidad:
+                    unidad_cod = unidad.split(" - ")[0]
+                    doc.add_paragraph(f"       Unidad Académica: {unidad_cod}")
 
             sub += 1
 
