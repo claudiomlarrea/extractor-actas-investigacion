@@ -194,54 +194,51 @@ if st.button("Generar Orden del Día"):
 
     contador = 1
 
-    for f in filas:
+for f in filas:
 
-        doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-        doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
+    doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
+    doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
 
-        if f.get("DESCRIPCIÓN"):
-            doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
+    if f.get("DESCRIPCIÓN"):
+        doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
 
-        if f.get("DIRECTOR"):
-            director = f.get("DIRECTOR")
-            cat_dir = f.get("CAT_DIRECTOR", "")
-            doc.add_paragraph(f"   Director: {director} ({cat_dir})" if cat_dir else f"   Director: {director}")
+    if f.get("DIRECTOR"):
+        director = f.get("DIRECTOR")
+        cat_dir = f.get("CAT_DIRECTOR", "")
+        doc.add_paragraph(f"   Director: {director} ({cat_dir})" if cat_dir else f"   Director: {director}")
 
-        if f.get("CODIRECTOR"):
-            codir = f.get("CODIRECTOR")
-            cat_codir = f.get("CAT_CODIRECTOR", "")
-            doc.add_paragraph(f"   Codirector: {codir} ({cat_codir})" if cat_codir else f"   Codirector: {codir}")
+    if f.get("CODIRECTOR"):
+        codir = f.get("CODIRECTOR")
+        cat_codir = f.get("CAT_CODIRECTOR", "")
+        doc.add_paragraph(f"   Codirector: {codir} ({cat_codir})" if cat_codir else f"   Codirector: {codir}")
 
-        if f.get("EQUIPO"):
-            doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
+    if f.get("EQUIPO"):
+        doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
 
-        if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
-            doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
+    if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
+        doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
 
-        if f.get("INSTITUTO DE INVESTIGACIÓN"):
-            doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
+    if f.get("INSTITUTO DE INVESTIGACIÓN"):
+        doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
 
-        if f.get("CÁTEDRA"):
-            doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
+    if f.get("CÁTEDRA"):
+        doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
 
-        if f.get("FINANCIAMIENTO"):
-            doc.add_paragraph(f"   Financiamiento: {f.get('FINANCIAMIENTO')}")
+    # 🔥 FINANCIAMIENTO CORRECTO
+    fin = f.get("FINANCIAMIENTO")
+    if fin:
+        try:
+            fin = int(float(fin))
+            fin = f"{fin:,}".replace(",", ".")
+        except:
+            pass
+        doc.add_paragraph(f"   Financiamiento: {fin}")
 
-        if f.get("ALUMNOS"):
-            doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
+    if f.get("ALUMNOS"):
+        doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
 
-        if f.get("UNIDAD ACADÉMICA"):
-            doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
+    if f.get("UNIDAD ACADÉMICA"):
+        doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
 
-        doc.add_paragraph("")
-        contador += 1
-
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    st.download_button(
-        "Descargar Orden del Día",
-        buffer,
-        file_name=f"Orden_{acta_buscar}.docx"
-    )
+    doc.add_paragraph("")
+    contador += 1
