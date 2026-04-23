@@ -43,13 +43,6 @@ except Exception as e:
     st.stop()
 
 # =========================
-# 🧠 SESSION STATE
-# =========================
-
-fecha = st.text_input("Fecha")
-acta = st.text_input("Número de Acta")
-
-# =========================
 # 📝 FORMULARIO
 # =========================
 
@@ -58,10 +51,8 @@ st.subheader("📋 Carga de Actas")
 with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
-
-    fecha = st.text_input("Fecha", key="fecha")
-
-    acta = st.text_input("Número de Acta", key="acta")
+    fecha = st.text_input("Fecha")
+    acta = st.text_input("Número de Acta")
 
     tipo = st.selectbox(
         "Tipo",
@@ -104,21 +95,28 @@ with st.form("form_acta", clear_on_submit=True):
         ]
     )
 
-    docente_categorizado = st.text_input("Docente categorizado")
+    # 🔥 SOLO se usa si corresponde
+    if tipo == "Categorización Docente":
 
-    categoria_docente = st.selectbox(
-        "Categoría Docente",
-        [
-            "Seleccionar",
-            "Investigador Superior I",
-            "Investigador Principal II",
-            "Investigador Independiente III",
-            "Investigador Asistente IV",
-            "Investigador Adjunto V",
-            "Becario/a de Iniciación VI",
-            "Sin categorización / Externo"
-        ]
-    )
+        docente_categorizado = st.text_input("Docente categorizado")
+
+        categoria_docente = st.selectbox(
+            "Categoría Docente",
+            [
+                "Seleccionar",
+                "Investigador Superior I",
+                "Investigador Principal II",
+                "Investigador Independiente III",
+                "Investigador Asistente IV",
+                "Investigador Adjunto V",
+                "Becario/a de Iniciación VI",
+                "Sin categorización / Externo"
+            ]
+        )
+
+    else:
+        docente_categorizado = ""
+        categoria_docente = ""
 
     submit = st.form_submit_button("Guardar en Google Sheets")
 
@@ -146,18 +144,14 @@ if submit:
         descripcion.strip(),
         director.strip(),
         codirector.strip(),
-        docente_categorizado.strip() if tipo == "Categorización Docente" else "",
-        categoria_docente.strip() if tipo == "Categorización Docente" else "",
+        docente_categorizado.strip(),
+        categoria_docente.strip(),
         unidad.strip()
     ]
 
     try:
         sheet.append_row(fila)
         st.success("✅ Registro guardado correctamente")
-
-        # limpiar campos
-        st.session_state.fecha = ""
-        st.session_state.acta = ""
 
     except Exception as e:
         st.error("❌ Error al guardar")
