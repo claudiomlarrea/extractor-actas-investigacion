@@ -47,9 +47,7 @@ categoria_opciones = [
 
 with st.form("form_acta", clear_on_submit=True):
 
-    # -------------------------
     # DATOS BÁSICOS
-    # -------------------------
     anio = st.text_input("Año", "2026")
     fecha = st.text_input("Fecha")
     acta = st.text_input("Número de Acta")
@@ -72,9 +70,7 @@ with st.form("form_acta", clear_on_submit=True):
     titulo = st.text_input("Título")
     descripcion = st.text_area("Descripción")
 
-    # -------------------------
     # EQUIPO
-    # -------------------------
     director = st.text_input("Director")
     categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
 
@@ -83,9 +79,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     equipo = st.text_area("Equipo de investigación")
 
-    # -------------------------
     # INSTITUCIONAL
-    # -------------------------
     unidad = st.selectbox(
         "Unidad Académica",
         [
@@ -111,28 +105,19 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = st.text_input("Instituto de Investigación")
     catedra = st.text_input("Cátedra")
 
-    # -------------------------
     # EXTRAS
-    # -------------------------
     financiamiento = st.text_input("Financiamiento")
     alumnos = st.text_input("Alumnos")
     archivo = st.file_uploader("Archivo adjunto")
 
-    # -------------------------
     # CATEGORIZACIÓN DOCENTE (CONDICIONAL)
-    # -------------------------
     docente_categorizado = ""
     categoria_docente = ""
 
     if tipo == "Categorización Docente":
         st.markdown("### Datos de Categorización")
-
         docente_categorizado = st.text_input("Docente categorizado")
-
-        categoria_docente = st.selectbox(
-            "Categoría docente",
-            categoria_opciones
-        )
+        categoria_docente = st.selectbox("Categoría docente", categoria_opciones)
 
     submit = st.form_submit_button("Guardar en Google Sheets")
 
@@ -171,7 +156,6 @@ if submit:
     try:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
-
     except Exception as e:
         st.error("Error al guardar")
         st.text(str(e))
@@ -209,7 +193,6 @@ if st.button("Generar Orden del Día"):
     doc.add_paragraph("CONSEJO DE INVESTIGACIÓN")
     doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO")
     doc.add_paragraph("")
-
     doc.add_paragraph("ORDEN DEL DÍA")
     doc.add_paragraph(f"Acta Nº {acta_buscar}")
     doc.add_paragraph(f"Fecha: {filas[0].get('FECHA', '')}")
@@ -221,7 +204,6 @@ if st.button("Generar Orden del Día"):
     for f in filas:
 
         doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-
         doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
 
         if f.get("DIRECTOR"):
@@ -234,10 +216,8 @@ if st.button("Generar Orden del Día"):
             doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
 
         doc.add_paragraph("")
-
         contador += 1
 
-    # EXPORTAR
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)
@@ -247,46 +227,3 @@ if st.button("Generar Orden del Día"):
         buffer,
         file_name=f"Orden_{acta_buscar}.docx"
     )
-
-# ENCABEZADO
-doc.add_paragraph("CONSEJO DE INVESTIGACIÓN")
-doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO")
-doc.add_paragraph("")
-
-doc.add_paragraph("ORDEN DEL DÍA")
-doc.add_paragraph(f"Acta Nº {acta_buscar}")
-doc.add_paragraph(f"Fecha: {filas[0].get('FECHA', '')}")
-doc.add_paragraph("")
-
-# CONTENIDO
-contador = 1
-
-for f in filas:
-
-    doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-
-    doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
-
-    if f.get("DIRECTOR"):
-        doc.add_paragraph(f"   Director: {f.get('DIRECTOR')}")
-
-    if f.get("CODIRECTOR"):
-        doc.add_paragraph(f"   Codirector: {f.get('CODIRECTOR')}")
-
-    if f.get("UNIDAD ACADÉMICA"):
-        doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
-
-    doc.add_paragraph("")
-
-    contador += 1
-
-# EXPORTAR
-buffer = BytesIO()
-doc.save(buffer)
-buffer.seek(0)
-
-st.download_button(
-    "Descargar Orden del Día",
-    buffer,
-    file_name=f"Orden_{acta_buscar}.docx"
-)
