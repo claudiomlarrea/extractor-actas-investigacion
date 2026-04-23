@@ -131,26 +131,27 @@ with st.form("form_acta", clear_on_submit=True):
 # 💾 GUARDAR
 # =========================
 
-if submit:
-
-    if acta.strip() == "":
-        st.warning("Debe ingresar número de acta")
-        st.stop()
-
-    fila = [
-        acta, fecha, anio, tipo, titulo, descripcion,
-        director, categoria_director,
-        codirector, categoria_codirector,
-        equipo,
-        docente_categorizado,
-        categoria_docente,
-        unidad,
-        resolucion_cd,
-        instituto,
-        catedra,
-        financiamiento,
-        alumnos
-    ]
+fila = [
+    acta,
+    fecha,
+    anio,
+    tipo,
+    titulo,
+    descripcion,
+    director,
+    "" if categoria_director == "Seleccionar" else categoria_director,
+    codirector,
+    "" if categoria_codirector == "Seleccionar" else categoria_codirector,
+    equipo,
+    docente_categorizado,
+    "" if categoria_docente == "Seleccionar" else categoria_docente,
+    unidad,
+    resolucion_cd,
+    instituto,
+    catedra,
+    financiamiento,
+    alumnos
+]
 
     sheet.append_row(fila)
     st.success("Registro guardado correctamente")
