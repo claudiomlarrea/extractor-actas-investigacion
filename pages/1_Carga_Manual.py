@@ -91,23 +91,20 @@ with st.form("form_acta", clear_on_submit=True):
     )
 
     # 🔴 CLAVE: valores por defecto
-    docente_categorizado = ""
-    categoria_docente = ""
-
-    if tipo == "Categorización Docente":
-        docente_categorizado = st.text_input("Docente categorizado")
-        categoria_docente = st.selectbox(
-            "Categoría Docente",
-            [
-                "Investigador Superior I",
-                "Investigador Principal II",
-                "Investigador Independiente III",
-                "Investigador Asistente IV",
-                "Investigador Adjunto V",
-                "Becario/a de Iniciación VI",
-                "Sin categorización / Externo"
-            ]
-        )
+    docente_categorizado = st.text_input("Docente categorizado")
+categoria_docente = st.selectbox(
+    "Categoría Docente",
+    [
+        "Seleccionar",
+        "Investigador Superior I",
+        "Investigador Principal II",
+        "Investigador Independiente III",
+        "Investigador Asistente IV",
+        "Investigador Adjunto V",
+        "Becario/a de Iniciación VI",
+        "Sin categorización / Externo"
+    ]
+)
 
     # ✅ SIEMPRE FUERA DEL IF
     submit = st.form_submit_button("Guardar en Google Sheets")
