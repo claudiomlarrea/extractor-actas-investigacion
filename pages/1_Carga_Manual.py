@@ -3,7 +3,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
-from collections import defaultdict
 
 st.title("Sistema de Actas - Consejo de Investigación")
 
@@ -48,7 +47,9 @@ categoria_opciones = [
 
 with st.form("form_acta", clear_on_submit=True):
 
-    # Básicos
+    # -------------------------
+    # DATOS BÁSICOS
+    # -------------------------
     anio = st.text_input("Año", "2026")
     fecha = st.text_input("Fecha")
     acta = st.text_input("Número de Acta")
@@ -71,7 +72,9 @@ with st.form("form_acta", clear_on_submit=True):
     titulo = st.text_input("Título")
     descripcion = st.text_area("Descripción")
 
-    # Equipo
+    # -------------------------
+    # EQUIPO
+    # -------------------------
     director = st.text_input("Director")
     categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
 
@@ -80,7 +83,9 @@ with st.form("form_acta", clear_on_submit=True):
 
     equipo = st.text_area("Equipo de investigación")
 
-    # Institucional
+    # -------------------------
+    # INSTITUCIONAL
+    # -------------------------
     unidad = st.selectbox(
         "Unidad Académica",
         [
@@ -106,12 +111,16 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = st.text_input("Instituto de Investigación")
     catedra = st.text_input("Cátedra")
 
-    # Extras
+    # -------------------------
+    # EXTRAS
+    # -------------------------
     financiamiento = st.text_input("Financiamiento")
     alumnos = st.text_input("Alumnos")
     archivo = st.file_uploader("Archivo adjunto")
 
-    # 🔥 SOLO SI ES CATEGORIZACIÓN DOCENTE
+    # -------------------------
+    # CATEGORIZACIÓN DOCENTE (CONDICIONAL)
+    # -------------------------
     docente_categorizado = ""
     categoria_docente = ""
 
@@ -131,30 +140,41 @@ with st.form("form_acta", clear_on_submit=True):
 # 💾 GUARDAR
 # =========================
 
-fila = [
-    acta,
-    fecha,
-    anio,
-    tipo,
-    titulo,
-    descripcion,
-    director,
-    "" if categoria_director == "Seleccionar" else categoria_director,
-    codirector,
-    "" if categoria_codirector == "Seleccionar" else categoria_codirector,
-    equipo,
-    docente_categorizado,
-    "" if categoria_docente == "Seleccionar" else categoria_docente,
-    unidad,
-    resolucion_cd,
-    instituto,
-    catedra,
-    financiamiento,
-    alumnos
-]
+if submit:
 
-    sheet.append_row(fila)
-    st.success("Registro guardado correctamente")
+    if acta.strip() == "":
+        st.warning("Debe ingresar número de acta")
+        st.stop()
+
+    fila = [
+        acta,
+        fecha,
+        anio,
+        tipo,
+        titulo,
+        descripcion,
+        director,
+        "" if categoria_director == "Seleccionar" else categoria_director,
+        codirector,
+        "" if categoria_codirector == "Seleccionar" else categoria_codirector,
+        equipo,
+        docente_categorizado,
+        "" if categoria_docente == "Seleccionar" else categoria_docente,
+        unidad,
+        resolucion_cd,
+        instituto,
+        catedra,
+        financiamiento,
+        alumnos
+    ]
+
+    try:
+        sheet.append_row(fila)
+        st.success("Registro guardado correctamente")
+
+    except Exception as e:
+        st.error("Error al guardar")
+        st.text(str(e))
 
 # =========================
 # 📄 ORDEN DEL DÍA
@@ -167,7 +187,12 @@ acta_buscar = st.text_input("Ingrese número de Acta")
 
 if st.button("Generar Orden del Día"):
 
-    data = sheet.get_all_records()
+    try:
+        data = sheet.get_all_records()
+    except Exception as e:
+        st.error("Error leyendo datos")
+        st.text(str(e))
+        st.stop()
 
     filas = [
         f for f in data
