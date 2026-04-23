@@ -9,7 +9,7 @@ from collections import defaultdict
 # 🎯 TÍTULO
 # =========================
 
-st.title("📥 Sistema de Actas - Consejo de Investigación")
+st.title("Sistema de Actas - Consejo de Investigación")
 
 # =========================
 # 🔐 CONEXIÓN
@@ -32,13 +32,13 @@ try:
     sh = client.open_by_key(SHEET_ID)
     sheet = sh.worksheet("Hoja 2")
 
-    st.success("✅ Conectado a Google Sheets")
+    st.success("Conectado a Google Sheets")
 
     sheet_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit#gid={sheet.id}"
-    st.write("📍 Archivo:", sheet_url)
+    st.write("Archivo:", sheet_url)
 
 except Exception as e:
-    st.error("❌ Error de conexión")
+    st.error("Error de conexión")
     st.text(str(e))
     st.stop()
 
@@ -46,10 +46,22 @@ except Exception as e:
 # 📝 FORMULARIO
 # =========================
 
-st.subheader("📋 Carga de Actas")
+st.subheader("Carga de Actas")
+
+categoria_opciones = [
+    "Seleccionar",
+    "Investigador Superior I",
+    "Investigador Principal II",
+    "Investigador Independiente III",
+    "Investigador Asistente IV",
+    "Investigador Adjunto V",
+    "Becario/a de Iniciación VI",
+    "Sin categorización / Externo"
+]
 
 with st.form("form_acta", clear_on_submit=True):
 
+    # Básicos
     anio = st.text_input("Año", "2026")
     fecha = st.text_input("Fecha")
     acta = st.text_input("Número de Acta")
@@ -65,15 +77,24 @@ with st.form("form_acta", clear_on_submit=True):
             "Convocatoria de Investigación",
             "Convocatoria a Proyectos de investigación",
             "Creación de Semillero de Investigación",
-            "Categorización Docente"
+            "Categorización Docente",
+            "Otros"
         ]
     )
 
     titulo = st.text_input("Título")
-    descripcion = st.text_input("Descripción")
-    director = st.text_input("Director")
-    codirector = st.text_input("Codirector")
+    descripcion = st.text_area("Descripción")
 
+    # Equipo
+    director = st.text_input("Director")
+    categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
+
+    codirector = st.text_input("Codirector")
+    categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
+
+    equipo = st.text_area("Equipo de investigación")
+
+    # Institucional
     unidad = st.selectbox(
         "Unidad Académica",
         [
@@ -95,28 +116,22 @@ with st.form("form_acta", clear_on_submit=True):
         ]
     )
 
-    # 🔥 SOLO se usa si corresponde
+    resolucion_cd = st.text_input("Resolución del Consejo Directivo")
+    instituto = st.text_input("Instituto de Investigación")
+    catedra = st.text_input("Cátedra")
+
+    # Extras
+    financiamiento = st.text_input("Financiamiento")
+    alumnos = st.text_input("Alumnos")
+    archivo = st.file_uploader("Archivo adjunto")
+
+    # Categorización docente (solo si corresponde)
+    docente_categorizado = ""
+    categoria_docente = ""
+
     if tipo == "Categorización Docente":
-
         docente_categorizado = st.text_input("Docente categorizado")
-
-        categoria_docente = st.selectbox(
-            "Categoría Docente",
-            [
-                "Seleccionar",
-                "Investigador Superior I",
-                "Investigador Principal II",
-                "Investigador Independiente III",
-                "Investigador Asistente IV",
-                "Investigador Adjunto V",
-                "Becario/a de Iniciación VI",
-                "Sin categorización / Externo"
-            ]
-        )
-
-    else:
-        docente_categorizado = ""
-        categoria_docente = ""
+        categoria_docente = st.selectbox("Categoría docente", categoria_opciones)
 
     submit = st.form_submit_button("Guardar en Google Sheets")
 
@@ -127,13 +142,8 @@ with st.form("form_acta", clear_on_submit=True):
 if submit:
 
     if acta.strip() == "":
-        st.warning("⚠️ Debe ingresar número de acta")
+        st.warning("Debe ingresar número de acta")
         st.stop()
-
-    if tipo == "Categorización Docente":
-        if docente_categorizado.strip() == "" or categoria_docente == "Seleccionar":
-            st.warning("⚠️ Debe completar docente y categoría")
-            st.stop()
 
     fila = [
         acta.strip(),
@@ -143,26 +153,34 @@ if submit:
         titulo.strip(),
         descripcion.strip(),
         director.strip(),
+        categoria_director.strip(),
         codirector.strip(),
+        categoria_codirector.strip(),
+        equipo.strip(),
         docente_categorizado.strip(),
         categoria_docente.strip(),
-        unidad.strip()
+        unidad.strip(),
+        resolucion_cd.strip(),
+        instituto.strip(),
+        catedra.strip(),
+        financiamiento.strip(),
+        alumnos.strip()
     ]
 
     try:
         sheet.append_row(fila)
-        st.success("✅ Registro guardado correctamente")
+        st.success("Registro guardado correctamente")
 
     except Exception as e:
-        st.error("❌ Error al guardar")
+        st.error("Error al guardar")
         st.text(str(e))
 
 # =========================
-# 📄 GENERAR ORDEN DEL DÍA
+# 📄 ORDEN DEL DÍA
 # =========================
 
 st.markdown("---")
-st.subheader("📄 Generar Orden del Día Oficial")
+st.subheader("Generar Orden del Día")
 
 acta_buscar = st.text_input("Ingrese número de Acta")
 
@@ -176,11 +194,10 @@ if st.button("Generar Orden del Día"):
     ]
 
     if not filas:
-        st.warning("No hay registros para esa acta")
+        st.warning("No hay registros")
         st.stop()
 
     fecha_doc = filas[0]["FECHA"]
-
     agrupado = defaultdict(list)
 
     for fila in filas:
@@ -191,7 +208,6 @@ if st.button("Generar Orden del Día"):
     doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO").runs[0].bold = True
     doc.add_paragraph("Consejo de Investigación")
     doc.add_paragraph("")
-
     doc.add_paragraph("ORDEN DEL DÍA").runs[0].bold = True
     doc.add_paragraph(f"Acta Nº {acta_buscar}")
     doc.add_paragraph(f"Fecha: {fecha_doc}")
@@ -206,42 +222,22 @@ if st.button("Generar Orden del Día"):
 
         for item in items:
 
-            if tipo == "Categorización Docente":
+            titulo = item.get("TITULO", "")
+            director = item.get("DIRECTOR", "")
+            codirector = item.get("CODIRECTOR", "")
+            unidad = item.get("UNIDAD ACADÉMICA", "")
 
-                docente = item.get("Docente categorizado", "")
-                categoria = item.get("Categoría Docente", "")
-                unidad = item.get("UNIDAD ACADÉMICA", "")
+            if titulo:
+                doc.add_paragraph(titulo)
 
-                doc.add_paragraph(f"    {contador}.{sub} {docente}")
+            if director:
+                doc.add_paragraph(f"    {contador}.{sub} Director: {director}")
 
-                if categoria:
-                    doc.add_paragraph(f"       Categoría: {categoria}")
+            if codirector:
+                doc.add_paragraph(f"       Codirector: {codirector}")
 
-                if unidad:
-                    doc.add_paragraph(f"       Unidad Académica: {unidad}")
-
-            else:
-
-                titulo = item.get("TITULO", "")
-                descripcion = item.get("DESCRIPCIÓN", "")
-                director = item.get("DIRECTOR", "")
-                codirector = item.get("CODIRECTOR", "")
-                unidad = item.get("UNIDAD ACADÉMICA", "")
-
-                if titulo:
-                    doc.add_paragraph(titulo)
-
-                if descripcion:
-                    doc.add_paragraph(descripcion)
-
-                if director:
-                    doc.add_paragraph(f"    {contador}.{sub} Director: {director}")
-
-                if codirector:
-                    doc.add_paragraph(f"       Codirector: {codirector}")
-
-                if unidad:
-                    doc.add_paragraph(f"       Unidad Académica: {unidad}")
+            if unidad:
+                doc.add_paragraph(f"       Unidad Académica: {unidad}")
 
             sub += 1
 
@@ -253,9 +249,9 @@ if st.button("Generar Orden del Día"):
     buffer.seek(0)
 
     st.download_button(
-        "⬇️ Descargar Orden del Día",
+        "Descargar Orden del Día",
         buffer,
-        file_name=f"Orden_del_Dia_Acta_{acta_buscar}.docx"
+        file_name=f"Orden_del_Dia_{acta_buscar}.docx"
     )
 
-    st.success("✅ Documento generado correctamente")
+    st.success("Documento generado")
