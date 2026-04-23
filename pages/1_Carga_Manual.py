@@ -221,13 +221,16 @@ if st.button("Generar Orden del Día"):
 
         # ✅ FINANCIAMIENTO CORREGIDO
         fin = f.get("FINANCIAMIENTO")
+
         if fin:
+            fin = str(fin).replace(".", "")   # 🔥 elimina puntos de miles
             try:
-                fin = int(float(fin))
-                fin = f"{fin:,}".replace(",", ".")
-            except:
-                pass
-            doc.add_paragraph(f"   Financiamiento: {fin}")
+                fin = int(fin)
+                fin = f"{fin:,}".replace(",", ".")  # vuelve a formatear 100.000
+        except:
+            pass
+
+        doc.add_paragraph(f"   Financiamiento: {fin}")
 
         if f.get("ALUMNOS"):
             doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
