@@ -66,21 +66,28 @@ with st.form("form_acta", clear_on_submit=True):
     fecha = st.text_input("Fecha")
     acta = st.text_input("Número de Acta")
 
-    tipo = st.selectbox(
-        "Tipo",
+   # 🔥 SOLO si corresponde
+if tipo == "Categorización Docente":
+
+    docente_categorizado = st.text_input("Docente categorizado")
+
+    categoria_docente = st.selectbox(
+        "Categoría docente",
         [
-            "Proyecto de Investigación",
-            "Proyecto de Cátedra",
-            "Informe Final",
-            "Informe de Avance",
-            "Jornada de Investigación",
-            "Convocatoria de Investigación",
-            "Convocatoria a Proyectos de investigación",
-            "Creación de Semillero de Investigación",
-            "Categorización Docente",
-            "Otros"
+            "Seleccionar",
+            "Investigador Superior I",
+            "Investigador Principal II",
+            "Investigador Independiente III",
+            "Investigador Asistente IV",
+            "Investigador Adjunto V",
+            "Becario/a de Iniciación VI",
+            "Sin categorización / Externo"
         ]
     )
+
+else:
+    docente_categorizado = ""
+    categoria_docente = ""
 
     titulo = st.text_input("Título")
     descripcion = st.text_area("Descripción")
