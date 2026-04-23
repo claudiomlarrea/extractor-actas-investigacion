@@ -201,7 +201,7 @@ if st.button("Generar Orden del Día"):
     # CONTENIDO
     contador = 1
 
-    for f in filas:
+for f in filas:
 
     doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
 
