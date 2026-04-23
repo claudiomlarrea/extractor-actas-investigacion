@@ -203,27 +203,51 @@ if st.button("Generar Orden del Día"):
 
     for f in filas:
 
-        doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-        doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
+    doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
 
-        if f.get("DIRECTOR"):
-            doc.add_paragraph(f"   Director: {f.get('DIRECTOR')}")
+    doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
 
-        if f.get("CODIRECTOR"):
-            doc.add_paragraph(f"   Codirector: {f.get('CODIRECTOR')}")
+    if f.get("DESCRIPCIÓN"):
+        doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
 
-        if f.get("UNIDAD ACADÉMICA"):
-            doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
+    # DIRECTOR + CATEGORÍA
+    if f.get("DIRECTOR"):
+        director = f.get("DIRECTOR")
+        cat_dir = f.get("CAT_DIRECTOR", "")
+        if cat_dir:
+            doc.add_paragraph(f"   Director: {director} ({cat_dir})")
+        else:
+            doc.add_paragraph(f"   Director: {director}")
 
-        doc.add_paragraph("")
-        contador += 1
+    # CODIRECTOR + CATEGORÍA
+    if f.get("CODIRECTOR"):
+        codir = f.get("CODIRECTOR")
+        cat_codir = f.get("CAT_CODIRECTOR", "")
+        if cat_codir:
+            doc.add_paragraph(f"   Codirector: {codir} ({cat_codir})")
+        else:
+            doc.add_paragraph(f"   Codirector: {codir}")
 
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
+    if f.get("EQUIPO"):
+        doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
 
-    st.download_button(
-        "Descargar Orden del Día",
-        buffer,
-        file_name=f"Orden_{acta_buscar}.docx"
-    )
+    if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
+        doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
+
+    if f.get("INSTITUTO DE INVESTIGACIÓN"):
+        doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
+
+    if f.get("CÁTEDRA"):
+        doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
+
+    if f.get("FINANCIAMIENTO"):
+        doc.add_paragraph(f"   Financiamiento: {f.get('FINANCIAMIENTO')}")
+
+    if f.get("ALUMNOS"):
+        doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
+
+    if f.get("UNIDAD ACADÉMICA"):
+        doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
+
+    doc.add_paragraph("")
+    contador += 1
