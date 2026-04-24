@@ -8,10 +8,7 @@ from io import BytesIO
 # ⚙ CONFIGURACIÓN
 # =========================
 
-st.set_page_config(
-    page_title="Consejo de Investigación",
-    layout="wide"
-)
+st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 
 # =========================
 # 🎨 HEADER
@@ -20,26 +17,15 @@ st.set_page_config(
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png",
-        width=120
-    )
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png", width=120)
 
 with col2:
     st.markdown("""
     <div style='background-color:#064a3f; padding:20px; border-radius:10px'>
-        <h2 style='color:white; margin:0'>
-            Universidad Católica de Cuyo
-        </h2>
-        <p style='color:white; margin:0'>
-            Secretaría de Investigación
-        </p>
+        <h2 style='color:white; margin:0'>Universidad Católica de Cuyo</h2>
+        <p style='color:white; margin:0'>Secretaría de Investigación</p>
     </div>
     """, unsafe_allow_html=True)
-
-# =========================
-# 🧠 TÍTULO
-# =========================
 
 st.title("Sistema de Actas - Consejo de Investigación")
 
@@ -60,13 +46,12 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 SHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
-sh = client.open_by_key(SHEET_ID)
-sheet = sh.worksheet("Hoja 2")
+sheet = client.open_by_key(SHEET_ID).worksheet("Hoja 2")
 
 st.success("Conectado a Google Sheets")
 
 # =========================
-# 📅 MAPA ACTAS
+# 📅 DATOS ACTAS
 # =========================
 
 actas_dict = {
@@ -103,195 +88,101 @@ fechas_actas = {
 
 st.subheader("Carga de Actas")
 
-categoria_opciones = [
-    "Seleccionar",
-    "Investigador Superior I",
-    "Investigador Principal II",
-    "Investigador Independiente III",
-    "Investigador Asistente IV",
-    "Investigador Adjunto V",
-    "Becario/a de Iniciación VI",
-    "Sin categorización / Externo"
-]
-
 with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
 
-    # ✅ ACTA + MES
     acta_label = st.selectbox(
         "Número de Acta",
-        options=[
-            f"Acta N°{n} - {actas_dict[n]['mes']}"
-            for n in actas_dict.keys()
-        ]
+        options=[f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict]
     )
 
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
-    # ✅ FECHA AUTOMÁTICA
     fecha = fechas_actas[numero_acta]
 
-    fecha = st.selectbox(
-        "Fecha",
-        options=list(fechas_actas.values()),
-        index=list(fechas_actas.values()).index(fechas_actas[numero_acta])
-    )
+    st.text_input("Fecha", value=fecha, disabled=True)
 
-    tipo = st.selectbox(
-        "Tipo",
-        [
-            "Proyecto de Investigación",
-            "Proyecto de Cátedra",
-            "Informe Final",
-            "Informe de Avance",
-            "Jornada de Investigación",
-            "Convocatoria de Investigación",
-            "Convocatoria a Proyectos de investigación",
-            "Creación de Semillero de Investigación",
-            "Categorización Docente"
-        ]
-    )
+    tipo = st.selectbox("Tipo", [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Jornada de Investigación",
+        "Convocatoria de Investigación",
+        "Convocatoria a Proyectos de investigación",
+        "Creación de Semillero de Investigación",
+        "Categorización Docente"
+    ])
 
     titulo = st.text_input("Título")
     descripcion = st.text_area("Descripción")
 
     director = st.text_input("Director")
-    categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
-
     codirector = st.text_input("Codirector")
-    categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
+    equipo = st.text_area("Equipo")
 
-    equipo = st.text_area("Equipo de investigación")
-
-    unidad = st.selectbox(
-        "Unidad Académica",
-        [
-            "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-            "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-            "FCVSL- Facultad de Veterinaria Sede San Luis",
-            "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-            "FBOSCO- Facultad Don Bosco",
-            "FCEESJ- Facultad de Ciencias Económicas San Juan",
-            "FFyHSJ- Facultad de Filosofía y Humanidades",
-            "ISDSM- Instituto Universitario Santa María",
-            "ECRyPSJ- Escuela Cultura Religiosa",
-            "FDCSSJ- Facultad de Derecho San Juan",
-            "FCMSJ- Facultad de Ciencias Médicas San Juan",
-            "FEDSJ- Facultad de Educación",
-            "ESEGSJ- Escuela de Seguridad",
-            "FCQyTSJ- Facultad de Ciencias Químicas",
-            "ISB- Instituto San Buenaventura"
-        ]
-    )
-
-    resolucion_cd = st.text_input("Resolución del Consejo Directivo")
-    instituto = st.text_input("Instituto de Investigación")
+    unidad = st.text_input("Unidad Académica")
+    resolucion_cd = st.text_input("Resolución CD")
+    instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
-
     financiamiento = st.text_input("Financiamiento")
     alumnos = st.text_input("Alumnos")
 
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
-# 💾 GUARDAR
+# 💾 GUARDAR (UNA SOLA VEZ)
 # =========================
 
 if submit:
 
     fila = [
-        numero_acta,
-        fecha,
-        anio,
-        tipo,
-        titulo,
-        descripcion,
-        director,
-        "" if categoria_director == "Seleccionar" else categoria_director,
-        codirector,
-        "" if categoria_codirector == "Seleccionar" else categoria_codirector,
-        equipo,
-        unidad,
-        resolucion_cd,
-        instituto,
-        catedra,
-        financiamiento,
-        alumnos
+        numero_acta, fecha, anio, tipo, titulo, descripcion,
+        director, codirector, equipo, unidad,
+        resolucion_cd, instituto, catedra, financiamiento, alumnos
     ]
 
-    try:
-        sheet.append_row(fila)
-        st.success("Registro guardado correctamente")
-    except Exception as e:
-        st.error("Error al guardar")
-        st.text(str(e))
+    sheet.append_row(fila)
+    st.success("Registro guardado correctamente")
 
 # =========================
 # 📄 GENERAR ORDEN DEL DÍA
 # =========================
 
-if submit:
+st.markdown("## 📄 Generar Orden del Día")
 
-    fila = [
-        numero_acta,
-        fecha,
-        anio,
-        tipo,
-        titulo,
-        descripcion,
-        director,
-        "" if categoria_director == "Seleccionar" else categoria_director,
-        codirector,
-        "" if categoria_codirector == "Seleccionar" else categoria_codirector,
-        equipo,
-        unidad,
-        resolucion_cd,
-        instituto,
-        catedra,
-        financiamiento,
-        alumnos
-    ]
+acta_word = st.selectbox(
+    "Seleccionar Acta",
+    options=list(actas_dict.keys())
+)
 
-    try:
-        sheet.append_row(fila)
-        st.success("Registro guardado correctamente")
-    except Exception as e:
-        st.error("Error al guardar")
-        st.text(str(e))
+if st.button("Generar Word"):
 
-    # =========================
-    # 📄 CREAR WORD
-    # =========================
+    datos = sheet.get_all_records()
 
-    doc = Document()
+    registros = [r for r in datos if str(r["ACTA"]) == str(acta_word)]
 
-    doc.add_heading('Consejo de Investigación', 0)
-    doc.add_paragraph(f'Acta N° {numero_acta}')
-    doc.add_paragraph(f'Fecha: {fecha}')
-    doc.add_paragraph('')
+    if not registros:
+        st.warning("No hay registros para esta acta")
+    else:
+        doc = Document()
 
-    doc.add_heading('Orden del Día', level=1)
+        doc.add_heading('Consejo de Investigación', 0)
+        doc.add_paragraph(f'Acta N° {acta_word}')
+        doc.add_paragraph(f'Fecha: {fechas_actas[acta_word]}')
 
-    doc.add_paragraph(f"Tipo: {tipo}")
-    doc.add_paragraph(f"Título: {titulo}")
-    doc.add_paragraph(f"Descripción: {descripcion}")
-    doc.add_paragraph(f"Director: {director}")
-    doc.add_paragraph(f"Unidad Académica: {unidad}")
+        doc.add_heading('Orden del Día', level=1)
 
-    doc.add_paragraph('')
+        for i, r in enumerate(registros, 1):
+            doc.add_paragraph(f"{i}. {r['TIPO']} - {r['TITULO']}")
 
-    # =========================
-    # 📥 DESCARGA
-    # =========================
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
 
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    st.download_button(
-        label="Descargar Orden del Día en Word",
-        data=buffer,
-        file_name=f"Acta_{numero_acta}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
+        st.download_button(
+            "Descargar Word",
+            data=buffer,
+            file_name=f"Acta_{acta_word}.docx"
+        )
