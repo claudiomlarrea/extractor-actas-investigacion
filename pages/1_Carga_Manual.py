@@ -128,9 +128,8 @@ with st.form("form_acta", clear_on_submit=True):
     )
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
     
-    fecha = st.selectbox(
-        "Fecha",
-        options=list(fechas_actas.values())
+    fecha = fechas_actas[numero_acta]
+    st.text_input("Fecha", value=fecha, disabled=True)
     )
 
     tipo = st.selectbox(
@@ -203,12 +202,12 @@ with st.form("form_acta", clear_on_submit=True):
 
 if submit:
 
-    if numero_acta == "":
-        st.warning("Debe ingresar número de acta")
+    if not numero_acta:
+        st.warning("Debe seleccionar número de acta")
         st.stop()
 
     fila = [
-        acta,
+        numero_acta,
         fecha,
         anio,
         tipo,
