@@ -3,6 +3,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
+import base64
 
 # =========================
 # ⚙ CONFIGURACIÓN
