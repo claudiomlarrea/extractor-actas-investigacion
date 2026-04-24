@@ -176,35 +176,47 @@ if st.button("Generar Word"):
 
         doc.add_heading('Orden del Día', level=1)
 
-       for i, r in enumerate(registros, 1):
+        # 👇 TODO ESTE BLOQUE VA ADENTRO DEL ELSE
+        for i, r in enumerate(registros, 1):
 
-    p = doc.add_paragraph()
-    
-    p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
-    
-    p.add_run(f"   Director: {r.get('director', '')} ({r.get('categoria_director', '')})\n")
-    
-    if r.get("codirector"):
-        p.add_run(f"   Codirector: {r.get('codirector', '')} ({r.get('categoria_codirector', '')})\n")
-    
-    if r.get("equipo"):
-        p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
-    
-    p.add_run(f"   Unidad Académica: {r.get('unidad', '')}\n")
-    
-    if r.get("resolucion_cd"):
-        p.add_run(f"   Resolución CD: {r.get('resolucion_cd', '')}\n")
-    
-    if r.get("instituto"):
-        p.add_run(f"   Instituto: {r.get('instituto', '')}\n")
-    
-    if r.get("catedra"):
-        p.add_run(f"   Cátedra: {r.get('catedra', '')}\n")
-    
-    if r.get("financiamiento"):
-        p.add_run(f"   Financiamiento: {r.get('financiamiento', '')}\n")
-    
-    if r.get("alumnos"):
-        p.add_run(f"   Alumnos: {r.get('alumnos', '')}\n")
+            p = doc.add_paragraph()
 
-    doc.add_paragraph("")  # espacio entre ítems
+            p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+
+            p.add_run(f"   Director: {r.get('director', '')} ({r.get('categoria_director', '')})\n")
+
+            if r.get("codirector"):
+                p.add_run(f"   Codirector: {r.get('codirector', '')} ({r.get('categoria_codirector', '')})\n")
+
+            if r.get("equipo"):
+                p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
+
+            p.add_run(f"   Unidad Académica: {r.get('unidad', '')}\n")
+
+            if r.get("resolucion_cd"):
+                p.add_run(f"   Resolución CD: {r.get('resolucion_cd', '')}\n")
+
+            if r.get("instituto"):
+                p.add_run(f"   Instituto: {r.get('instituto', '')}\n")
+
+            if r.get("catedra"):
+                p.add_run(f"   Cátedra: {r.get('catedra', '')}\n")
+
+            if r.get("financiamiento"):
+                p.add_run(f"   Financiamiento: {r.get('financiamiento', '')}\n")
+
+            if r.get("alumnos"):
+                p.add_run(f"   Alumnos: {r.get('alumnos', '')}\n")
+
+            doc.add_paragraph("")
+
+        # 👇 ESTO TAMBIÉN DEBE ESTAR DENTRO DEL ELSE
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            "Descargar Word",
+            data=buffer,
+            file_name=f"Acta_{acta_num}.docx"
+        )
