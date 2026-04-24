@@ -119,9 +119,12 @@ with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
 
-    numero_acta = st.selectbox(
+    acta_label = st.selectbox(
         "Número de Acta",
-        options=list(actas_dict.keys())
+        options=[
+            f"Acta N°{n} - {actas_dict[n]['mes']}"
+            for n in actas_dict.keys()
+        ]
     )
 
     fecha = st.selectbox(
