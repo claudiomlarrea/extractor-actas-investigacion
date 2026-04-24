@@ -21,7 +21,7 @@ st.set_page_config(
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png", width=120)
+    st.image("assets/logo_uccuyo.png", width=140)
 
 with col2:
     st.markdown("""
