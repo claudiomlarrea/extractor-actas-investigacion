@@ -18,16 +18,7 @@ st.set_page_config(
 # =========================
 
 
-st.markdown(f"""
-<div style='
-    background-color:#064a3f;
-    padding:20px;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    gap:15px;
-'>
-    col1, col2 = st.columns([1, 6])
+col1, col2 = st.columns([1, 6])
 
 with col1:
     st.image("assets/logo_uccuyo.png", width=70)
