@@ -132,7 +132,11 @@ with st.form("form_acta", clear_on_submit=True):
     # ✅ FECHA AUTOMÁTICA
     fecha = fechas_actas[numero_acta]
 
-    st.text_input("Fecha", value=fecha, disabled=True)
+    fecha = st.selectbox(
+        "Fecha",
+        options=list(fechas_actas.values()),
+        index=list(fechas_actas.values()).index(fechas_actas[numero_acta])
+    )
 
     tipo = st.selectbox(
         "Tipo",
