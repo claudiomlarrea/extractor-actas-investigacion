@@ -179,6 +179,9 @@ if st.button("Generar Word"):
         # 👇 TODO ESTE BLOQUE VA ADENTRO DEL ELSE
         for i, r in enumerate(registros, 1):
 
+            # 🔥 NORMALIZA TODAS LAS CLAVES
+            r = {k.lower(): v for k, v in r.items()}
+
             p = doc.add_paragraph()
 
             p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
@@ -209,14 +212,3 @@ if st.button("Generar Word"):
                 p.add_run(f"   Alumnos: {r.get('alumnos', '')}\n")
 
             doc.add_paragraph("")
-
-        # 👇 ESTO TAMBIÉN DEBE ESTAR DENTRO DEL ELSE
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
-
-        st.download_button(
-            "Descargar Word",
-            data=buffer,
-            file_name=f"Acta_{acta_num}.docx"
-        )
