@@ -174,16 +174,34 @@ with st.form("form_acta", clear_on_submit=True):
 # =========================
 
 if submit:
-
+    financiamiento = str(financiamiento).replace(".", "").strip() if financiamiento else ""
     fila = [
-        numero_acta, fecha, anio, tipo, titulo, descripcion,
-        director, codirector, equipo, unidad,
-        resolucion_cd, instituto, catedra, financiamiento, alumnos
+        numero_acta,                # numero_acta
+        fecha,                      # FECHA
+        anio,                       # AÑO
+        tipo,                       # TIPO
+        titulo,                     # TITULO
+        descripcion,                # DESCRIPCIÓN
+        director,                   # DIRECTOR
+        categoria_director,         # CAT_DIRECTOR
+        codirector,                 # CODIRECTOR
+        categoria_codirector,       # CAT_CODIRECTOR
+        equipo,                     # EQUIPO
+        "",                         # Docente categorizado (si no lo usás)
+        "",                         # Categoría Docente (si no lo usás)
+        unidad,                     # UNIDAD ACADÉMICA
+        resolucion_cd,              # RESOLUCION_CD
+        instituto,                  # INSTITUTO
+        catedra,                    # CATEDRA
+        financiamiento, # FINANCIAMIENTO
+        alumnos                     # ALUMNOS
     ]
-
-    sheet.append_row(fila)
-    st.success("Registro guardado correctamente")
-
+    # 🔍 Validación
+    if not numero_acta or not tipo or not titulo:
+        st.error("Faltan datos obligatorios")
+    else:
+        sheet.append_row(fila)
+        st.success("Registro guardado correctamente")
 # =========================
 # 📄 GENERAR WORD
 # =========================
