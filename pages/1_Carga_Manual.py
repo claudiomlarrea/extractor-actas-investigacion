@@ -9,7 +9,7 @@ from io import BytesIO
 # =========================
 
 st.set_page_config(
-    page_title="Consejo de Investigación",
+    page_title="Secretaría de Investigación",
     layout="wide"
 )
 
