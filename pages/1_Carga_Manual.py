@@ -19,9 +19,19 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+
 body {
-    background-color: #0e1117;
+    background-color: #1f2933;  /* gris institucional oscuro */
 }
+
+.main {
+    background-color: #1f2933;
+}
+
+h1 {
+    color: white;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
