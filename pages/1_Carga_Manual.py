@@ -85,7 +85,19 @@ actas_dict = {
     196: {"mes": "Noviembre", "fecha": "20/11/2026"},
     197: {"mes": "Diciembre", "fecha": "18/12/2026"},
 }
-
+fechas_actas = {
+    187: "19 de Febrero 2026",
+    188: "19 de Marzo 2026",
+    189: "16 de Abril 2026",
+    190: "21 de Mayo 2026",
+    191: "18 de Junio 2026",
+    192: "23 de Julio 2026",
+    193: "20 de Agosto 2026",
+    194: "15 de Septiembre 2026",
+    195: "22 de Octubre 2026",
+    196: "19 de Noviembre 2026",
+    197: "10 de Diciembre 2026"
+}
 # =========================
 # 📝 FORMULARIO
 # =========================
@@ -112,11 +124,10 @@ with st.form("form_acta", clear_on_submit=True):
         options=list(actas_dict.keys())
     )
 
-    fecha = actas_dict[numero_acta]["fecha"]
-    mes = actas_dict[numero_acta]["mes"]
-
-    st.text_input("Fecha", value=fecha, disabled=True)
-    st.text_input("Mes", value=mes, disabled=True)
+    fecha = st.selectbox(
+        "Fecha",
+        options=[fechas_actas[numero_acta]]
+    )
 
     tipo = st.selectbox(
         "Tipo",
