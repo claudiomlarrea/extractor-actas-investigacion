@@ -161,10 +161,8 @@ if st.button("Generar Word"):
 
     datos = sheet.get_all_records()
 
-    # 🔹 convertir etiqueta a número
-    acta_num = int(acta_word.split(" ")[1].replace("N°", ""))
+    acta_num = acta_word
 
-    # 🔹 filtrar correctamente
     registros = [r for r in datos if str(r["numero_acta"]) == str(acta_num)]
 
     if not registros:
