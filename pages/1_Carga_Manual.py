@@ -3,7 +3,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
-import base64
 
 # =========================
 # ⚙ CONFIGURACIÓN
@@ -28,9 +27,14 @@ st.markdown(f"""
     align-items:center;
     gap:15px;
 '>
-    <img src="data:image/png;base64,{logo}" width="70">
+    col1, col2 = st.columns([1, 6])
 
-    <div>
+with col1:
+    st.image("assets/logo_uccuyo.png", width=70)
+
+with col2:
+    st.markdown("""
+    <div style='background-color:#064a3f; padding:20px; border-radius:10px'>
         <h2 style='color:white; margin:0'>
             Universidad Católica de Cuyo
         </h2>
@@ -38,8 +42,7 @@ st.markdown(f"""
             Secretaría de Investigación
         </p>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # =========================
 # 🟢 HEADER INSTITUCIONAL
