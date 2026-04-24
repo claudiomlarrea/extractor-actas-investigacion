@@ -14,14 +14,16 @@ st.set_page_config(
 )
 
 # =========================
-# 🎨 ESTILO
+# 🎨 HEADER
 # =========================
-
 
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png", width=2000)
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png",
+        width=120
+    )
 
 with col2:
     st.markdown("""
@@ -34,11 +36,6 @@ with col2:
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-# =========================
-# 🟢 HEADER INSTITUCIONAL
-# =========================
-
 
 # =========================
 # 🧠 TÍTULO
@@ -69,22 +66,23 @@ sheet = sh.worksheet("Hoja 2")
 st.success("Conectado a Google Sheets")
 
 # =========================
-# 📅 MAPA ACTAS → FECHAS
+# 📅 MAPA ACTAS
 # =========================
 
 actas_dict = {
-    187: {"mes": "Febrero", "fecha": "20/02/2026"},
-    188: {"mes": "Marzo", "fecha": "20/03/2026"},
-    189: {"mes": "Abril", "fecha": "24/04/2026"},
-    190: {"mes": "Mayo", "fecha": "22/05/2026"},
-    191: {"mes": "Junio", "fecha": "19/06/2026"},
-    192: {"mes": "Julio", "fecha": "17/07/2026"},
-    193: {"mes": "Agosto", "fecha": "21/08/2026"},
-    194: {"mes": "Septiembre", "fecha": "18/09/2026"},
-    195: {"mes": "Octubre", "fecha": "16/10/2026"},
-    196: {"mes": "Noviembre", "fecha": "20/11/2026"},
-    197: {"mes": "Diciembre", "fecha": "18/12/2026"},
+    187: {"mes": "Febrero"},
+    188: {"mes": "Marzo"},
+    189: {"mes": "Abril"},
+    190: {"mes": "Mayo"},
+    191: {"mes": "Junio"},
+    192: {"mes": "Julio"},
+    193: {"mes": "Agosto"},
+    194: {"mes": "Septiembre"},
+    195: {"mes": "Octubre"},
+    196: {"mes": "Noviembre"},
+    197: {"mes": "Diciembre"},
 }
+
 fechas_actas = {
     187: "19 de Febrero 2026",
     188: "19 de Marzo 2026",
@@ -98,6 +96,7 @@ fechas_actas = {
     196: "19 de Noviembre 2026",
     197: "10 de Diciembre 2026"
 }
+
 # =========================
 # 📝 FORMULARIO
 # =========================
@@ -119,6 +118,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
 
+    # ✅ ACTA + MES
     acta_label = st.selectbox(
         "Número de Acta",
         options=[
@@ -126,11 +126,13 @@ with st.form("form_acta", clear_on_submit=True):
             for n in actas_dict.keys()
         ]
     )
+
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
-    
+
+    # ✅ FECHA AUTOMÁTICA
     fecha = fechas_actas[numero_acta]
+
     st.text_input("Fecha", value=fecha, disabled=True)
-    )
 
     tipo = st.selectbox(
         "Tipo",
@@ -186,14 +188,6 @@ with st.form("form_acta", clear_on_submit=True):
     financiamiento = st.text_input("Financiamiento")
     alumnos = st.text_input("Alumnos")
 
-    docente_categorizado = ""
-    categoria_docente = ""
-
-    if tipo == "Categorización Docente":
-        st.markdown("### Datos de Categorización")
-        docente_categorizado = st.text_input("Docente categorizado")
-        categoria_docente = st.selectbox("Categoría docente", categoria_opciones)
-
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
@@ -201,10 +195,6 @@ with st.form("form_acta", clear_on_submit=True):
 # =========================
 
 if submit:
-
-    if not numero_acta:
-        st.warning("Debe seleccionar número de acta")
-        st.stop()
 
     fila = [
         numero_acta,
@@ -218,8 +208,6 @@ if submit:
         codirector,
         "" if categoria_codirector == "Seleccionar" else categoria_codirector,
         equipo,
-        docente_categorizado,
-        "" if categoria_docente == "Seleccionar" else categoria_docente,
         unidad,
         resolucion_cd,
         instituto,
@@ -234,108 +222,3 @@ if submit:
     except Exception as e:
         st.error("Error al guardar")
         st.text(str(e))
-
-# =========================
-# 📄 ORDEN DEL DÍA
-# =========================
-
-st.markdown("---")
-st.subheader("Generar Orden del Día")
-
-acta_buscar = st.text_input("Ingrese número de Acta")
-
-if st.button("Generar Orden del Día"):
-
-    try:
-        data = sheet.get_all_records()
-    except Exception as e:
-        st.error("Error leyendo datos")
-        st.text(str(e))
-        st.stop()
-
-    filas = [
-        f for f in data
-        if str(f.get("ACTA", "")).strip() == acta_buscar.strip()
-    ]
-
-    if not filas:
-        st.warning("No hay registros")
-        st.stop()
-
-    doc = Document()
-
-    doc.add_paragraph("CONSEJO DE INVESTIGACIÓN")
-    doc.add_paragraph("UNIVERSIDAD CATÓLICA DE CUYO")
-    doc.add_paragraph("")
-    doc.add_paragraph("ORDEN DEL DÍA")
-    doc.add_paragraph(f"Acta Nº {acta_buscar}")
-    doc.add_paragraph(f"Fecha: {filas[0].get('FECHA', '')}")
-    doc.add_paragraph("")
-
-    contador = 1
-
-    for f in filas:
-
-        doc.add_paragraph(f"{contador}. {f.get('TIPO', '')}")
-        doc.add_paragraph(f"   Título: {f.get('TITULO', '')}")
-
-        if f.get("DESCRIPCIÓN"):
-            doc.add_paragraph(f"   Descripción: {f.get('DESCRIPCIÓN')}")
-
-        if f.get("DIRECTOR"):
-            director = f.get("DIRECTOR")
-            cat_dir = f.get("CAT_DIRECTOR", "")
-            if cat_dir:
-                doc.add_paragraph(f"   Director: {director} ({cat_dir})")
-            else:
-                doc.add_paragraph(f"   Director: {director}")
-
-        if f.get("CODIRECTOR"):
-            codir = f.get("CODIRECTOR")
-            cat_codir = f.get("CAT_CODIRECTOR", "")
-            if cat_codir:
-                doc.add_paragraph(f"   Codirector: {codir} ({cat_codir})")
-            else:
-                doc.add_paragraph(f"   Codirector: {codir}")
-
-        if f.get("EQUIPO"):
-            doc.add_paragraph(f"   Equipo: {f.get('EQUIPO')}")
-
-        if f.get("RESOLUCIÓN DEL CONSEJO DIRECTIVO"):
-            doc.add_paragraph(f"   Resolución CD: {f.get('RESOLUCIÓN DEL CONSEJO DIRECTIVO')}")
-
-        if f.get("INSTITUTO DE INVESTIGACIÓN"):
-            doc.add_paragraph(f"   Instituto: {f.get('INSTITUTO DE INVESTIGACIÓN')}")
-
-        if f.get("CÁTEDRA"):
-            doc.add_paragraph(f"   Cátedra: {f.get('CÁTEDRA')}")
-
-        # 💰 FINANCIAMIENTO BIEN FORMATEADO
-        if f.get("FINANCIAMIENTO"):
-            fin = f.get("FINANCIAMIENTO")
-            try:
-                fin = str(fin).replace(".", "")
-                fin = int(float(fin))
-                fin = f"{fin:,}".replace(",", ".")
-            except:
-                pass
-            doc.add_paragraph(f"   Financiamiento: {fin}")
-
-        if f.get("ALUMNOS"):
-            doc.add_paragraph(f"   Alumnos: {f.get('ALUMNOS')}")
-
-        if f.get("UNIDAD ACADÉMICA"):
-            doc.add_paragraph(f"   Unidad Académica: {f.get('UNIDAD ACADÉMICA')}")
-
-        doc.add_paragraph("")
-        contador += 1
-
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-
-    st.download_button(
-        "Descargar Orden del Día",
-        buffer,
-        file_name=f"Orden_{acta_buscar}.docx"
-    )
