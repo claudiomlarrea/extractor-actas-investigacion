@@ -226,3 +226,72 @@ if submit:
     except Exception as e:
         st.error("Error al guardar")
         st.text(str(e))
+
+# =========================
+# 📄 GENERAR ORDEN DEL DÍA
+# =========================
+
+if submit:
+
+    fila = [
+        numero_acta,
+        fecha,
+        anio,
+        tipo,
+        titulo,
+        descripcion,
+        director,
+        "" if categoria_director == "Seleccionar" else categoria_director,
+        codirector,
+        "" if categoria_codirector == "Seleccionar" else categoria_codirector,
+        equipo,
+        unidad,
+        resolucion_cd,
+        instituto,
+        catedra,
+        financiamiento,
+        alumnos
+    ]
+
+    try:
+        sheet.append_row(fila)
+        st.success("Registro guardado correctamente")
+    except Exception as e:
+        st.error("Error al guardar")
+        st.text(str(e))
+
+    # =========================
+    # 📄 CREAR WORD
+    # =========================
+
+    doc = Document()
+
+    doc.add_heading('Consejo de Investigación', 0)
+    doc.add_paragraph(f'Acta N° {numero_acta}')
+    doc.add_paragraph(f'Fecha: {fecha}')
+    doc.add_paragraph('')
+
+    doc.add_heading('Orden del Día', level=1)
+
+    doc.add_paragraph(f"Tipo: {tipo}")
+    doc.add_paragraph(f"Título: {titulo}")
+    doc.add_paragraph(f"Descripción: {descripcion}")
+    doc.add_paragraph(f"Director: {director}")
+    doc.add_paragraph(f"Unidad Académica: {unidad}")
+
+    doc.add_paragraph('')
+
+    # =========================
+    # 📥 DESCARGA
+    # =========================
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    st.download_button(
+        label="Descargar Orden del Día en Word",
+        data=buffer,
+        file_name=f"Acta_{numero_acta}.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
