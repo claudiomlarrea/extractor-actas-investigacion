@@ -18,13 +18,6 @@ st.set_page_config(
 # 🎨 ESTILO
 # =========================
 
-import base64
-
-def get_base64_image(path):
-    with open(path, "rb") as img:
-        return base64.b64encode(img.read()).decode()
-
-logo = get_base64_image("assets/logo_uccuyo.png")
 
 st.markdown(f"""
 <div style='
