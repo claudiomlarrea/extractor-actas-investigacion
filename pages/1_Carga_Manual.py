@@ -9,7 +9,7 @@ from io import BytesIO
 # =========================
 
 st.set_page_config(
-    page_title="Secretaría de Investigación",
+    page_title="Consejo de Investigación",
     layout="wide"
 )
 
@@ -45,7 +45,7 @@ st.markdown("""
         Universidad Católica de Cuyo
     </h2>
     <p style='color:white; margin:0'>
-        Consejo de Investigación
+        Secretaría de Investigación
     </p>
 </div>
 """, unsafe_allow_html=True)
