@@ -132,7 +132,7 @@ with st.form("form_acta", clear_on_submit=True):
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
-# 💾 GUARDAR (UNA SOLA VEZ)
+# 💾 GUARDAR
 # =========================
 
 if submit:
@@ -147,7 +147,7 @@ if submit:
     st.success("Registro guardado correctamente")
 
 # =========================
-# 📄 GENERAR ORDEN DEL DÍA
+# 📄 GENERAR WORD
 # =========================
 
 st.markdown("## 📄 Generar Orden del Día")
@@ -157,13 +157,15 @@ acta_word = st.selectbox(
     options=list(actas_dict.keys())
 )
 
-if st.button("Generar Word"):
+generar = st.button("Generar Word")
+
+if generar:
 
     datos = sheet.get_all_records()
 
-    acta_num = acta_word
+    acta_num = int(acta_word)
 
-    registros = [r for r in datos if str(r["numero_acta"]) == str(acta_num)]
+    registros = [r for r in datos if str(r.get("numero_acta", "")) == str(acta_num)]
 
     if not registros:
         st.warning("No hay registros para esta acta")
@@ -172,43 +174,51 @@ if st.button("Generar Word"):
 
         doc.add_heading('Consejo de Investigación', 0)
         doc.add_paragraph(f'Acta N° {acta_num}')
-        doc.add_paragraph(f'Fecha: {fechas_actas[acta_num]}')
+        doc.add_paragraph(f'Fecha: {fechas_actas.get(acta_num, "")}')
 
         doc.add_heading('Orden del Día', level=1)
 
-        # 👇 TODO ESTE BLOQUE VA ADENTRO DEL ELSE
         for i, r in enumerate(registros, 1):
 
-            # 🔥 NORMALIZA TODAS LAS CLAVES
-            r = {k.lower(): v for k, v in r.items()}
+            r = {k.lower().strip(): v for k, v in r.items()}
 
             p = doc.add_paragraph()
 
             p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-            p.add_run(f"   Director: {r.get('director', '')} ({r.get('categoria_director', '')})\n")
+            p.add_run(f"   Director: {r.get('director', '')}\n")
 
             if r.get("codirector"):
-                p.add_run(f"   Codirector: {r.get('codirector', '')} ({r.get('categoria_codirector', '')})\n")
+                p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
 
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
-            p.add_run(f"   Unidad Académica: {r.get('unidad', '')}\n")
+            p.add_run(f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n")
 
-            if r.get("resolucion_cd"):
-                p.add_run(f"   Resolución CD: {r.get('resolucion_cd', '')}\n")
+            if r.get("resolucion cd"):
+                p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
 
             if r.get("instituto"):
-                p.add_run(f"   Instituto: {r.get('instituto', '')}\n")
+                p.add_run(f"   Instituto: {r.get('instituto')}\n")
 
             if r.get("catedra"):
-                p.add_run(f"   Cátedra: {r.get('catedra', '')}\n")
+                p.add_run(f"   Cátedra: {r.get('catedra')}\n")
 
             if r.get("financiamiento"):
-                p.add_run(f"   Financiamiento: {r.get('financiamiento', '')}\n")
+                p.add_run(f"   Financiamiento: {r.get('financiamiento')}\n")
 
             if r.get("alumnos"):
-                p.add_run(f"   Alumnos: {r.get('alumnos', '')}\n")
+                p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
 
             doc.add_paragraph("")
+
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            "Descargar Word",
+            data=buffer,
+            file_name=f"Acta_{acta_num}.docx"
+        )
