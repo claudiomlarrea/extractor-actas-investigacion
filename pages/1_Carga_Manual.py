@@ -161,7 +161,11 @@ if st.button("Generar Word"):
 
     datos = sheet.get_all_records()
 
-    registros = [r for r in datos if str(r["ACTA"]) == str(acta_word)]
+    # 🔹 convertir etiqueta a número
+    acta_num = int(acta_word.split(" ")[1].replace("N°", ""))
+
+    # 🔹 filtrar correctamente
+    registros = [r for r in datos if str(r["numero_acta"]) == str(acta_num)]
 
     if not registros:
         st.warning("No hay registros para esta acta")
@@ -169,8 +173,8 @@ if st.button("Generar Word"):
         doc = Document()
 
         doc.add_heading('Consejo de Investigación', 0)
-        doc.add_paragraph(f'Acta N° {acta_word}')
-        doc.add_paragraph(f'Fecha: {fechas_actas[acta_word]}')
+        doc.add_paragraph(f'Acta N° {acta_num}')
+        doc.add_paragraph(f'Fecha: {fechas_actas[acta_num]}')
 
         doc.add_heading('Orden del Día', level=1)
 
