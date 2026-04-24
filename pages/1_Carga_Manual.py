@@ -17,22 +17,34 @@ st.set_page_config(
 # 🎨 ESTILO
 # =========================
 
-st.markdown("""
-<style>
+import base64
 
-body {
-    background-color: #1f2933;  /* gris institucional oscuro */
-}
+def get_base64_image(path):
+    with open(path, "rb") as img:
+        return base64.b64encode(img.read()).decode()
 
-.main {
-    background-color: #1f2933;
-}
+logo = get_base64_image("assets/logo_uccuyo.png")
 
-h1 {
-    color: white;
-}
+st.markdown(f"""
+<div style='
+    background-color:#064a3f;
+    padding:20px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+'>
+    <img src="data:image/png;base64,{logo}" width="70">
 
-</style>
+    <div>
+        <h2 style='color:white; margin:0'>
+            Universidad Católica de Cuyo
+        </h2>
+        <p style='color:white; margin:0'>
+            Secretaría de Investigación
+        </p>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 # =========================
