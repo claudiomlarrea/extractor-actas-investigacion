@@ -112,10 +112,11 @@ with st.form("form_acta", clear_on_submit=True):
         options=list(actas_dict.keys())
     )
 
-    fecha = st.selectbox(
-        "Fecha",
-        options=[actas_dict[numero_acta]["fecha"]]
-    )
+    fecha = actas_dict[numero_acta]["fecha"]
+    mes = actas_dict[numero_acta]["mes"]
+
+    st.text_input("Fecha", value=fecha, disabled=True)
+    st.text_input("Mes", value=mes, disabled=True)
 
     tipo = st.selectbox(
         "Tipo",
