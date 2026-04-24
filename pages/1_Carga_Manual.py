@@ -99,9 +99,11 @@ with st.form("form_acta", clear_on_submit=True):
 
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
-    fecha = fechas_actas[numero_acta]
-
-    st.text_input("Fecha", value=fecha, disabled=True)
+    fecha = st.selectbox(
+        "Fecha",
+         options=list(fechas_actas.values()),
+        index=list(fechas_actas.keys()).index(numero_acta)
+    )
 
     tipo = st.selectbox("Tipo", [
         "Proyecto de Investigación",
