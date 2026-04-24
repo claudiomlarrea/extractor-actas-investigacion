@@ -69,6 +69,24 @@ sheet = sh.worksheet("Hoja 2")
 st.success("Conectado a Google Sheets")
 
 # =========================
+# 📅 MAPA ACTAS → FECHAS
+# =========================
+
+actas_dict = {
+    187: {"mes": "Febrero", "fecha": "20/02/2026"},
+    188: {"mes": "Marzo", "fecha": "20/03/2026"},
+    189: {"mes": "Abril", "fecha": "24/04/2026"},
+    190: {"mes": "Mayo", "fecha": "22/05/2026"},
+    191: {"mes": "Junio", "fecha": "19/06/2026"},
+    192: {"mes": "Julio", "fecha": "17/07/2026"},
+    193: {"mes": "Agosto", "fecha": "21/08/2026"},
+    194: {"mes": "Septiembre", "fecha": "18/09/2026"},
+    195: {"mes": "Octubre", "fecha": "16/10/2026"},
+    196: {"mes": "Noviembre", "fecha": "20/11/2026"},
+    197: {"mes": "Diciembre", "fecha": "18/12/2026"},
+}
+
+# =========================
 # 📝 FORMULARIO
 # =========================
 
@@ -88,8 +106,16 @@ categoria_opciones = [
 with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
-    fecha = st.text_input("Fecha")
-    acta = st.text_input("Número de Acta")
+
+    numero_acta = st.selectbox(
+        "Número de Acta",
+        options=list(actas_dict.keys())
+    )
+
+    fecha = st.selectbox(
+        "Fecha",
+        options=[actas_dict[numero_acta]["fecha"]]
+    )
 
     tipo = st.selectbox(
         "Tipo",
