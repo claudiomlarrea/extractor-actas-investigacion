@@ -4,6 +4,46 @@ from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
 
+# =========================
+# ⚙ CONFIGURACIÓN
+# =========================
+
+st.set_page_config(
+    page_title="Consejo de Investigación",
+    layout="wide"
+)
+
+# =========================
+# 🎨 ESTILO
+# =========================
+
+st.markdown("""
+<style>
+body {
+    background-color: #0e1117;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
+# 🟢 HEADER INSTITUCIONAL
+# =========================
+
+st.markdown("""
+<div style='background-color:#064a3f; padding:20px; border-radius:10px'>
+    <h2 style='color:white; margin:0'>
+        Universidad Católica de Cuyo
+    </h2>
+    <p style='color:white; margin:0'>
+        Consejo de Investigación
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# =========================
+# 🧠 TÍTULO
+# =========================
+
 st.title("Sistema de Actas - Consejo de Investigación")
 
 # =========================
