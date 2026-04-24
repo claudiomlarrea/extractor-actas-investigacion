@@ -140,7 +140,27 @@ with st.form("form_acta", clear_on_submit=True):
     )
     equipo = st.text_area("Equipo")
 
-    unidad = st.text_input("Unidad Académica")
+    unidad = st.selectbox(
+    "Unidad Académica",
+    [
+        "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+        "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+        "FCVSL- Facultad de Veterinaria Sede San Luis",
+        "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+        "FBOSCO- Facultad Don Bosco",
+        "FCEESJ- Facultad de Ciencias Económicas San Juan",
+        "FFyHSJ- Facultad de Filosofía y Humanidades",
+        "ISDSM- Instituto Universitario Santa María",
+        "ECRyPSJ- Escuela Cultura Religiosa",
+        "FDCSSJ- Facultad de Derecho San Juan",
+        "FCMSJ- Facultad de Ciencias Médicas San Juan",
+        "FEDSJ- Facultad de Educación",
+        "ESEGSJ- Escuela de Seguridad",
+        "FCQyTSJ- Facultad de Ciencias Químicas",
+        "ISB- Instituto San Buenaventura"
+    ],
+    key="unidad_academica"
+)
     resolucion_cd = st.text_input("Resolución CD")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
