@@ -126,7 +126,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     fecha = st.selectbox(
         "Fecha",
-        options=[fechas_actas[numero_acta]]
+        options=list(fechas_actas.values())
     )
 
     tipo = st.selectbox(
