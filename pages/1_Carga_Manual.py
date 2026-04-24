@@ -81,7 +81,14 @@ fechas_actas = {
     196: "19 de Noviembre 2026",
     197: "10 de Diciembre 2026"
 }
-
+# 🔹 LISTA DE CATEGORÍAS (VA ARRIBA DE TODO)
+categoria_opciones = [
+    "Seleccionar",
+    "Investigador Superior I",
+    "Investigador Independiente II",
+    "Investigador Independiente III",
+    "Investigador Asistente IV"
+]
 # =========================
 # 📝 FORMULARIO
 # =========================
@@ -121,7 +128,16 @@ with st.form("form_acta", clear_on_submit=True):
     descripcion = st.text_area("Descripción")
 
     director = st.text_input("Director")
+    categoria_director = st.selectbox(
+        "Categoría del Director",
+        categoria_opciones
+    )
+
     codirector = st.text_input("Codirector")
+    categoria_codirector = st.selectbox(
+        "Categoría del Codirector",
+        categoria_opciones
+    )
     equipo = st.text_area("Equipo")
 
     unidad = st.text_input("Unidad Académica")
@@ -188,10 +204,14 @@ if generar:
 
             p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-            p.add_run(f"   Director: {r.get('director', '')}\n")
+            p.add_run(
+                f"   Director: {r.get('director', '')} ({r.get('cat_director', '')})\n"
+            )
 
             if r.get("codirector"):
-                p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
+                p.add_run(
+                    f"   Codirector: {r.get('codirector', '')} ({r.get('cat_codirector', '')})\n"
+                )
 
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
