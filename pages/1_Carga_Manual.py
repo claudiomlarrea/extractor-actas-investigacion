@@ -126,7 +126,8 @@ with st.form("form_acta", clear_on_submit=True):
             for n in actas_dict.keys()
         ]
     )
-
+    numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
+    
     fecha = st.selectbox(
         "Fecha",
         options=list(fechas_actas.values())
@@ -202,7 +203,7 @@ with st.form("form_acta", clear_on_submit=True):
 
 if submit:
 
-    if acta.strip() == "":
+    if numero_acta == "":
         st.warning("Debe ingresar número de acta")
         st.stop()
 
