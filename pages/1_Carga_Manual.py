@@ -17,7 +17,10 @@ st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png", width=120)
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png",
+        width=120
+    )
 
 with col2:
     st.markdown("""
@@ -28,12 +31,53 @@ with col2:
     """, unsafe_allow_html=True)
 
 st.title("Sistema de Actas - Consejo de Investigación")
-    # 🎨 FONDO GRIS (BIEN UBICADO)
+
 st.markdown("""
 <style>
+
+/* Fondo general */
 .stApp {
     background-color: #DADADA;
 }
+
+/* Títulos */
+h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+}
+
+/* Labels */
+label {
+    color: black !important;
+    font-weight: 500;
+}
+
+/* Inputs y textos internos */
+input, textarea {
+    color: black !important;
+}
+
+/* Selectbox (texto seleccionado) */
+div[data-baseweb="select"] span {
+    color: black !important;
+}
+
+/* Dropdown opciones */
+div[role="listbox"] {
+    color: black !important;
+}
+
+/* Placeholder (muy importante) */
+::placeholder {
+    color: #555 !important;
+}
+
+/* Texto general dentro de widgets */
+.stTextInput div,
+.stSelectbox div,
+.stTextArea div {
+    color: black !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 # =========================
