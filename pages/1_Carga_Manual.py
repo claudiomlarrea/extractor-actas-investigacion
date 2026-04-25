@@ -87,7 +87,7 @@ categoria_opciones = [
     "Investigador Superior I",
     "Investigador Independiente II",
     "Investigador Independiente III",
-    "Investigador Asistente IV"
+    "Investigador Asistente IV",
     "Investigador Asistente V"
 ]
 # =========================
