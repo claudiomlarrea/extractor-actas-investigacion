@@ -329,7 +329,8 @@ if generar:
 
         doc.add_heading('Consejo de Investigación', 0)
         doc.add_paragraph(f'Acta N° {acta_num}')
-        doc.add_paragraph(f'Fecha: {fechas_actas.get(acta_num, "")}')
+        fecha_real = registros[0].get("FECHA", "")
+        doc.add_paragraph(f'Fecha: {fecha_real}')
 
         doc.add_heading('Orden del Día', level=1)
 
