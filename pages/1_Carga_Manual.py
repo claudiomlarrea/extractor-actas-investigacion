@@ -137,7 +137,16 @@ client = gspread.authorize(creds)
 SHEET_ID = "17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8"
 sheet = client.open_by_key(SHEET_ID).worksheet("Hoja 2")
 
-st.success("Conectado a Google Sheets")
+st.markdown(
+    """
+    <div style='background-color:#d4edda; padding:15px; border-radius:10px'>
+        <a href='https://docs.google.com/spreadsheets/d/17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8' target='_blank' style='text-decoration:none; color:#155724; font-weight:bold; font-size:18px;'>
+            ✔ Conectado a Google Sheets (abrir)
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # =========================
 # 📅 DATOS ACTAS
