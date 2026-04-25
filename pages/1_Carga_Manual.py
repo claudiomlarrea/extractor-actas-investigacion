@@ -88,6 +88,7 @@ categoria_opciones = [
     "Investigador Independiente II",
     "Investigador Independiente III",
     "Investigador Asistente IV"
+    "Investigador Asistente V"
 ]
 # =========================
 # 📝 FORMULARIO
