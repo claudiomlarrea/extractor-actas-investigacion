@@ -28,7 +28,14 @@ with col2:
     """, unsafe_allow_html=True)
 
 st.title("Sistema de Actas - Consejo de Investigación")
-
+    # 🎨 FONDO GRIS (BIEN UBICADO)
+st.markdown("""
+<style>
+.stApp {
+    background-color: #F5F5F5;
+}
+</style>
+""", unsafe_allow_html=True)
 # =========================
 # 🔐 CONEXIÓN
 # =========================
