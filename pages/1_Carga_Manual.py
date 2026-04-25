@@ -32,7 +32,7 @@ st.title("Sistema de Actas - Consejo de Investigación")
 st.markdown("""
 <style>
 .stApp {
-    background-color: #F5F5F5;
+    background-color: #DADADA;
 }
 </style>
 """, unsafe_allow_html=True)
