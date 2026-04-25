@@ -24,20 +24,11 @@ with col1:
 
 with col2:
     st.markdown("""
-    <div style='background-color:#064a3f; padding:20px; border-radius:10px'>
-        <h2 style='color:white; margin:0'>Universidad Católica de Cuyo</h2>
-        <p style='color:white; margin:0'>Secretaría de Investigación</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.title("Sistema de Actas - Consejo de Investigación")
-
-st.markdown("""
 <style>
 
 /* Fondo general */
 .stApp {
-    background-color: #DADADA;
+    background-color: #E6E6E6;
 }
 
 /* Títulos */
@@ -51,30 +42,52 @@ label {
     font-weight: 500;
 }
 
-/* Inputs y textos internos */
+/* INPUTS → FONDO BLANCO + TEXTO NEGRO */
 input, textarea {
+    background-color: white !important;
     color: black !important;
 }
 
-/* Selectbox (texto seleccionado) */
+/* Selectbox cerrado */
+div[data-baseweb="select"] {
+    background-color: white !important;
+}
+
+/* Texto dentro del select */
 div[data-baseweb="select"] span {
     color: black !important;
 }
 
-/* Dropdown opciones */
+/* Dropdown abierto */
 div[role="listbox"] {
+    background-color: white !important;
     color: black !important;
 }
 
-/* Placeholder (muy importante) */
-::placeholder {
-    color: #555 !important;
+/* Opciones del dropdown */
+div[role="option"] {
+    background-color: white !important;
+    color: black !important;
 }
 
-/* Texto general dentro de widgets */
-.stTextInput div,
-.stSelectbox div,
-.stTextArea div {
+/* Hover opciones */
+div[role="option"]:hover {
+    background-color: #e6e6e6 !important;
+}
+
+/* Placeholder */
+::placeholder {
+    color: #777 !important;
+}
+
+/* Inputs de Streamlit específicos */
+.stTextInput > div > div > input {
+    background-color: white !important;
+    color: black !important;
+}
+
+.stTextArea textarea {
+    background-color: white !important;
     color: black !important;
 }
 
