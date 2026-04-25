@@ -14,7 +14,7 @@ st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 # 🎨 HEADER
 # =========================
 
-col1, col2 = st.columns([1, 6])
+col1, col2 = st.columns([1, 8], vertical_alignment="center")
 
 with col1:
     st.image(
@@ -24,6 +24,18 @@ with col1:
 
 with col2:
     st.markdown("""
+    <div class='header-uccuyo'>
+        <h2 style="font-weight:600;">Universidad Católica de Cuyo</h2>
+        <h4 style="opacity:0.9;">Secretaría de Investigación</h4>
+        <h5 style="opacity:0.8;">Consejo de Investigación</h5>
+    </div>
+    """, unsafe_allow_html=True)
+
+# =========================
+# 🎨 CSS GLOBAL
+# =========================
+
+st.markdown("""
 <style>
 
 /* Fondo general */
@@ -31,9 +43,27 @@ with col2:
     background-color: #E6E6E6;
 }
 
-/* Títulos */
+/* HEADER INSTITUCIONAL */
+.header-uccuyo {
+    background: linear-gradient(90deg, #064a3f, #0B6B5D);
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+}
+
+.header-uccuyo h2,
+.header-uccuyo h4,
+.header-uccuyo h5 {
+    color: white !important;
+    margin: 0;
+}
+
+/* Títulos GENERALES (NO TOCA HEADER) */
 h1, h2, h3, h4, h5, h6 {
-    color: black !important;
+    color: black;
 }
 
 /* Labels */
@@ -42,35 +72,30 @@ label {
     font-weight: 500;
 }
 
-/* INPUTS → FONDO BLANCO + TEXTO NEGRO */
+/* INPUTS */
 input, textarea {
     background-color: white !important;
     color: black !important;
 }
 
-/* Selectbox cerrado */
+/* Selectbox */
 div[data-baseweb="select"] {
     background-color: white !important;
 }
 
-/* Texto dentro del select */
 div[data-baseweb="select"] span {
     color: black !important;
 }
 
-/* Dropdown abierto */
 div[role="listbox"] {
     background-color: white !important;
-    color: black !important;
 }
 
-/* Opciones del dropdown */
 div[role="option"] {
     background-color: white !important;
     color: black !important;
 }
 
-/* Hover opciones */
 div[role="option"]:hover {
     background-color: #e6e6e6 !important;
 }
@@ -80,7 +105,6 @@ div[role="option"]:hover {
     color: #777 !important;
 }
 
-/* Inputs de Streamlit específicos */
 .stTextInput > div > div > input {
     background-color: white !important;
     color: black !important;
@@ -93,6 +117,7 @@ div[role="option"]:hover {
 
 </style>
 """, unsafe_allow_html=True)
+
 # =========================
 # 🔐 CONEXIÓN
 # =========================
