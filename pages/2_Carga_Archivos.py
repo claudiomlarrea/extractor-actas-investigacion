@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 st.set_page_config(page_title="Carga de Archivos", layout="wide")
 st.title("📂 Carga de Archivos de Actas")
 
-ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"
+ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"  # carpeta 2026
 
 # =========================
 # GOOGLE AUTH
@@ -36,8 +36,11 @@ drive_service = build("drive", "v3", credentials=creds)
 def obtener_subcarpetas(parent_id):
     resultados = drive_service.files().list(
         q=f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
-        fields="files(id, name)"
+        fields="files(id, name)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
     ).execute()
+
     return resultados.get("files", [])
 
 
@@ -85,7 +88,8 @@ if archivo is not None:
 
     if st.button("Subir archivo a carpeta correspondiente"):
 
-        carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
+        with st.spinner("Buscando carpeta..."):
+            carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
 
         if not carpeta_id:
             st.error("❌ No se encontró la carpeta")
@@ -93,32 +97,34 @@ if archivo is not None:
 
         else:
             try:
-                file_bytes = archivo.getvalue()
+                with st.spinner("Subiendo archivo..."):
 
-                media = MediaIoBaseUpload(
-                    io.BytesIO(file_bytes),
-                    mimetype=archivo.type,
-                    resumable=True
-                )
+                    file_bytes = archivo.getvalue()
 
-                file_metadata = {
-                    "name": archivo.name,
-                    "parents": [carpeta_id]
-                }
+                    media = MediaIoBaseUpload(
+                        io.BytesIO(file_bytes),
+                        mimetype=archivo.type,
+                        resumable=True
+                    )
 
-                file = drive_service.files().create(
-                    body=file_metadata,
-                    media_body=media,
-                    fields="id",
-                    supportsAllDrives=True
-                ).execute()
+                    file_metadata = {
+                        "name": archivo.name,
+                        "parents": [carpeta_id]
+                    }
 
-                file_id = file.get("id")
+                    file = drive_service.files().create(
+                        body=file_metadata,
+                        media_body=media,
+                        fields="id",
+                        supportsAllDrives=True
+                    ).execute()
 
-                link = f"https://drive.google.com/file/d/{file_id}/view"
+                    file_id = file.get("id")
+
+                    link = f"https://drive.google.com/file/d/{file_id}/view"
 
                 st.success("✅ Archivo subido correctamente")
-                st.markdown(f"[Abrir archivo]({link})")
+                st.markdown(f"🔗 [Abrir archivo]({link})")
 
             except HttpError as e:
                 st.error("❌ Error al subir archivo")
