@@ -9,14 +9,13 @@ import io
 # =========================
 
 st.set_page_config(page_title="Carga de Archivos", layout="wide")
-
 st.title("📂 Carga de Archivos de Actas")
 
-# 🔴 ID carpeta "Actas del Consejo"
-ROOT_FOLDER_ID = "1PWQwpzkN8qixL-nDCuInosEL_jgUBpLh"  # la que mostraste en captura
+# 🔴 CARPETA 2026
+ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"
 
 # =========================
-# GOOGLE
+# GOOGLE DRIVE
 # =========================
 
 scope = ["https://www.googleapis.com/auth/drive"]
@@ -39,15 +38,15 @@ def obtener_subcarpetas(parent_id):
     ).execute()
     return resultados.get("files", [])
 
-def buscar_carpeta_por_nombre(parent_id, nombre_buscar):
+def buscar_carpeta(parent_id, nombre):
     carpetas = obtener_subcarpetas(parent_id)
-    for carpeta in carpetas:
-        if carpeta["name"].strip() == nombre_buscar.strip():
-            return carpeta["id"]
+    for c in carpetas:
+        if c["name"].strip() == nombre.strip():
+            return c["id"]
     return None
 
 # =========================
-# SELECT ACTA
+# ACTAS
 # =========================
 
 actas = [
@@ -64,10 +63,10 @@ actas = [
     "Acta 197 - Diciembre"
 ]
 
-acta_seleccionada = st.selectbox("Seleccionar Acta", actas)
+acta = st.selectbox("Seleccionar Acta", actas)
 
 # =========================
-# UPLOAD
+# SUBIDA
 # =========================
 
 archivo = st.file_uploader("Subir archivo", type=["pdf", "docx"])
@@ -76,17 +75,14 @@ if archivo is not None:
 
     st.success("Archivo cargado")
 
-    if st.button("Subir a carpeta correspondiente"):
+    if st.button("Subir archivo a carpeta correspondiente"):
 
-        with st.spinner("Buscando carpeta..."):
-
-            # 🔴 buscar carpeta dentro de ROOT
-            carpeta_id = buscar_carpeta_por_nombre(ROOT_FOLDER_ID, acta_seleccionada)
+        with st.spinner("Buscando carpeta en Drive..."):
+            carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
 
         if not carpeta_id:
-            st.error("No se encontró la carpeta en Drive. Revisar nombres.")
+            st.error("❌ No se encontró la carpeta. Revisar nombres en Drive.")
         else:
-
             with st.spinner("Subiendo archivo..."):
 
                 media = MediaIoBaseUpload(
@@ -109,6 +105,5 @@ if archivo is not None:
 
                 link = f"https://drive.google.com/file/d/{file_id}/view"
 
-            st.success("Archivo subido correctamente")
-
-            st.markdown(f"[🔗 Abrir archivo]({link})")
+            st.success("✅ Archivo subido correctamente")
+            st.markdown(f"🔗 [Abrir archivo]({link})")
