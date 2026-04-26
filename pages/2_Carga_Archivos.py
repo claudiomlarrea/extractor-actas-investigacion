@@ -69,18 +69,18 @@ st.title("📂 Carga de Actas del Consejo de Investigación")
 st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo directamente en Google Drive")
 
 # =========================
-# LINKS (SOLO COMPLETAR LOS QUE TENÉS)
+# LINKS (TODOS CONFIGURADOS)
 # =========================
 
 actas = {
     "Acta 190 - Mayo": "https://drive.google.com/drive/folders/1i6amwbRjPYBqCK0gZ2k5sbcBV6mVM0ki",
     "Acta 191 - Junio": "https://drive.google.com/drive/folders/118VKqYfacn5eBH0dYXRvM5uAXv2M4flI",
-    "Acta 192 - Julio": "",
-    "Acta 193 - Agosto": "",
-    "Acta 194 - Septiembre": "",
-    "Acta 195 - Octubre": "",
-    "Acta 196 - Noviembre": "",
-    "Acta 197 - Diciembre": ""
+    "Acta 192 - Julio": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
+    "Acta 193 - Agosto": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
+    "Acta 194 - Septiembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
+    "Acta 195 - Octubre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
+    "Acta 196 - Noviembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
+    "Acta 197 - Diciembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX"
 }
 
 # =========================
@@ -89,8 +89,8 @@ actas = {
 
 for nombre, link in actas.items():
 
-    if link.strip() == "":
-        link_html = "<p class='no-link'>🔒 Carpeta no disponible aún</p>"
+    if "XXXXXXXX" in link:
+        link_html = "<p class='no-link'>🔒 Carpeta aún no habilitada</p>"
     else:
         link_html = f'<p>🔗 <a href="{link}" target="_blank">Abrir carpeta</a></p>'
 
