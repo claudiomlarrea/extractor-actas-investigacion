@@ -18,7 +18,10 @@ ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"
 # GOOGLE DRIVE
 # =========================
 
-scope = ["https://www.googleapis.com/auth/drive"]
+scope = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/drive.file"
+]
 
 creds = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"],
@@ -77,6 +80,8 @@ acta = st.selectbox("Seleccionar Acta", actas)
 # SUBIDA
 # =========================
 
+from googleapiclient.errors import HttpError
+
 archivo = st.file_uploader("Subir archivo", type=["pdf", "docx"])
 
 if archivo is not None:
@@ -91,27 +96,39 @@ if archivo is not None:
         if not carpeta_id:
             st.error("❌ No se encontró la carpeta. Revisar nombres en Drive.")
         else:
-            with st.spinner("Subiendo archivo..."):
+            try:
+                with st.spinner("Subiendo archivo..."):
 
-                media = MediaIoBaseUpload(
-                    io.BytesIO(archivo.read()),
-                    mimetype=archivo.type
-                )
+                    # 🔹 Obtener bytes correctamente
+                    file_bytes = archivo.getvalue()
 
-                file_metadata = {
-                    "name": archivo.name,
-                    "parents": [carpeta_id]
-                }
+                    # 🔹 Crear media upload
+                    media = MediaIoBaseUpload(
+                        io.BytesIO(file_bytes),
+                        mimetype=archivo.type,
+                        resumable=True
+                    )
 
-                file = drive_service.files().create(
-                    body=file_metadata,
-                    media_body=media,
-                    fields="id"
-                ).execute()
+                    # 🔹 Metadata
+                    file_metadata = {
+                        "name": archivo.name,
+                        "parents": [carpeta_id]
+                    }
 
-                file_id = file.get("id")
+                    # 🔹 Subir archivo
+                    file = drive_service.files().create(
+                        body=file_metadata,
+                        media_body=media,
+                        fields="id"
+                    ).execute()
 
-                link = f"https://drive.google.com/file/d/{file_id}/view"
+                    file_id = file.get("id")
 
-            st.success("✅ Archivo subido correctamente")
-            st.markdown(f"🔗 [Abrir archivo]({link})")
+                    link = f"https://drive.google.com/file/d/{file_id}/view"
+
+                st.success("✅ Archivo subido correctamente")
+                st.markdown(f"🔗 [Abrir archivo]({link})")
+
+            except HttpError as e:
+                st.error("❌ Error al subir archivo a Google Drive")
+                st.text(str(e))
