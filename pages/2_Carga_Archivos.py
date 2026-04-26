@@ -129,3 +129,17 @@ if archivo is not None:
             except HttpError as e:
                 st.error("❌ Error al subir archivo")
                 st.text(str(e))
+if st.button("Crear carpeta test en Drive"):
+
+    folder_metadata = {
+        "name": "TEST_ACTAS",
+        "mimeType": "application/vnd.google-apps.folder"
+    }
+
+    folder = drive_service.files().create(
+        body=folder_metadata,
+        fields="id",
+        supportsAllDrives=True
+    ).execute()
+
+    st.success(f"Carpeta creada: {folder.get('id')}")
