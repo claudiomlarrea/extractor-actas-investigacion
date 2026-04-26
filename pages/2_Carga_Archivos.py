@@ -5,22 +5,21 @@ from googleapiclient.http import MediaIoBaseUpload
 import io
 
 # =========================
-# ⚙ CONFIG
+# CONFIG
 # =========================
 
 st.set_page_config(page_title="Carga de Archivos", layout="wide")
 
 st.title("📂 Carga de Archivos de Actas")
 
-st.markdown("Suba el archivo correspondiente al acta")
+# 🔴 ID carpeta "Actas del Consejo"
+ROOT_FOLDER_ID = "1PWQwpzkN8qixL-nDCuInosEL_jgUBpLh"  # la que mostraste en captura
 
 # =========================
-# 🔐 CONEXIÓN GOOGLE DRIVE
+# GOOGLE
 # =========================
 
-scope = [
-    "https://www.googleapis.com/auth/drive"
-]
+scope = ["https://www.googleapis.com/auth/drive"]
 
 creds = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"],
@@ -29,50 +28,87 @@ creds = Credentials.from_service_account_info(
 
 drive_service = build("drive", "v3", credentials=creds)
 
-# 🔴 TU CARPETA
-FOLDER_ID = "1ExWjGHYBgILVKA2-nd6voRZUajm-zeOL"
-
 # =========================
-# 📤 SUBIDA DE ARCHIVO
+# FUNCIONES
 # =========================
 
-archivo = st.file_uploader(
-    "Seleccionar archivo",
-    type=["pdf", "docx"]
-)
+def obtener_subcarpetas(parent_id):
+    resultados = drive_service.files().list(
+        q=f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+        fields="files(id, name)"
+    ).execute()
+    return resultados.get("files", [])
+
+def buscar_carpeta_por_nombre(parent_id, nombre_buscar):
+    carpetas = obtener_subcarpetas(parent_id)
+    for carpeta in carpetas:
+        if carpeta["name"].strip() == nombre_buscar.strip():
+            return carpeta["id"]
+    return None
+
+# =========================
+# SELECT ACTA
+# =========================
+
+actas = [
+    "Acta 187 - Febrero",
+    "Acta 188 - Marzo",
+    "Acta 189 - Abril",
+    "Acta 190 - Mayo",
+    "Acta 191 - Junio",
+    "Acta 192 - Julio",
+    "Acta 193 - Agosto",
+    "Acta 194 - Septiembre",
+    "Acta 195 - Octubre",
+    "Acta 196 - Noviembre",
+    "Acta 197 - Diciembre"
+]
+
+acta_seleccionada = st.selectbox("Seleccionar Acta", actas)
+
+# =========================
+# UPLOAD
+# =========================
+
+archivo = st.file_uploader("Subir archivo", type=["pdf", "docx"])
 
 if archivo is not None:
 
-    st.success("Archivo cargado correctamente")
+    st.success("Archivo cargado")
 
-    st.write("Nombre:", archivo.name)
-    st.write("Tipo:", archivo.type)
-    st.write("Tamaño (KB):", round(len(archivo.getvalue()) / 1024, 2))
+    if st.button("Subir a carpeta correspondiente"):
 
-    if st.button("⬆ Subir a Google Drive"):
+        with st.spinner("Buscando carpeta..."):
 
-        with st.spinner("Subiendo archivo..."):
+            # 🔴 buscar carpeta dentro de ROOT
+            carpeta_id = buscar_carpeta_por_nombre(ROOT_FOLDER_ID, acta_seleccionada)
 
-            media = MediaIoBaseUpload(
-                io.BytesIO(archivo.read()),
-                mimetype=archivo.type
-            )
+        if not carpeta_id:
+            st.error("No se encontró la carpeta en Drive. Revisar nombres.")
+        else:
 
-            file_metadata = {
-                "name": archivo.name,
-                "parents": [FOLDER_ID]
-            }
+            with st.spinner("Subiendo archivo..."):
 
-            file = drive_service.files().create(
-                body=file_metadata,
-                media_body=media,
-                fields="id"
-            ).execute()
+                media = MediaIoBaseUpload(
+                    io.BytesIO(archivo.read()),
+                    mimetype=archivo.type
+                )
 
-            file_id = file.get("id")
+                file_metadata = {
+                    "name": archivo.name,
+                    "parents": [carpeta_id]
+                }
 
-            link = f"https://drive.google.com/file/d/{file_id}/view"
+                file = drive_service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields="id"
+                ).execute()
 
-        st.success("Archivo subido correctamente a Drive")
+                file_id = file.get("id")
 
-        st.markdown(f"🔗 [Abrir archivo en Drive]({link})")
+                link = f"https://drive.google.com/file/d/{file_id}/view"
+
+            st.success("Archivo subido correctamente")
+
+            st.markdown(f"[🔗 Abrir archivo]({link})")
