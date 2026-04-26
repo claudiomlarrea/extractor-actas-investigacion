@@ -1,9 +1,8 @@
 import streamlit as st
 import io
-from google.oauth2.service_account import Credentials
+import requests
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-from googleapiclient.errors import HttpError
 
 # =========================
 # CONFIG
@@ -12,19 +11,62 @@ from googleapiclient.errors import HttpError
 st.set_page_config(page_title="Carga de Archivos", layout="wide")
 st.title("📂 Carga de Archivos de Actas")
 
-ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"  # carpeta 2026
+ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"
+
+CLIENT_ID = st.secrets["google_oauth"]["client_id"]
+CLIENT_SECRET = st.secrets["google_oauth"]["client_secret"]
+REDIRECT_URI = st.secrets["google_oauth"]["redirect_uri"]
 
 # =========================
-# GOOGLE AUTH
+# AUTH
 # =========================
 
-scope = [
-    "https://www.googleapis.com/auth/drive"
-]
+if "token" not in st.session_state:
 
-creds = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=scope
+    auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        f"?client_id={CLIENT_ID}"
+        "&response_type=code"
+        f"&redirect_uri={REDIRECT_URI}"
+        "&scope=https://www.googleapis.com/auth/drive"
+        "&access_type=offline"
+        "&prompt=consent"
+    )
+
+    st.markdown(f"[🔐 Iniciar sesión con Google]({auth_url})")
+
+    query_params = st.query_params
+
+    if "code" in query_params:
+        code = query_params["code"]
+
+        token_url = "https://oauth2.googleapis.com/token"
+
+        data = {
+            "code": code,
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "redirect_uri": REDIRECT_URI,
+            "grant_type": "authorization_code",
+        }
+
+        r = requests.post(token_url, data=data)
+        token = r.json()
+
+        st.session_state.token = token
+
+        st.rerun()
+
+    st.stop()
+
+# =========================
+# DRIVE SERVICE
+# =========================
+
+from google.oauth2.credentials import Credentials
+
+creds = Credentials(
+    token=st.session_state.token["access_token"]
 )
 
 drive_service = build("drive", "v3", credentials=creds)
@@ -36,9 +78,7 @@ drive_service = build("drive", "v3", credentials=creds)
 def obtener_subcarpetas(parent_id):
     resultados = drive_service.files().list(
         q=f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
-        fields="files(id, name)",
-        supportsAllDrives=True,
-        includeItemsFromAllDrives=True
+        fields="files(id, name)"
     ).execute()
 
     return resultados.get("files", [])
@@ -82,64 +122,43 @@ acta = st.selectbox("Seleccionar Acta", actas)
 
 archivo = st.file_uploader("Subir archivo", type=["pdf", "docx"])
 
-if archivo is not None:
+if archivo:
 
     st.success("Archivo cargado")
 
     if st.button("Subir archivo a carpeta correspondiente"):
 
-        with st.spinner("Buscando carpeta..."):
-            carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
+        carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
 
         if not carpeta_id:
             st.error("❌ No se encontró la carpeta")
-            st.write("Carpetas detectadas:", obtener_subcarpetas(ROOT_FOLDER_ID))
-
         else:
             try:
-                with st.spinner("Subiendo archivo..."):
+                file_bytes = archivo.getvalue()
 
-                    file_bytes = archivo.getvalue()
+                media = MediaIoBaseUpload(
+                    io.BytesIO(file_bytes),
+                    mimetype=archivo.type
+                )
 
-                    media = MediaIoBaseUpload(
-                        io.BytesIO(file_bytes),
-                        mimetype=archivo.type,
-                        resumable=True
-                    )
+                file_metadata = {
+                    "name": archivo.name,
+                    "parents": [carpeta_id]
+                }
 
-                    file_metadata = {
-                        "name": archivo.name,
-                        "parents": [carpeta_id]
-                    }
+                file = drive_service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields="id"
+                ).execute()
 
-                    file = drive_service.files().create(
-                        body=file_metadata,
-                        media_body=media,
-                        fields="id",
-                        supportsAllDrives=True
-                    ).execute()
+                file_id = file.get("id")
 
-                    file_id = file.get("id")
-
-                    link = f"https://drive.google.com/file/d/{file_id}/view"
+                link = f"https://drive.google.com/file/d/{file_id}/view"
 
                 st.success("✅ Archivo subido correctamente")
-                st.markdown(f"🔗 [Abrir archivo]({link})")
+                st.markdown(f"[Abrir archivo]({link})")
 
-            except HttpError as e:
+            except Exception as e:
                 st.error("❌ Error al subir archivo")
                 st.text(str(e))
-if st.button("Crear carpeta test en Drive"):
-
-    folder_metadata = {
-        "name": "TEST_ACTAS",
-        "mimeType": "application/vnd.google-apps.folder"
-    }
-
-    folder = drive_service.files().create(
-        body=folder_metadata,
-        fields="id",
-        supportsAllDrives=True
-    ).execute()
-
-    st.success(f"Carpeta creada: {folder.get('id')}")
