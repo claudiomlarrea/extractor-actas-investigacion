@@ -1,8 +1,9 @@
 import streamlit as st
+import io
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-import io
+from googleapiclient.errors import HttpError
 
 # =========================
 # CONFIG
@@ -11,16 +12,14 @@ import io
 st.set_page_config(page_title="Carga de Archivos", layout="wide")
 st.title("📂 Carga de Archivos de Actas")
 
-# 🔴 CARPETA 2026
 ROOT_FOLDER_ID = "13GUJ-wDQSjGiRKTO9ufiuVZjjhIZyakX"
 
 # =========================
-# GOOGLE DRIVE
+# GOOGLE AUTH
 # =========================
 
 scope = [
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/drive.file"
+    "https://www.googleapis.com/auth/drive"
 ]
 
 creds = Credentials.from_service_account_info(
@@ -56,14 +55,12 @@ def buscar_carpeta(parent_id, nombre):
             return c["id"]
 
     return None
+
 # =========================
 # ACTAS
 # =========================
 
 actas = [
-    "Acta 187 - Febrero",
-    "Acta 188 - Marzo",
-    "Acta 189 - Abril",
     "Acta 190 - Mayo",
     "Acta 191 - Junio",
     "Acta 192 - Julio",
@@ -80,8 +77,6 @@ acta = st.selectbox("Seleccionar Acta", actas)
 # SUBIDA
 # =========================
 
-from googleapiclient.errors import HttpError
-
 archivo = st.file_uploader("Subir archivo", type=["pdf", "docx"])
 
 if archivo is not None:
@@ -90,46 +85,41 @@ if archivo is not None:
 
     if st.button("Subir archivo a carpeta correspondiente"):
 
-        with st.spinner("Buscando carpeta en Drive..."):
-            carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
+        carpeta_id = buscar_carpeta(ROOT_FOLDER_ID, acta)
 
         if not carpeta_id:
-            st.error("❌ No se encontró la carpeta. Revisar nombres en Drive.")
+            st.error("❌ No se encontró la carpeta")
+            st.write("Carpetas detectadas:", obtener_subcarpetas(ROOT_FOLDER_ID))
+
         else:
             try:
-                with st.spinner("Subiendo archivo..."):
+                file_bytes = archivo.getvalue()
 
-                    # 🔹 Obtener bytes correctamente
-                    file_bytes = archivo.getvalue()
+                media = MediaIoBaseUpload(
+                    io.BytesIO(file_bytes),
+                    mimetype=archivo.type,
+                    resumable=True
+                )
 
-                    # 🔹 Crear media upload
-                    media = MediaIoBaseUpload(
-                        io.BytesIO(file_bytes),
-                        mimetype=archivo.type,
-                        resumable=True
-                    )
+                file_metadata = {
+                    "name": archivo.name,
+                    "parents": [carpeta_id]
+                }
 
-                    # 🔹 Metadata
-                    file_metadata = {
-                        "name": archivo.name,
-                        "parents": [carpeta_id]
-                    }
+                file = drive_service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields="id",
+                    supportsAllDrives=True
+                ).execute()
 
-                    # 🔹 Subir archivo
-                    file = drive_service.files().create(
-                        body=file_metadata,
-                        media_body=media,
-                        fields="id",
-                        supportsAllDrives=True
-                    ).execute()
+                file_id = file.get("id")
 
-                    file_id = file.get("id")
-
-                    link = f"https://drive.google.com/file/d/{file_id}/view"
+                link = f"https://drive.google.com/file/d/{file_id}/view"
 
                 st.success("✅ Archivo subido correctamente")
-                st.markdown(f"🔗 [Abrir archivo]({link})")
+                st.markdown(f"[Abrir archivo]({link})")
 
             except HttpError as e:
-                st.error("❌ Error al subir archivo a Google Drive")
+                st.error("❌ Error al subir archivo")
                 st.text(str(e))
