@@ -75,12 +75,12 @@ st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo direc
 actas = {
     "Acta 190 - Mayo": "https://drive.google.com/drive/folders/1i6amwbRjPYBqCK0gZ2k5sbcBV6mVM0ki",
     "Acta 191 - Junio": "https://drive.google.com/drive/folders/118VKqYfacn5eBH0dYXRvM5uAXv2M4flI",
-    "Acta 192 - Julio": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
-    "Acta 193 - Agosto": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
-    "Acta 194 - Septiembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
-    "Acta 195 - Octubre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
-    "Acta 196 - Noviembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX",
-    "Acta 197 - Diciembre": "https://drive.google.com/drive/folders/XXXXXXXXXXXX"
+    "Acta 192 - Julio": "https://drive.google.com/drive/folders/1LdSq7ZcQXItGTKoHoHeFJ7xLVO4lXmRc",
+    "Acta 193 - Agosto": "https://drive.google.com/drive/folders/1VVdUSebRgH2FdivZ6ZceoK30mmqtPYVs",
+    "Acta 194 - Septiembre": "https://drive.google.com/drive/folders/1XkVQdpn4zNQhy2pLx0SbfTxfDQQw0eoY",
+    "Acta 195 - Octubre": "https://drive.google.com/drive/folders/1UhA4EHVhHFlfB75bkbsLGYDm4YzmVZI0",
+    "Acta 196 - Noviembre": "https://drive.google.com/drive/folders/1zy8FMLNbqRUkv9EaIgpCKebf1kgy1nmv",
+    "Acta 197 - Diciembre": "https://drive.google.com/drive/folders/1pRFUHhn1hxpGDvEirgOjlUf2mB2Ml0Em"
 }
 
 # =========================
