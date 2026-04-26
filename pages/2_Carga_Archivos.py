@@ -38,13 +38,21 @@ def obtener_subcarpetas(parent_id):
     ).execute()
     return resultados.get("files", [])
 
+
+def normalizar(texto):
+    return texto.lower().replace(" ", "").replace("-", "")
+
+
 def buscar_carpeta(parent_id, nombre):
     carpetas = obtener_subcarpetas(parent_id)
-    for c in carpetas:
-        if c["name"].strip() == nombre.strip():
-            return c["id"]
-    return None
 
+    nombre_norm = normalizar(nombre)
+
+    for c in carpetas:
+        if normalizar(c["name"]) == nombre_norm:
+            return c["id"]
+
+    return None
 # =========================
 # ACTAS
 # =========================
