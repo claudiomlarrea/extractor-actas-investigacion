@@ -1,7 +1,7 @@
 import streamlit as st
 
 # =========================
-# CONFIGURACIÓN GENERAL
+# CONFIG
 # =========================
 
 st.set_page_config(
@@ -10,28 +10,24 @@ st.set_page_config(
 )
 
 # =========================
-# ESTILO INSTITUCIONAL
+# ESTILO
 # =========================
 
 st.markdown("""
 <style>
 
-/* Fondo */
 .stApp {
     background-color: #0E1117;
 }
 
-/* Títulos */
 h1, h2, h3 {
     color: white;
 }
 
-/* Texto */
 p, li {
     color: #CFCFCF;
 }
 
-/* Botones tipo link */
 a {
     color: #4FC3F7;
     text-decoration: none;
@@ -47,6 +43,11 @@ a:hover {
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
+}
+
+.no-link {
+    color: #FF6B6B;
+    font-weight: 500;
 }
 
 </style>
@@ -68,34 +69,37 @@ st.title("📂 Carga de Actas del Consejo de Investigación")
 st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo directamente en Google Drive")
 
 # =========================
-# LINKS DE ACTAS
+# LINKS (SOLO COMPLETAR LOS QUE TENÉS)
 # =========================
 
 actas = {
     "Acta 190 - Mayo": "https://drive.google.com/drive/folders/1i6amwbRjPYBqCK0gZ2k5sbcBV6mVM0ki",
     "Acta 191 - Junio": "https://drive.google.com/drive/folders/118VKqYfacn5eBH0dYXRvM5uAXv2M4flI",
-    "Acta 192 - Julio": "PEGAR_LINK_AQUI",
-    "Acta 193 - Agosto": "PEGAR_LINK_AQUI",
-    "Acta 194 - Septiembre": "PEGAR_LINK_AQUI",
-    "Acta 195 - Octubre": "PEGAR_LINK_AQUI",
-    "Acta 196 - Noviembre": "PEGAR_LINK_AQUI",
-    "Acta 197 - Diciembre": "PEGAR_LINK_AQUI"
+    "Acta 192 - Julio": "",
+    "Acta 193 - Agosto": "",
+    "Acta 194 - Septiembre": "",
+    "Acta 195 - Octubre": "",
+    "Acta 196 - Noviembre": "",
+    "Acta 197 - Diciembre": ""
 }
 
 # =========================
-# RENDER ACTAS
+# RENDER
 # =========================
 
 for nombre, link in actas.items():
+
+    if link.strip() == "":
+        link_html = "<p class='no-link'>🔒 Carpeta no disponible aún</p>"
+    else:
+        link_html = f'<p>🔗 <a href="{link}" target="_blank">Abrir carpeta</a></p>'
 
     st.markdown(f"""
     <div class="card">
 
     <h3>📁 {nombre}</h3>
 
-    <p>
-        🔗 <a href="{link}" target="_blank">Abrir carpeta</a>
-    </p>
+    {link_html}
 
     <p><strong>Cómo cargar el archivo:</strong></p>
 
