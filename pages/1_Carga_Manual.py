@@ -207,7 +207,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     fecha = st.selectbox(
         "Fecha",
-         options=list(fechas_actas.values()),
+        options=list(fechas_actas.values()),
         index=list(fechas_actas.keys()).index(numero_acta)
     )
 
@@ -227,63 +227,61 @@ with st.form("form_acta", clear_on_submit=True):
     descripcion = st.text_area("Descripción")
 
     director = st.text_input("Director")
-    categoria_director = st.selectbox(
-        "Categoría del Director",
-        categoria_opciones
-    )
+    categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
 
     codirector = st.text_input("Codirector")
-    categoria_codirector = st.selectbox(
-        "Categoría del Codirector",
-        categoria_opciones
-    )
+    categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
+
     equipo = st.text_area("Equipo")
 
     unidad = st.selectbox(
-    "Unidad Académica",
-    [
-        "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-        "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-        "FCVSL- Facultad de Veterinaria Sede San Luis",
-        "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-        "FBOSCO- Facultad Don Bosco",
-        "FCEESJ- Facultad de Ciencias Económicas San Juan",
-        "FFyHSJ- Facultad de Filosofía y Humanidades",
-        "ISDSM- Instituto Universitario Santa María",
-        "ECRyPSJ- Escuela Cultura Religiosa",
-        "FDCSSJ- Facultad de Derecho San Juan",
-        "FCMSJ- Facultad de Ciencias Médicas San Juan",
-        "FEDSJ- Facultad de Educación",
-        "ESEGSJ- Escuela de Seguridad",
-        "FCQyTSJ- Facultad de Ciencias Químicas",
-        "ISB- Instituto San Buenaventura"
-    ],
-    key="unidad_academica"
-)
+        "Unidad Académica",
+        [
+            "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+            "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+            "FCVSL- Facultad de Veterinaria Sede San Luis",
+            "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+            "FBOSCO- Facultad Don Bosco",
+            "FCEESJ- Facultad de Ciencias Económicas San Juan",
+            "FFyHSJ- Facultad de Filosofía y Humanidades",
+            "ISDSM- Instituto Universitario Santa María",
+            "ECRyPSJ- Escuela Cultura Religiosa",
+            "FDCSSJ- Facultad de Derecho San Juan",
+            "FCMSJ- Facultad de Ciencias Médicas San Juan",
+            "FEDSJ- Facultad de Educación",
+            "ESEGSJ- Escuela de Seguridad",
+            "FCQyTSJ- Facultad de Ciencias Químicas",
+            "ISB- Instituto San Buenaventura"
+        ]
+    )
+
     resolucion_cd = st.text_input("Resolución CD")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Alumnos")
+
+    # ✅ SOLO UNA VEZ
     tipo_financiamiento = st.selectbox(
-    "Tipo de financiamiento",
-    ["", "Interno", "Externo"]
-)
-
-# Si selecciona algo → aparecen los otros campos
-if tipo_financiamiento:
-
-    fuente_financiamiento = st.text_input("Fuente de financiamiento")
-
-    monto_financiamiento = st.number_input(
-        "Monto del financiamiento",
-        min_value=0,
-        step=1000
+        "Tipo de financiamiento",
+        ["Seleccionar...", "Interno", "Externo"]
     )
 
-else:
-    fuente_financiamiento = ""
-    monto_financiamiento = 0
-submit = st.form_submit_button("Guardar en Google Sheets")
+    # ✅ TODO ADENTRO DEL FORM
+    if tipo_financiamiento in ["Interno", "Externo"]:
+
+        fuente_financiamiento = st.text_input("Fuente de financiamiento")
+
+        monto_financiamiento = st.number_input(
+            "Monto del financiamiento",
+            min_value=0,
+            step=1000
+        )
+    else:
+        fuente_financiamiento = ""
+        monto_financiamiento = 0
+
+    # ✅ SIEMPRE AL FINAL Y FUERA DEL IF
+    submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
 # 💾 GUARDAR
