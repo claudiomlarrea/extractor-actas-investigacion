@@ -16,49 +16,61 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Fondo general oscuro */
+/* ===== FONDO GENERAL CLARO ===== */
 .stApp {
-    background-color: #0E1117;
+    background-color: #F5F7FA;
 }
 
-/* 🔥 Títulos principales en NEGRO (porque están sobre fondo claro de Streamlit) */
+/* ===== TITULOS ===== */
 h1, h2, h3 {
-    color: black !important;
+    color: #1a1a1a !important;
 }
 
-/* Texto normal en NEGRO */
+/* ===== TEXTO ===== */
 p, li, label, span {
-    color: black !important;
+    color: #333333 !important;
 }
 
-/* Inputs (formularios) */
-.stTextInput input,
-.stTextArea textarea,
-.stSelectbox div {
-    color: black !important;
-}
-
-/* Links */
+/* ===== LINKS ===== */
 a {
-    color: #1E88E5;
+    color: #1565C0;
     text-decoration: none;
+    font-weight: 500;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
-/* Tarjetas (cards) */
+/* ===== CARDS ===== */
 .card {
-    background-color: #F5F5F5;  /* 🔥 gris claro */
-    color: black;               /* 🔥 texto negro */
-    padding: 20px;
+    background-color: white;
+    padding: 25px;
     border-radius: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     border-left: 6px solid #064a3f;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* Texto sin link */
+/* ===== BOTONES ===== */
+.stButton>button {
+    background-color: #064a3f;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    padding: 10px 20px;
+}
+
+.stButton>button:hover {
+    background-color: #0b6b5a;
+}
+
+/* ===== INPUTS ===== */
+input, textarea {
+    color: black !important;
+}
+
+/* ===== TEXTO SIN LINK ===== */
 .no-link {
     color: #C62828;
     font-weight: 500;
@@ -66,7 +78,6 @@ a:hover {
 
 </style>
 """, unsafe_allow_html=True)
-
 # =========================
 # HEADER
 # =========================
