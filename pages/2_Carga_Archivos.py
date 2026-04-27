@@ -16,45 +16,35 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* 🔥 FONDO GENERAL CLARO */
-.stApp {
-    background-color: #F4F6F8;
+/* 🔥 RESTAURAR CONTRASTE REAL */
+[data-testid="stAppViewContainer"] {
+    background-color: #F4F6F8 !important;
 }
 
-/* 🔥 TEXTO GENERAL NEGRO */
-h1, h2, h3, h4, p, li {
-    color: #222222;
+/* 🔥 CONTENIDO PRINCIPAL */
+.block-container {
+    background-color: transparent !important;
+    opacity: 1 !important;
 }
 
-/* 🔥 HEADER (solo este en blanco) */
-.header-uccuyo h1,
-.header-uccuyo p {
-    color: white !important;
+/* 🔥 ELIMINA EFECTO "VELO BLANCO" */
+section.main > div {
+    opacity: 1 !important;
 }
 
-/* 🔥 TARJETAS */
-.card {
-    background-color: #FFFFFF;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    border-left: 6px solid #064a3f;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+/* 🔥 TEXTO PRINCIPAL BIEN OSCURO */
+h1, h2, h3, p, li {
+    color: #1A1A1A !important;
 }
 
-/* 🔥 LINKS */
-a {
-    color: #1E88E5;
-    text-decoration: none;
+/* 🔥 SIDEBAR MÁS VISIBLE */
+[data-testid="stSidebar"] {
+    background-color: #1C1F26;
 }
 
-a:hover {
-    text-decoration: underline;
-}
-
-.no-link {
-    color: #FF6B6B;
-    font-weight: 500;
+/* 🔥 ITEMS DEL SIDEBAR */
+[data-testid="stSidebar"] * {
+    color: #EAEAEA !important;
 }
 
 </style>
