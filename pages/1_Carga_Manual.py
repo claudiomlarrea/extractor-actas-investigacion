@@ -264,16 +264,33 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Alumnos")
-    financiamiento = st.text_input("Financiamiento")
+    tipo_financiamiento = st.selectbox(
+    "Tipo de financiamiento",
+    ["", "Interno", "Externo"]
+)
+
+# Si selecciona algo → aparecen los otros campos
+if tipo_financiamiento:
+
     fuente_financiamiento = st.text_input("Fuente de financiamiento")
-    submit = st.form_submit_button("Guardar en Google Sheets")
+
+    monto_financiamiento = st.number_input(
+        "Monto del financiamiento",
+        min_value=0,
+        step=1000
+    )
+
+else:
+    fuente_financiamiento = ""
+    monto_financiamiento = 0
+submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
 # 💾 GUARDAR
 # =========================
 
 if submit:
-    financiamiento = str(financiamiento).replace(".", "").strip() if financiamiento else ""
+
     fila = [
         numero_acta,                # numero_acta
         fecha,                      # FECHA
@@ -286,19 +303,29 @@ if submit:
         codirector,                 # CODIRECTOR
         categoria_codirector,       # CAT_CODIRECTOR
         equipo,                     # EQUIPO
-        "",                         # Docente categorizado (si no lo usás)
-        "",                         # Categoría Docente (si no lo usás)
+        "",                         # Docente categorizado
+        "",                         # Categoría Docente
         unidad,                     # UNIDAD ACADÉMICA
         resolucion_cd,              # RESOLUCION_CD
         instituto,                  # INSTITUTO
         catedra,                    # CATEDRA
-        financiamiento, # FINANCIAMIENTO
-        fuente_financiamiento,
+        tipo_financiamiento,        # ✔ NUEVO
+        fuente_financiamiento,      # ✔ NUEVO
+        monto_financiamiento,       # ✔ NUEVO
         alumnos                     # ALUMNOS
     ]
-    # 🔍 Validación
+
+    # 🔍 VALIDACIÓN
     if not numero_acta or not tipo or not titulo:
         st.error("Faltan datos obligatorios")
+
+    # 👉 Validación inteligente de financiamiento
+    elif tipo_financiamiento and not fuente_financiamiento:
+        st.error("Debe indicar la fuente de financiamiento")
+
+    elif tipo_financiamiento and monto_financiamiento == 0:
+        st.error("Debe indicar el monto del financiamiento")
+
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
@@ -366,11 +393,20 @@ if generar:
             if r.get("catedra"):
                 p.add_run(f"   Cátedra: {r.get('catedra')}\n")
 
-            if r.get("financiamiento"):
-                p.add_run(f"   Financiamiento: {r.get('financiamiento')}\n")
+            if r.get("tipo de financiamiento"):
+                p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
 
             if r.get("fuente de financiamiento"):
-                p.add_run(f"   Fuente de financiamiento: {r.get('fuente de financiamiento')}\n")
+                p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
+
+            if r.get("monto del financiamiento"):
+                try:
+                    monto = int(float(r.get("monto del financiamiento")))
+                    monto = f"${monto:,}".replace(",", ".")
+                except:
+                    monto = r.get("monto del financiamiento")
+
+                p.add_run(f"   Monto: {monto}\n")
 
             if r.get("alumnos"):
                 p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
