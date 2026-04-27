@@ -16,43 +16,49 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Fondo claro institucional */
+/* Fondo general oscuro */
 .stApp {
-    background-color: #F5F7F9;
+    background-color: #0E1117;
 }
 
-/* Títulos */
+/* 🔥 Títulos principales en NEGRO (porque están sobre fondo claro de Streamlit) */
 h1, h2, h3 {
-    color: #064a3f;
+    color: black !important;
 }
 
-/* Texto */
-p, li {
-    color: #333333;
+/* Texto normal en NEGRO */
+p, li, label, span {
+    color: black !important;
+}
+
+/* Inputs (formularios) */
+.stTextInput input,
+.stTextArea textarea,
+.stSelectbox div {
+    color: black !important;
 }
 
 /* Links */
 a {
-    color: #064a3f;
+    color: #1E88E5;
     text-decoration: none;
-    font-weight: 500;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
-/* Cards */
+/* Tarjetas (cards) */
 .card {
-    background-color: #FFFFFF;
+    background-color: #F5F5F5;  /* 🔥 gris claro */
+    color: black;               /* 🔥 texto negro */
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
-    border-left: 5px solid #064a3f;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border-left: 6px solid #064a3f;
 }
 
-/* Sin link */
+/* Texto sin link */
 .no-link {
     color: #C62828;
     font-weight: 500;
