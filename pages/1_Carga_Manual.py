@@ -260,68 +260,73 @@ with st.form("form_acta", clear_on_submit=True):
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Alumnos")
 
-    # ✅ SOLO UNA VEZ
+    # =========================
+    # 💰 FINANCIAMIENTO
+    # =========================
+
     tipo_financiamiento = st.selectbox(
         "Tipo de financiamiento",
         ["Seleccionar...", "Interno", "Externo"]
     )
 
-    # ✅ TODO ADENTRO DEL FORM
-    if tipo_financiamiento in ["Interno", "Externo"]:
+    # 🔥 SIEMPRE visibles (esto soluciona el problema)
+    fuente_financiamiento = st.text_input("Fuente de financiamiento")
 
-        fuente_financiamiento = st.text_input("Fuente de financiamiento")
+    monto_financiamiento = st.number_input(
+        "Monto del financiamiento",
+        min_value=0,
+        step=1000
+    )
 
-        monto_financiamiento = st.number_input(
-            "Monto del financiamiento",
-            min_value=0,
-            step=1000
-        )
-    else:
-        fuente_financiamiento = ""
-        monto_financiamiento = 0
+    st.caption("Complete estos campos solo si corresponde")
 
-    # ✅ SIEMPRE AL FINAL Y FUERA DEL IF
+    # 🔘 SUBMIT SIEMPRE AL FINAL
     submit = st.form_submit_button("Guardar en Google Sheets")
+
 
 # =========================
 # 💾 GUARDAR
 # =========================
 
 if submit:
+    if tipo_financiamiento == "Seleccionar...":
+        tipo_financiamiento = ""
 
     fila = [
-        numero_acta,                # numero_acta
-        fecha,                      # FECHA
-        anio,                       # AÑO
-        tipo,                       # TIPO
-        titulo,                     # TITULO
-        descripcion,                # DESCRIPCIÓN
-        director,                   # DIRECTOR
-        categoria_director,         # CAT_DIRECTOR
-        codirector,                 # CODIRECTOR
-        categoria_codirector,       # CAT_CODIRECTOR
-        equipo,                     # EQUIPO
-        "",                         # Docente categorizado
-        "",                         # Categoría Docente
-        unidad,                     # UNIDAD ACADÉMICA
-        resolucion_cd,              # RESOLUCION_CD
-        instituto,                  # INSTITUTO
-        catedra,                    # CATEDRA
-        tipo_financiamiento,        # ✔ NUEVO
-        fuente_financiamiento,      # ✔ NUEVO
-        monto_financiamiento,       # ✔ NUEVO
-        alumnos                     # ALUMNOS
+        numero_acta,
+        fecha,
+        anio,
+        tipo,
+        titulo,
+        descripcion,
+        director,
+        categoria_director,
+        codirector,
+        categoria_codirector,
+        equipo,
+        "",  # Docente categorizado
+        "",  # Categoría docente
+        unidad,
+        resolucion_cd,
+        instituto,
+        catedra,
+        tipo_financiamiento,
+        fuente_financiamiento,
+        monto_financiamiento,
+        alumnos
     ]
 
-    # 🔍 VALIDACIÓN
+    # =========================
+    # 🔍 VALIDACIONES
+    # =========================
+
     if not numero_acta or not tipo or not titulo:
         st.error("Faltan datos obligatorios")
 
-    # 👉 Validación inteligente de financiamiento
-    elif tipo_financiamiento and not fuente_financiamiento:
+    elif tipo_financiamiento in ["Interno", "Externo"] and not fuente_financiamiento:
         st.error("Debe indicar la fuente de financiamiento")
 
-    elif tipo_financiamiento and monto_financiamiento == 0:
+    elif tipo_financiamiento in ["Interno", "Externo"] and monto_financiamiento == 0:
         st.error("Debe indicar el monto del financiamiento")
 
     else:
