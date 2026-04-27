@@ -258,7 +258,7 @@ with st.form("form_acta", clear_on_submit=True):
     resolucion_cd = st.text_input("Resolución CD")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
-    alumnos = st.text_input("Alumnos")
+    alumnos = st.text_input("Cantidad de Alumnos")
 
     # =========================
     # 💰 FINANCIAMIENTO
