@@ -55,8 +55,8 @@ h1, h2, h3, p, li {
 
 st.markdown("""
 <div style='background-color:#064a3f; padding:20px; border-radius:10px'>
-    <h2>Universidad Católica de Cuyo</h2>
-    <p>Secretaría de Investigación</p>
+    <h2 style='color:white; margin:0'>Universidad Católica de Cuyo</h2>
+    <p style='color:white; margin:0'>Secretaría de Investigación</p>
 </div>
 """, unsafe_allow_html=True)
 
