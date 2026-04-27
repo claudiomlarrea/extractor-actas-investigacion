@@ -263,9 +263,9 @@ with st.form("form_acta", clear_on_submit=True):
     resolucion_cd = st.text_input("Resolución CD")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
-    financiamiento = st.text_input("Financiamiento")
     alumnos = st.text_input("Alumnos")
-
+    financiamiento = st.text_input("Financiamiento")
+    fuente_financiamiento = st.text_input("Fuente de financiamiento")
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
@@ -293,6 +293,7 @@ if submit:
         instituto,                  # INSTITUTO
         catedra,                    # CATEDRA
         financiamiento, # FINANCIAMIENTO
+        fuente_financiamiento,
         alumnos                     # ALUMNOS
     ]
     # 🔍 Validación
