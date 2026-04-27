@@ -16,63 +16,44 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* ===== FONDO GENERAL CLARO ===== */
+/* 🔥 FONDO GENERAL CLARO */
 .stApp {
-    background-color: #F5F7FA;
+    background-color: #F4F6F8;
 }
 
-/* ===== TITULOS ===== */
-h1, h2, h3 {
-    color: #1a1a1a !important;
+/* 🔥 TEXTO GENERAL NEGRO */
+h1, h2, h3, h4, p, li {
+    color: #222222;
 }
 
-/* ===== TEXTO ===== */
-p, li, label, span {
-    color: #333333 !important;
+/* 🔥 HEADER (solo este en blanco) */
+.header-uccuyo h1,
+.header-uccuyo p {
+    color: white !important;
 }
 
-/* ===== LINKS ===== */
+/* 🔥 TARJETAS */
+.card {
+    background-color: #FFFFFF;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 6px solid #064a3f;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 🔥 LINKS */
 a {
-    color: #1565C0;
+    color: #1E88E5;
     text-decoration: none;
-    font-weight: 500;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
-/* ===== CARDS ===== */
-.card {
-    background-color: white;
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    border-left: 6px solid #064a3f;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-/* ===== BOTONES ===== */
-.stButton>button {
-    background-color: #064a3f;
-    color: white;
-    border-radius: 8px;
-    border: none;
-    padding: 10px 20px;
-}
-
-.stButton>button:hover {
-    background-color: #0b6b5a;
-}
-
-/* ===== INPUTS ===== */
-input, textarea {
-    color: black !important;
-}
-
-/* ===== TEXTO SIN LINK ===== */
 .no-link {
-    color: #C62828;
+    color: #FF6B6B;
     font-weight: 500;
 }
 
@@ -83,9 +64,9 @@ input, textarea {
 # =========================
 
 st.markdown("""
-<div style='background-color:#064a3f; padding:25px; border-radius:15px'>
-    <h1 style='color:white; margin:0'>Universidad Católica de Cuyo</h1>
-    <p style='color:white; margin:0'>Secretaría de Investigación</p>
+<div class='header-uccuyo' style='background-color:#064a3f; padding:25px; border-radius:15px'>
+    <h1>Universidad Católica de Cuyo</h1>
+    <p>Secretaría de Investigación</p>
 </div>
 """, unsafe_allow_html=True)
 
