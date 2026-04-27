@@ -369,6 +369,9 @@ if generar:
             if r.get("financiamiento"):
                 p.add_run(f"   Financiamiento: {r.get('financiamiento')}\n")
 
+            if r.get("fuente de financiamiento"):
+                p.add_run(f"   Fuente de financiamiento: {r.get('fuente de financiamiento')}\n")
+
             if r.get("alumnos"):
                 p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
 
