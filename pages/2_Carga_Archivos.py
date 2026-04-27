@@ -16,20 +16,24 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Fondo claro institucional */
 .stApp {
-    background-color: #0E1117;
+    background-color: #F5F7F9;
 }
 
+/* Títulos */
 h1, h2, h3 {
-    color: white;
+    color: #064a3f;
 }
 
+/* Texto */
 p, li {
-    color: #CFCFCF;
+    color: #333333;
 }
 
+/* Links */
 a {
-    color: #4FC3F7;
+    color: #064a3f;
     text-decoration: none;
     font-weight: 500;
 }
@@ -38,15 +42,19 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Cards */
 .card {
-    background-color: #1C1F26;
+    background-color: #FFFFFF;
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
+    border-left: 5px solid #064a3f;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+/* Sin link */
 .no-link {
-    color: #FF6B6B;
+    color: #C62828;
     font-weight: 500;
 }
 
