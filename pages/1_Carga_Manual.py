@@ -225,21 +225,21 @@ with st.form("form_acta", clear_on_submit=True):
         "Categorización Docente"
     ])
 
-# =========================
-# 👤 CAMPOS DOCENTE
-# =========================
+    # =========================
+    # 👤 CAMPOS DOCENTE (DENTRO DEL FORM)
+    # =========================
 
-titulo = st.text_input(
-    "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
-)
+    titulo = st.text_input(
+        "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
+    )
 
-apellido_nombre_docente = st.text_input(
-    "Apellido y Nombre del docente para categorizar"
-)
+    apellido_nombre_docente = st.text_input(
+        "Apellido y Nombre del docente para categorizar"
+    )
 
-dni_docente = st.text_input(
-    "DNI"
-)
+    dni_docente = st.text_input(
+        "DNI"
+    )
 
    
 
