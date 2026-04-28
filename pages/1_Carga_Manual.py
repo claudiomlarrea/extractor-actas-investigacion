@@ -363,12 +363,6 @@ if submit:
     ] and puntaje == 0:
         st.error("Debe ingresar el puntaje")
 
-    elif tipo_financiamiento in ["Interno", "Externo"] and not fuente_financiamiento:
-        st.error("Debe indicar la fuente de financiamiento")
-
-    elif tipo_financiamiento in ["Interno", "Externo"] and monto_financiamiento == 0:
-        st.error("Debe indicar el monto del financiamiento")
-
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
