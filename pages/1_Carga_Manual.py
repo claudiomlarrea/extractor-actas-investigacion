@@ -213,7 +213,7 @@ with st.form("form_acta", clear_on_submit=True):
         index=list(fechas_actas.keys()).index(numero_acta)
     )
 
-    tipo = st.selectbox("Tipo", [
+    tipo = st.selectbox("Nombre de la actividad", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
