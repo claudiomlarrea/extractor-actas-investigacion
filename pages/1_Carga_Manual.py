@@ -213,7 +213,7 @@ with st.form("form_acta", clear_on_submit=True):
         index=list(fechas_actas.keys()).index(numero_acta)
     )
 
-    tipo = st.selectbox("Nombre de la actividad", [
+    tipo = st.selectbox("Elija actividad", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
@@ -348,24 +348,29 @@ if submit:
         puntaje
     ]
 
-    # =========================
-    # 🔍 VALIDACIONES
-    # =========================
+   # =========================
+# 🔍 VALIDACIONES
+# =========================
 
-    if not numero_acta or not tipo or not titulo:
-        st.error("Faltan datos obligatorios")
+if not anio.strip():
+    st.error("Debe completar el año")
 
-    elif tipo in [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance"
-    ] and puntaje == 0:
-        st.error("Debe ingresar el puntaje")
+elif not numero_acta:
+    st.error("Debe seleccionar el número de acta")
 
-    else:
-        sheet.append_row(fila)
-        st.success("Registro guardado correctamente")
+elif not fecha:
+    st.error("Debe seleccionar la fecha")
+
+elif not tipo:
+    st.error("Debe elegir la actividad")
+
+elif not titulo.strip():
+    st.error("Debe completar la denominación de la actividad")
+
+else:
+    sheet.append_row(fila)
+    st.success("Registro guardado correctamente")
+    
 # =========================
 # 📄 GENERAR WORD
 # =========================
