@@ -314,7 +314,6 @@ with st.form("form_acta", clear_on_submit=True):
     st.caption("Complete estos campos solo si corresponde")
     st.markdown(
         "<span style='color:#444444;'>Complete estos campos solo si corresponde</span>",
-        "<span style='color:#444444;'>A conticuación haga clic en Guardar</span>",
         unsafe_allow_html=True
     )
 
