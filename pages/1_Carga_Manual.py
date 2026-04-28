@@ -9,6 +9,16 @@ from io import BytesIO
 # =========================
 
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
+st.markdown("""
+<style>
+
+/* 🔥 LABELS EN NEGRITA */
+label {
+    font-weight: 700 !important;
+}
+
+</style>
+""", unsaf
 
 # =========================
 # 🎨 HEADER
