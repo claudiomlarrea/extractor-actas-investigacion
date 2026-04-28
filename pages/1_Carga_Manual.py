@@ -252,8 +252,8 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     descripcion = st.text_area(
-        "Descripción en 20 palabras de la actividad",
-        help="Sintetice la actividad en un máximo de 20 palabras"
+        "Sintetice la actividad en 30 palabras",
+        help="Sintetice la actividad en un máximo de 30 palabras"
     )
 
     director = st.text_input("Director")
