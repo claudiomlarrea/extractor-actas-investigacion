@@ -200,12 +200,13 @@ fechas_actas = {
 }
 # 🔹 LISTA DE CATEGORÍAS (VA ARRIBA DE TODO)
 categoria_opciones = [
-    "Seleccionar",
-    "Investigador Superior I",
-    "Investigador Independiente II",
-    "Investigador Independiente III",
-    "Investigador Asistente IV",
-    "Investigador Asistente V"
+    "Investigador/a Superior I",
+    "Investigador/a Principal II",
+    "Investigador/a Independiente III",
+    "Investigador/a Adjunto/a IV",
+    "Investigador/a Asistente V",
+    "Becario/a de Iniciación VI",
+    "Sin categorización / Externo"
 ]
 # =========================
 # 📝 FORMULARIO
