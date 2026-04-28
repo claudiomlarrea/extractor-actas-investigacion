@@ -244,7 +244,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     if tipo in tipos_con_puntaje:
         puntaje = st.number_input(
-            "Puntaje",
+            "Puntaje del Proyecto o Informe",
             min_value=0,
             max_value=1000,
             step=1,
