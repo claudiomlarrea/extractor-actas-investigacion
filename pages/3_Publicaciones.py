@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 st.set_page_config(page_title="Producción Científica", layout="wide")
 
@@ -27,18 +26,18 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        titulo = st.text_input("Título del artículo")
-        autores = st.text_input("Autor/es")
-        revista = st.text_input("Revista")
-        indexacion = st.selectbox("Indexación", ["Scopus", "WoS", "Scielo", "Otra"])
+        titulo = st.text_input("Título del artículo", key="titulo_revista")
+        autores = st.text_input("Autor/es", key="autores_revista")
+        revista = st.text_input("Revista", key="revista")
+        indexacion = st.selectbox("Indexación", ["Scopus", "WoS", "Scielo", "Otra"], key="indexacion")
 
     with col2:
-        doi = st.text_input("DOI")
-        año = st.number_input("Año", 2000, 2030, 2025)
-        unidad = st.text_input("Unidad Académica")
+        doi = st.text_input("DOI", key="doi")
+        año = st.number_input("Año", 2000, 2030, 2025, key="año_revista")
+        unidad = st.text_input("Unidad Académica", key="unidad_revista")
 
-    if st.button("Guardar artículo"):
-        st.success("Artículo registrado (pendiente conexión a base de datos)")
+    if st.button("Guardar artículo", key="btn_revista"):
+        st.success("Artículo registrado")
 
 # =========================
 # 2. LIBROS / CAPÍTULOS
@@ -50,17 +49,17 @@ with tab2:
     col1, col2 = st.columns(2)
 
     with col1:
-        titulo_libro = st.text_input("Título")
-        autores_libro = st.text_input("Autor/es")
-        tipo = st.selectbox("Tipo", ["Libro", "Capítulo de libro"])
+        titulo_libro = st.text_input("Título", key="titulo_libro")
+        autores_libro = st.text_input("Autor/es", key="autores_libro")
+        tipo = st.selectbox("Tipo", ["Libro", "Capítulo de libro"], key="tipo_libro")
 
     with col2:
-        editorial = st.text_input("Editorial")
-        isbn = st.text_input("ISBN")
-        año_libro = st.number_input("Año", 2000, 2030, 2025)
-        unidad_libro = st.text_input("Unidad Académica")
+        editorial = st.text_input("Editorial", key="editorial")
+        isbn = st.text_input("ISBN", key="isbn")
+        año_libro = st.number_input("Año", 2000, 2030, 2025, key="año_libro")
+        unidad_libro = st.text_input("Unidad Académica", key="unidad_libro")
 
-    if st.button("Guardar libro/capítulo"):
+    if st.button("Guardar libro/capítulo", key="btn_libro"):
         st.success("Registro guardado")
 
 # =========================
@@ -73,26 +72,26 @@ with tab3:
     col1, col2 = st.columns(2)
 
     with col1:
-        titulo_repo = st.text_input("Título del trabajo")
-        autores_repo = st.text_input("Autor/es")
+        titulo_repo = st.text_input("Título del trabajo", key="titulo_repo")
+        autores_repo = st.text_input("Autor/es", key="autores_repo")
         tipo_repo = st.selectbox("Tipo", [
             "Artículo",
             "Informe técnico",
             "Tesis",
             "Documento institucional"
-        ])
+        ], key="tipo_repo")
 
     with col2:
         repositorio = st.selectbox("Repositorio", [
             "Repositorio UCCuyo",
             "CONICET",
             "Otro"
-        ])
-        link_repo = st.text_input("Link")
-        año_repo = st.number_input("Año", 2000, 2030, 2025)
-        unidad_repo = st.text_input("Unidad Académica")
+        ], key="repositorio")
+        link_repo = st.text_input("Link", key="link_repo")
+        año_repo = st.number_input("Año", 2000, 2030, 2025, key="año_repo")
+        unidad_repo = st.text_input("Unidad Académica", key="unidad_repo")
 
-    if st.button("Guardar en repositorio"):
+    if st.button("Guardar en repositorio", key="btn_repo"):
         st.success("Registro guardado")
 
 # =========================
@@ -105,26 +104,26 @@ with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        evento = st.text_input("Nombre del evento")
+        evento = st.text_input("Nombre del evento", key="evento")
         tipo_evento = st.selectbox("Tipo", [
             "Congreso",
             "Jornada",
             "Seminario",
             "Workshop"
-        ])
+        ], key="tipo_evento")
         rol = st.selectbox("Rol", [
             "Expositor",
             "Asistente",
             "Organizador"
-        ])
+        ], key="rol")
 
     with col2:
-        trabajo = st.text_input("Título del trabajo")
-        lugar = st.text_input("Lugar")
-        fecha = st.date_input("Fecha")
-        unidad_evento = st.text_input("Unidad Académica")
+        trabajo = st.text_input("Título del trabajo", key="trabajo")
+        lugar = st.text_input("Lugar", key="lugar")
+        fecha = st.date_input("Fecha", key="fecha")
+        unidad_evento = st.text_input("Unidad Académica", key="unidad_evento")
 
-    if st.button("Guardar evento"):
+    if st.button("Guardar evento", key="btn_evento"):
         st.success("Evento registrado")
 
 # =========================
@@ -137,18 +136,18 @@ with tab5:
     col1, col2 = st.columns(2)
 
     with col1:
-        titulo_diario = st.text_input("Título del artículo")
-        medio = st.text_input("Medio (ej: Diario de Cuyo)")
-        autor_diario = st.text_input("Autor/es")
+        titulo_diario = st.text_input("Título del artículo", key="titulo_diario")
+        medio = st.text_input("Medio (ej: Diario de Cuyo)", key="medio")
+        autor_diario = st.text_input("Autor/es", key="autor_diario")
 
     with col2:
-        fecha_diario = st.date_input("Fecha")
-        link_diario = st.text_input("Link")
-        unidad_diario = st.text_input("Unidad Académica")
+        fecha_diario = st.date_input("Fecha", key="fecha_diario")
+        link_diario = st.text_input("Link", key="link_diario")
+        unidad_diario = st.text_input("Unidad Académica", key="unidad_diario")
 
-    resumen = st.text_area("Resumen")
+    resumen = st.text_area("Resumen", key="resumen_diario")
 
-    if st.button("Guardar publicación en diario"):
+    if st.button("Guardar publicación en diario", key="btn_diario"):
         st.success("Publicación registrada")
 
 # =========================
