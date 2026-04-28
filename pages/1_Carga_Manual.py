@@ -311,9 +311,9 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-    st.caption("Complete los campos que correspondan, luego haga clic en Guardar")
+    st.caption("Complete los campos que correspondan, luego haga clic en Guardar en Google Sheets")
     st.markdown(
-        "<span style='color:#444444;'>Complete los campos que correspondan, luego haga clic en Guardar</span>",
+        "<span style='color:#444444;'>Complete los campos que correspondan, luego haga clic en Guardar en Google Sheets</span>",
         unsafe_allow_html=True
     )
 
