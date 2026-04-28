@@ -284,6 +284,7 @@ with st.form("form_acta", clear_on_submit=True):
     )
 
     resolucion_cd = st.text_input("Resolución CD")
+    resolucion_cs = st.text_input("Resolución CS del Proyecto (ej: Res-367-CS)")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Cantidad de Alumnos")
@@ -334,6 +335,7 @@ if submit:
         "",  # Categoría docente
         unidad,
         resolucion_cd,
+        resolucion_cs, 
         instituto,
         catedra,
         tipo_financiamiento,
@@ -443,6 +445,9 @@ if generar:
 
             if r.get("resolucion cd"):
                 p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
+
+            if r.get("resolucion cs"):
+                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion cs')}\n")
 
             if r.get("instituto"):
                 p.add_run(f"   Instituto: {r.get('instituto')}\n")
