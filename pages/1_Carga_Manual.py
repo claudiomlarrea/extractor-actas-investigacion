@@ -192,7 +192,7 @@ categoria_opciones = [
 # 📝 FORMULARIO
 # =========================
 
-st.subheader("Carga de Actas")
+st.subheader("Sistema de envío de Temas al Consejo de Investigación")
 
 with st.form("form_acta", clear_on_submit=True):
 
