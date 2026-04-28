@@ -382,30 +382,38 @@ if submit and titulo.strip() != "":
         puntaje
     ]
 
-    # =========================
-    # 🔍 VALIDACIONES
-    # =========================
+   # =========================
+# 🔍 VALIDACIONES
+# =========================
 
-    if not numero_acta or not tipo or not titulo:
-        st.error("Faltan datos obligatorios")
+if submit:
 
-    elif tipo in [
+    errores = []
+
+    if not titulo.strip():
+        errores.append("Debe completar la denominación de la actividad")
+
+    if tipo in [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
         "Informe de Avance"
     ] and puntaje == 0:
-        st.error("Debe ingresar el puntaje")
+        errores.append("Debe ingresar el puntaje")
 
-    elif tipo_financiamiento in ["Interno", "Externo"] and not fuente_financiamiento:
-        st.error("Debe indicar la fuente de financiamiento")
+    if tipo_financiamiento in ["Interno", "Externo"] and not fuente_financiamiento:
+        errores.append("Debe indicar la fuente de financiamiento")
 
-    elif tipo_financiamiento in ["Interno", "Externo"] and monto_financiamiento == 0:
-        st.error("Debe indicar el monto del financiamiento")
+    if tipo_financiamiento in ["Interno", "Externo"] and monto_financiamiento == 0:
+        errores.append("Debe indicar el monto del financiamiento")
 
+    if errores:
+        for e in errores:
+            st.error(e)
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
+        
 # =========================
 # 📄 GENERAR WORD
 # =========================
@@ -417,9 +425,7 @@ acta_word = st.selectbox(
     options=list(actas_dict.keys())
 )
 
-generar = st.button("Generar Word")
-
-if generar:
+if st.button("Generar Word"):
 
     datos = sheet.get_all_records()
 
@@ -452,7 +458,7 @@ if generar:
 
             p = doc.add_paragraph()
 
-            p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+            p.add_run(f"{i}. {r.get('actividad', r.get('tipo', ''))} - {r.get('titulo', '')}\n").bold = True
 
             p.add_run(
                 f"   Director: {r.get('director', '')} ({r.get('cat_director', '')})\n"
@@ -466,12 +472,11 @@ if generar:
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
-            p.add_run(f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n")
+            p.add_run(
+                f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n"
+            )
 
-            # =========================
-            # 🎯 PUNTAJE ROBUSTO
-            # =========================
-
+            # 🎯 PUNTAJE
             puntaje_valor = r.get("puntaje", 0)
 
             try:
