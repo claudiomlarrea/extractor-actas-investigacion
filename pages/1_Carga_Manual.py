@@ -225,6 +225,24 @@ with st.form("form_acta", clear_on_submit=True):
         "Categorización Docente"
     ])
 
+    # =========================
+    # 👤 CAMPOS SOLO PARA CATEGORIZACIÓN
+    # =========================
+
+    apellido_nombre_docente = ""
+    dni_docente = ""
+
+    if tipo == "Categorización Docente":
+
+        apellido_nombre_docente = st.text_input(
+            "Apellido y nombre del docente"
+        )
+
+        dni_docente = st.text_input(
+            "DNI"
+        )
+
+    # 👇 ESTE SIEMPRE VA (FUERA DEL IF)
     titulo = st.text_input(
         "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
     )
