@@ -349,44 +349,13 @@ with st.form("form_acta", clear_on_submit=True):
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
-# 💾 GUARDAR
-# =========================
-
-if submit and titulo.strip() != "":
-    if tipo_financiamiento == "Seleccionar...":
-        tipo_financiamiento = ""
-
-    fila = [
-        numero_acta,
-        fecha,
-        anio,
-        tipo,
-        titulo,
-        descripcion,
-        director,
-        cat_director,
-        codirector,
-        categoria_codirector,
-        equipo,
-        "",  # Docente categorizado
-        "",  # Categoría docente
-        unidad,
-        resolucion_cd,
-        resolucion_cs, 
-        instituto,
-        catedra,
-        tipo_financiamiento,
-        fuente_financiamiento,
-        monto_financiamiento,
-        alumnos,
-        puntaje
-    ]
-
-   # =========================
-# 🔍 VALIDACIONES
+# 💾 GUARDAR + VALIDACIONES
 # =========================
 
 if submit:
+
+    if tipo_financiamiento == "Seleccionar...":
+        tipo_financiamiento = ""
 
     errores = []
 
@@ -411,6 +380,33 @@ if submit:
         for e in errores:
             st.error(e)
     else:
+
+        fila = [
+            numero_acta,
+            fecha,
+            anio,
+            tipo,
+            titulo,
+            descripcion,
+            director,
+            cat_director,
+            codirector,
+            categoria_codirector,
+            equipo,
+            "",
+            "",
+            unidad,
+            resolucion_cd,
+            resolucion_cs,
+            instituto,
+            catedra,
+            tipo_financiamiento,
+            fuente_financiamiento,
+            monto_financiamiento,
+            alumnos,
+            puntaje
+        ]
+
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
         
