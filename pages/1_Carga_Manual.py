@@ -242,7 +242,10 @@ with st.form("form_acta", clear_on_submit=True):
         "Categorización Docente"
     ])
 
-    titulo = st.text_input("Título")
+    titulo = st.text_input(
+        "Denominación de la actividad",
+        help="Título del proyecto, nombre del docente a categorizar, jornada o semillero"
+    )
 
     # =========================
     # 🎯 PUNTAJE (SOLO ESTO ES CONDICIONAL)
