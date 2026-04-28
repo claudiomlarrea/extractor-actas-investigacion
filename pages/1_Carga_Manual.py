@@ -282,7 +282,10 @@ with st.form("form_acta", clear_on_submit=True):
         ]
     )
 
-    resolucion_cd = st.text_input("Resolución CD")
+    resolucion_cd = st.text_input(
+        "Resolución CD (aprobación de esta actividad en la presente acta)",
+        help="Indique la resolución del Consejo Directivo que aprueba este proyecto, informe o actividad en esta acta"
+    )
     resolucion_cs = st.text_input("Resolución CS del Proyecto (ej: Res-367-CS)")
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
