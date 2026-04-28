@@ -427,7 +427,9 @@ if generar:
 
     registros = [
         r for r in datos
-        if str(r.get("numero_acta", "")).strip() == str(acta_num)
+        if str(
+            r.get("numero_acta", r.get("numero acta", r.get("NUMERO_ACTA", "")))
+        ).strip() == str(acta_num)
     ]
 
     if not registros:
