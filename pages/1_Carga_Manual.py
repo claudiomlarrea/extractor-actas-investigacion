@@ -12,8 +12,13 @@ st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 st.markdown("""
 <style>
 
-/* Oculta avatar y widget inferior */
-[data-testid="stStatusWidget"] {
+/* 🔥 Oculta avatar flotante (tu cara) */
+button[kind="secondary"] img {
+    display: none !important;
+}
+
+/* 🔥 Oculta el contenedor del botón completo */
+button[kind="secondary"] {
     display: none !important;
 }
 
