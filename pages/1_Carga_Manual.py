@@ -224,10 +224,38 @@ with st.form("form_acta", clear_on_submit=True):
     ])
 
     titulo = st.text_input("Título")
+
+    # =========================
+    # 🎯 PUNTAJE (SOLO ESTO ES CONDICIONAL)
+    # =========================
+
+    puntaje = 0
+
+    tipos_con_puntaje = [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance"
+    ]
+
+    if tipo in tipos_con_puntaje:
+        puntaje = st.number_input(
+            f"Puntaje - {tipo}",
+            min_value=0,
+            max_value=1000,
+            step=1,
+            key="puntaje",
+            help="Ingrese el puntaje asignado según la evaluación"
+        )
+
+    # =========================
+    # 🧾 RESTO DEL FORMULARIO (SIEMPRE VISIBLE)
+    # =========================
+
     descripcion = st.text_area("Descripción")
 
     director = st.text_input("Director")
-    categoria_director = st.selectbox("Categoría del Director", categoria_opciones)
+    cat_director = st.selectbox("Categoría del Director", categoria_opciones)
 
     codirector = st.text_input("Codirector")
     categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
@@ -269,7 +297,6 @@ with st.form("form_acta", clear_on_submit=True):
         ["Seleccionar...", "Interno", "Externo"]
     )
 
-    # 🔥 SIEMPRE visibles (esto soluciona el problema)
     fuente_financiamiento = st.text_input("Fuente de financiamiento")
 
     monto_financiamiento = st.number_input(
@@ -282,7 +309,6 @@ with st.form("form_acta", clear_on_submit=True):
 
     # 🔘 SUBMIT SIEMPRE AL FINAL
     submit = st.form_submit_button("Guardar en Google Sheets")
-
 
 # =========================
 # 💾 GUARDAR
@@ -300,7 +326,7 @@ if submit:
         titulo,
         descripcion,
         director,
-        categoria_director,
+        cat_director,
         codirector,
         categoria_codirector,
         equipo,
@@ -313,7 +339,8 @@ if submit:
         tipo_financiamiento,
         fuente_financiamiento,
         monto_financiamiento,
-        alumnos
+        alumnos,
+        puntaje
     ]
 
     # =========================
@@ -322,6 +349,14 @@ if submit:
 
     if not numero_acta or not tipo or not titulo:
         st.error("Faltan datos obligatorios")
+
+    elif tipo in [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance"
+    ] and puntaje == 0:
+        st.error("Debe ingresar el puntaje")
 
     elif tipo_financiamiento in ["Interno", "Externo"] and not fuente_financiamiento:
         st.error("Debe indicar la fuente de financiamiento")
@@ -351,7 +386,10 @@ if generar:
 
     acta_num = int(acta_word)
 
-    registros = [r for r in datos if str(r.get("numero_acta", "")) == str(acta_num)]
+    registros = [
+        r for r in datos
+        if str(r.get("numero_acta", "")).strip() == str(acta_num)
+    ]
 
     if not registros:
         st.warning("No hay registros para esta acta")
@@ -360,13 +398,15 @@ if generar:
 
         doc.add_heading('Consejo de Investigación', 0)
         doc.add_paragraph(f'Acta N° {acta_num}')
-        fecha_real = registros[0].get("FECHA", "")
+
+        fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
         doc.add_paragraph(f'Fecha: {fecha_real}')
 
         doc.add_heading('Orden del Día', level=1)
 
         for i, r in enumerate(registros, 1):
 
+            # 🔹 Normalización de claves
             r = {k.lower().strip(): v for k, v in r.items()}
 
             p = doc.add_paragraph()
@@ -386,6 +426,20 @@ if generar:
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
             p.add_run(f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n")
+
+            # =========================
+            # 🎯 PUNTAJE ROBUSTO
+            # =========================
+
+            puntaje_valor = r.get("puntaje", 0)
+
+            try:
+                puntaje_num = float(puntaje_valor)
+            except (TypeError, ValueError):
+                puntaje_num = 0
+
+            if puntaje_num > 0:
+                p.add_run(f"   Puntaje: {int(puntaje_num)}\n")
 
             if r.get("resolucion cd"):
                 p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
