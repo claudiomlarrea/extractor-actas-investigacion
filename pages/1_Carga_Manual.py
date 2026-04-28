@@ -352,7 +352,7 @@ with st.form("form_acta", clear_on_submit=True):
 # 💾 GUARDAR
 # =========================
 
-if submit:
+if submit and titulo.strip() != "":
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
