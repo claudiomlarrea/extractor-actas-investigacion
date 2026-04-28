@@ -12,12 +12,16 @@ st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 st.markdown("""
 <style>
 
-/* 🔥 Oculta avatar flotante (tu cara) */
-button[kind="secondary"] img {
+/* 🔥 Oculta el badge flotante completo de Streamlit */
+[data-testid="stDecoration"] {
     display: none !important;
 }
 
-/* 🔥 Oculta el contenedor del botón completo */
+/* 🔥 Backup adicional por si cambia el selector */
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
 button[kind="secondary"] {
     display: none !important;
 }
