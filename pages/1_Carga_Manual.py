@@ -239,7 +239,7 @@ with st.form("form_acta", clear_on_submit=True):
         )
 
         dni_docente = st.text_input(
-            "DNI"
+        "DNI"
         )
 
     # 👇 ESTE SIEMPRE VA (FUERA DEL IF)
