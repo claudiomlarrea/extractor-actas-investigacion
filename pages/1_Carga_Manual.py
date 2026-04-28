@@ -226,7 +226,7 @@ with st.form("form_acta", clear_on_submit=True):
     ])
 
     titulo = st.text_input(
-        "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, o nombre de la jornada o semillero"
+        "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
     )
 
     # =========================
