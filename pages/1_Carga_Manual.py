@@ -263,7 +263,7 @@ with st.form("form_acta", clear_on_submit=True):
     categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
 
     equipo = st.text_area(
-        "Equipo de Investigación: Apellidos, Nombre, Categoría",
+        "Equipo de Investigación: Apellido, Nombre, Categoría",
         help="Ingrese cada integrante separado por coma o en líneas nuevas. Ej: Pérez Juan - Investigador Adjunto"
     )
 
