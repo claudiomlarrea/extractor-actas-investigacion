@@ -240,14 +240,13 @@ with st.form("form_acta", clear_on_submit=True):
 
     if tipo in tipos_con_puntaje:
         puntaje = st.number_input(
-            f"Puntaje - {tipo}",
+            "Puntaje",
             min_value=0,
             max_value=1000,
             step=1,
             key="puntaje",
             help="Ingrese el puntaje asignado según la evaluación"
         )
-
     # =========================
     # 🧾 RESTO DEL FORMULARIO (SIEMPRE VISIBLE)
     # =========================
