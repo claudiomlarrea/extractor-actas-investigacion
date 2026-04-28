@@ -9,6 +9,16 @@ from io import BytesIO
 # =========================
 
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
+st.markdown("""
+<style>
+
+/* Oculta avatar y widget inferior */
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # =========================
 # 🎨 HEADER
