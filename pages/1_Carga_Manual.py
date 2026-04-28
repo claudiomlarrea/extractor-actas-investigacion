@@ -225,27 +225,23 @@ with st.form("form_acta", clear_on_submit=True):
         "Categorización Docente"
     ])
 
-    # =========================
-    # 👤 CAMPOS SOLO PARA CATEGORIZACIÓN
-    # =========================
+   # =========================
+# 👤 CAMPOS DOCENTE (SIEMPRE VISIBLES)
+# =========================
 
-    apellido_nombre_docente = ""
-    dni_docente = ""
+titulo = st.text_input(
+    "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
+)
 
-    if tipo == "Categorización Docente":
+apellido_nombre_docente = st.text_input(
+    "Apellido y Nombre del docente para categorizar"
+)
 
-        apellido_nombre_docente = st.text_input(
-            "Apellido y nombre del docente"
-        )
+dni_docente = st.text_input(
+    "DNI"
+)
 
-        dni_docente = st.text_input(
-        "DNI"
-        )
-
-    # 👇 ESTE SIEMPRE VA (FUERA DEL IF)
-    titulo = st.text_input(
-        "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
-    )
+   
 
     # =========================
     # 🎯 PUNTAJE (SOLO ESTO ES CONDICIONAL)
