@@ -251,7 +251,10 @@ with st.form("form_acta", clear_on_submit=True):
     # 🧾 RESTO DEL FORMULARIO (SIEMPRE VISIBLE)
     # =========================
 
-    descripcion = st.text_area("Descripción")
+    descripcion = st.text_area(
+        "Descripción en 20 palabras de la actividad",
+        help="Sintetice la actividad en un máximo de 20 palabras"
+    )
 
     director = st.text_input("Director")
     cat_director = st.selectbox("Categoría del Director", categoria_opciones)
