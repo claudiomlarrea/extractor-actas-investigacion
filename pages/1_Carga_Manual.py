@@ -287,7 +287,7 @@ with st.form("form_acta", clear_on_submit=True):
         help="Indique la resolución del Consejo Directivo que aprueba este proyecto, informe o actividad en esta acta"
     )
     resolucion_cs = st.text_input(
-        "Resolución CS del Proyecto (solo para Informes)",
+        "Resolución CS del Proyecto (solo para Informes Finales y de Avances)",
         help="Indique la resolución de Consejo Superior que aprobó el proyecto del cual deriva este Informe Final o Informe de Avance (ej: Res-367-CS)"
     )
     instituto = st.text_input("Instituto")
