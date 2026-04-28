@@ -225,8 +225,8 @@ with st.form("form_acta", clear_on_submit=True):
         "Categorización Docente"
     ])
 
-   # =========================
-# 👤 CAMPOS DOCENTE (SIEMPRE VISIBLES)
+# =========================
+# 👤 CAMPOS DOCENTE
 # =========================
 
 titulo = st.text_input(
@@ -402,7 +402,7 @@ if generar:
 
     datos = sheet.get_all_records()
 
-    acta_num = int(acta_word)
+    acta_num = int(acta_word.split(" - ")[0])
 
     registros = [
         r for r in datos
