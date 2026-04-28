@@ -378,8 +378,8 @@ else:
 st.markdown("## 📄 Generar Orden del Día")
 
 acta_word = st.selectbox(
-    "Seleccionar Acta",
-    options=list(actas_dict.keys())
+    "Seleccionar Orden del Día",
+    options=[f"{n} - {actas_dict[n]['mes']}" for n in actas_dict]
 )
 
 generar = st.button("Generar Word")
