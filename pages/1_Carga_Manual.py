@@ -500,6 +500,11 @@ if generar:
 
             p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
+            descripcion = r.get("descripcion", "")
+
+            if descripcion:
+                p.add_run(f"   Descripción: {descripcion}\n")
+                
             tipo_actividad = r.get("tipo", "")
 
             # 🔹 CATEGORIZACIÓN DOCENTE
