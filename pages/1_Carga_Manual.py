@@ -364,6 +364,12 @@ if submit:
     if tipo_financiamiento.strip().startswith("Seleccionar"):
         tipo_financiamiento = ""
 
+    if str(cat_director).strip().startswith("Seleccionar"):
+        cat_director = ""
+
+    if str(categoria_codirector).strip().startswith("Seleccionar"):
+        categoria_codirector = ""
+
     fila = [
         numero_acta,
         fecha,
