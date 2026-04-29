@@ -226,16 +226,15 @@ with st.form("form_acta", clear_on_submit=True):
     ])
 
     # =========================
-    # 👤 CAMPOS DOCENTE (DENTRO DEL FORM)
+    # 📌 IDENTIFICACIÓN
     # =========================
 
     titulo = st.text_input(
-        "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
+        "Denominación de la Actividad: Título del proyecto o informe, nombre de la jornada, semillero, etc"
     )
 
-   
     # =========================
-    # 🎯 PUNTAJE (SOLO ESTO ES CONDICIONAL)
+    # 🎯 PUNTAJE (CONDICIONAL)
     # =========================
 
     puntaje = 0
@@ -256,8 +255,9 @@ with st.form("form_acta", clear_on_submit=True):
             key="puntaje",
             help="Ingrese el puntaje asignado según la evaluación"
         )
+
     # =========================
-    # 🧾 RESTO DEL FORMULARIO (SIEMPRE VISIBLE)
+    # 🧾 RESTO DEL FORMULARIO
     # =========================
 
     descripcion = st.text_area("Descripción")
@@ -314,10 +314,10 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-   st.caption("Complete estos campos solo si corresponde")
+    st.caption("Complete estos campos solo si corresponde")
 
     # =========================
-    # 👤 CATEGORIZACIÓN DOCENTE (AL FINAL)
+    # 👤 CATEGORIZACIÓN DOCENTE
     # =========================
 
     if tipo == "Categorización Docente":
@@ -336,13 +336,17 @@ with st.form("form_acta", clear_on_submit=True):
         apellido_nombre_docente = ""
         dni_docente = ""
 
-    # 🔘 SUBMIT SIEMPRE AL FINAL
+    # =========================
+    # 🔘 SUBMIT
+    # =========================
+
     submit = st.form_submit_button("Guardar en Google Sheets")
 # =========================
 # 💾 GUARDAR
 # =========================
 
 if submit:
+
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
@@ -358,11 +362,11 @@ if submit:
         codirector,
         categoria_codirector,
         equipo,
-        "",  # Docente categorizado
-        "",  # Categoría docente
+        apellido_nombre_docente,
+        "",  # categoría docente si no la usás aún
         unidad,
         resolucion_cd,
-        resolucion_cs, 
+        resolucion_cs,
         instituto,
         catedra,
         tipo_financiamiento,
@@ -372,28 +376,25 @@ if submit:
         puntaje
     ]
 
-   # =========================
-# 🔍 VALIDACIONES
-# =========================
+    # VALIDACIONES
+    if not anio.strip():
+        st.error("Debe completar el año")
 
-if not anio.strip():
-    st.error("Debe completar el año")
+    elif not numero_acta:
+        st.error("Debe seleccionar el número de acta")
 
-elif not numero_acta:
-    st.error("Debe seleccionar el número de acta")
+    elif not fecha:
+        st.error("Debe seleccionar la fecha")
 
-elif not fecha:
-    st.error("Debe seleccionar la fecha")
+    elif not tipo:
+        st.error("Debe elegir la actividad")
 
-elif not tipo:
-    st.error("Debe elegir la actividad")
+    elif not titulo.strip():
+        st.error("Debe completar la denominación de la actividad")
 
-elif not titulo.strip():
-    st.error("Debe completar la denominación de la actividad")
-
-else:
-    sheet.append_row(fila)
-    st.success("Registro guardado correctamente")
+    else:
+        sheet.append_row(fila)
+        st.success("Registro guardado correctamente")
     
 # =========================
 # 📄 GENERAR WORD
