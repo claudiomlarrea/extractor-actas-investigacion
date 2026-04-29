@@ -447,6 +447,39 @@ if generar:
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
     ]
 
+    # =========================
+    # 🔹 ORDENAR POR UNIDAD ACADÉMICA
+    # =========================
+
+    orden_unidades = [
+        "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+        "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+        "FCVSL- Facultad de Veterinaria Sede San Luis",
+        "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+        "FBOSCO- Facultad Don Bosco",
+        "FCEESJ- Facultad de Ciencias Económicas San Juan",
+        "FFyHSJ- Facultad de Filosofía y Humanidades",
+        "ISDSM- Instituto Universitario Santa María",
+        "ECRyPSJ- Escuela Cultura Religiosa",
+        "FDCSSJ- Facultad de Derecho San Juan",
+        "FCMSJ- Facultad de Ciencias Médicas San Juan",
+        "FEDSJ- Facultad de Educación",
+        "ESEGSJ- Escuela de Seguridad",
+        "FCQyTSJ- Facultad de Ciencias Químicas",
+        "ISB- Instituto San Buenaventura"
+    ]
+
+    orden_dict = {u: i for i, u in enumerate(orden_unidades)}
+
+    def obtener_unidad(r):
+        r_norm = {k.lower().strip(): v for k, v in r.items()}
+        return r_norm.get("unidad académica", "").strip()
+
+    registros = sorted(
+        registros,
+        key=lambda r: orden_dict.get(obtener_unidad(r), 999)
+    )
+
     if not registros:
         st.warning("No hay registros para esta acta")
     else:
@@ -481,8 +514,9 @@ if generar:
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
-            p.add_run(f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n")
-
+            p.add_run(
+                f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n"
+            )
             # =========================
             # 🎯 PUNTAJE ROBUSTO
             # =========================
