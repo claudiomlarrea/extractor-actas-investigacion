@@ -205,7 +205,10 @@ tipo = st.selectbox("Elija actividad", [
         "Convocatoria de Investigación",
         "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación",
-        "Categorización Docente"
+        "Categorización Docente",
+        "Cronograma",
+        "Llamado a Concurso de Becas",
+        "Llamado a Concurso de Proyectos"
     ])
 
 with st.form("form_acta", clear_on_submit=True):
@@ -297,7 +300,9 @@ with st.form("form_acta", clear_on_submit=True):
             "FEDSJ- Facultad de Educación",
             "ESEGSJ- Escuela de Seguridad",
             "FCQyTSJ- Facultad de Ciencias Químicas",
-            "ISB- Instituto San Buenaventura"
+            "ISB- Instituto San Buenaventura",
+            "Secretaría de Investigación",
+            "Unidad de Vinculación Tecnológica"
         ]
     )
 
