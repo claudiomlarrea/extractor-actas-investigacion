@@ -493,26 +493,47 @@ if generar:
 
             p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-            # 🔹 DIRECTOR
-            cat = r.get('cat_director', '')
-            if cat == "Seleccionar" or cat == "":
-                p.add_run(f"   Director: {r.get('director', '')}\n")
-            else:
-                p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
+            tipo_actividad = r.get("tipo", "")
 
-            # 🔹 CODIRECTOR
-            cat_codir = r.get('cat_codirector', '')
-            if cat_codir == "Seleccionar" or cat_codir == "":
-                p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
-            else:
-                p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
+            # 🔹 CATEGORIZACIÓN DOCENTE
+            if tipo_actividad == "Categorización Docente":
+
+                nombre_doc = r.get("apellido_nombre_docente", "")
+                dni_doc = r.get("dni_docente", "")
+
+                if nombre_doc:
+                    p.add_run(f"   Docente: {nombre_doc}\n")
+
+                if dni_doc:
+                    p.add_run(f"   DNI: {dni_doc}\n")
+
+            # 🔹 DIRECTOR / CODIRECTOR
+            tipos_con_director = [
+                "Proyecto de Investigación",
+                "Proyecto de Cátedra",
+                "Informe Final",
+                "Informe de Avance"
+            ]
+
+            if tipo_actividad in tipos_con_director:
+
+                cat = r.get('cat_director', '')
+                if cat == "Seleccionar" or cat == "":
+                    p.add_run(f"   Director: {r.get('director', '')}\n")
+                else:
+                    p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
+
+                cat_codir = r.get('cat_codirector', '')
+                if cat_codir == "Seleccionar" or cat_codir == "":
+                    p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
+                else:
+                    p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
 
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
             p.add_run(f"   Unidad Académica: {unidad}\n")
 
-            # 🔹 PUNTAJE
             puntaje_valor = r.get("puntaje", 0)
             try:
                 puntaje_num = float(puntaje_valor)
