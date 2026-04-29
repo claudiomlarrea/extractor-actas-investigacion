@@ -500,7 +500,7 @@ if generar:
 
             p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-            descripcion = r.get("descripcion", "")
+            descripcion = r.get("descripcion") or r.get("descripción") or ""
 
             if descripcion:
                 p.add_run(f"   Descripción: {descripcion}\n")
