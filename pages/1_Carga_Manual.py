@@ -419,9 +419,6 @@ if submit:
     elif not tipo:
         st.error("Debe elegir la actividad")
 
-    elif not titulo.strip():
-        st.error("Debe completar la denominación de la actividad")
-
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
