@@ -326,25 +326,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     st.caption("Complete estos campos solo si corresponde")
 
-    # =========================
-    # 👤 CATEGORIZACIÓN DOCENTE
-    # =========================
 
-    if tipo == "Categorización Docente":
-
-        st.markdown("### Categorización docente")
-
-        apellido_nombre_docente = st.text_input(
-            "Apellido y Nombre del docente"
-        )
-
-        dni_docente = st.text_input(
-            "DNI"
-        )
-
-    else:
-        apellido_nombre_docente = ""
-        dni_docente = ""
 
     # =========================
     # 🔘 SUBMIT
