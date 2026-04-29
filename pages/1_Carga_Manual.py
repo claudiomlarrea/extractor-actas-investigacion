@@ -292,7 +292,7 @@ with st.form("form_acta", clear_on_submit=True):
     )
 
     resolucion_cd = st.text_input("Resolución CD")
-    resolucion_cs = st.text_input("Resolución CS del Proyecto (ej: Res-367-CS)")
+    resolucion_cs = st.text_input("Resolución CS del Proyecto (ej: Res-367-CS)" solo en caso de presentar Informe Final y de Avance)
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Cantidad de Alumnos")
