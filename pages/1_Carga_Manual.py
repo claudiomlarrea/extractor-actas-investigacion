@@ -351,6 +351,19 @@ if submit:
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
+    # 🔹 LIMPIAR "Seleccionar"
+    if unidad == "Seleccionar":
+        unidad = ""
+
+    if instituto == "Seleccionar":
+        instituto = ""
+
+    if catedra == "Seleccionar":
+        catedra = ""
+
+    if tipo_financiamiento in ["Seleccionar", "Seleccionar..."]:
+        tipo_financiamiento = ""
+
     fila = [
         numero_acta,
         fecha,
@@ -364,7 +377,7 @@ if submit:
         categoria_codirector,
         equipo,
         apellido_nombre_docente,
-        dni_docente, # categoría docente si no la usás aún
+        dni_docente,
         unidad,
         resolucion_cd,
         resolucion_cs,
