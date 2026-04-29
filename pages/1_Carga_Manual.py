@@ -404,7 +404,7 @@ if submit:
 st.markdown("## 📄 Generar Orden del Día")
 
 acta_word = st.selectbox(
-    "Seleccionar Orden del Día para descargar",
+    "Seleccionar Orden del Día para generarlo y descargar",
     options=[f"{n} - {actas_dict[n]['mes']}" for n in actas_dict]
 )
 
