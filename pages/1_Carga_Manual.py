@@ -312,7 +312,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     tipo_financiamiento = st.selectbox(
         "Tipo de financiamiento",
-        ["Seleccionar...", "Interno", "Externo"]
+        ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"]
     )
 
     fuente_financiamiento = st.text_input("Fuente de financiamiento")
