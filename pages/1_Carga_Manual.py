@@ -209,6 +209,7 @@ tipo = st.selectbox("Elija actividad", [
         "Cronograma",
         "Llamado a Concurso de Becas",
         "Llamado a Concurso de Proyectos",
+        "Líneas prioritarias de investigación",
         "Otra"
     ])
 
@@ -292,15 +293,15 @@ with st.form("form_acta", clear_on_submit=True):
             "FCVSL- Facultad de Veterinaria Sede San Luis",
             "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
             "FBOSCO- Facultad Don Bosco",
-            "FCEESJ- Facultad de Ciencias Económicas San Juan",
+            "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
             "FFyHSJ- Facultad de Filosofía y Humanidades",
             "ISDSM- Instituto Universitario Santa María",
-            "ECRyPSJ- Escuela Cultura Religiosa",
-            "FDCSSJ- Facultad de Derecho San Juan",
+            "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
+            "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
             "FCMSJ- Facultad de Ciencias Médicas San Juan",
             "FEDSJ- Facultad de Educación",
             "ESEGSJ- Escuela de Seguridad",
-            "FCQyTSJ- Facultad de Ciencias Químicas",
+            "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
             "ISB- Instituto San Buenaventura",
             "Secretaría de Investigación",
             "Unidad de Vinculación Tecnológica"
