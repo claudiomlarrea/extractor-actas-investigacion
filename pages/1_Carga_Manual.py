@@ -233,16 +233,7 @@ with st.form("form_acta", clear_on_submit=True):
         "Denominación de la Actividad: Título del proyecto o informe, apellido y nombre del docente a categorizar, nombre de la jornada, semillero, etc"
     )
 
-    apellido_nombre_docente = st.text_input(
-        "Apellido y Nombre del docente para categorizar"
-    )
-
-    dni_docente = st.text_input(
-        "DNI"
-    )
-
    
-
     # =========================
     # 🎯 PUNTAJE (SOLO ESTO ES CONDICIONAL)
     # =========================
@@ -323,11 +314,30 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-    st.caption("Complete estos campos solo si corresponde")
+   st.caption("Complete estos campos solo si corresponde")
+
+    # =========================
+    # 👤 CATEGORIZACIÓN DOCENTE (AL FINAL)
+    # =========================
+
+    if tipo == "Categorización Docente":
+
+        st.markdown("### Categorización docente")
+
+        apellido_nombre_docente = st.text_input(
+            "Apellido y Nombre del docente"
+        )
+
+        dni_docente = st.text_input(
+            "DNI"
+        )
+
+    else:
+        apellido_nombre_docente = ""
+        dni_docente = ""
 
     # 🔘 SUBMIT SIEMPRE AL FINAL
     submit = st.form_submit_button("Guardar en Google Sheets")
-
 # =========================
 # 💾 GUARDAR
 # =========================
