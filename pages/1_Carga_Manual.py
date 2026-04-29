@@ -343,24 +343,6 @@ with st.form("form_acta", clear_on_submit=True):
     submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
-# 👤 CATEGORIZACIÓN DOCENTE (VISUAL)
-# =========================
-
-if tipo == "Categorización Docente":
-
-    st.markdown("### Categorización docente")
-
-    apellido_nombre_docente = st.text_input(
-        "Apellido y Nombre del docente"
-    )
-
-    dni_docente = st.text_input(
-        "DNI"
-    )
-else:
-    apellido_nombre_docente = ""
-    dni_docente = ""
-# =========================
 # 💾 GUARDAR
 # =========================
 
