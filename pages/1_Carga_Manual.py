@@ -212,10 +212,20 @@ with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
 
-    acta_label = st.selectbox(...)
-    numero_acta = ...
-    fecha = st.selectbox(...)
+    acta_label = st.selectbox(
+        "Número de Acta",
+        options=[f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict]
+    )
 
+    numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
+
+    fecha = st.selectbox(
+        "Fecha",
+        options=list(fechas_actas.values()),
+        index=list(fechas_actas.keys()).index(numero_acta)
+    )
+
+    # 👤 CATEGORIZACIÓN DOCENTE
     if tipo == "Categorización Docente":
 
         st.markdown("### Categorización docente")
@@ -227,8 +237,8 @@ with st.form("form_acta", clear_on_submit=True):
         apellido_nombre_docente = ""
         dni_docente = ""
 
-    # 🔴 ESTA LÍNEA ES CLAVE
-    submit = st.form_submit_button("Guardar")
+    # 🔴 ESTO ARREGLA TODO
+    submit = st.form_submit_button("Guardar en Google Sheets")
     # =========================
     # 👤 CATEGORIZACIÓN DOCENTE
     # =========================
