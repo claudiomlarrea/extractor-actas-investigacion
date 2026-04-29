@@ -196,6 +196,18 @@ categoria_opciones = [
 
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 
+tipo = st.selectbox("Elija actividad", [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Jornada de Investigación",
+        "Convocatoria de Investigación",
+        "Convocatoria a Proyectos de investigación",
+        "Creación de Semillero de Investigación",
+        "Categorización Docente"
+    ])
+
 with st.form("form_acta", clear_on_submit=True):
 
     anio = st.text_input("Año", "2026")
@@ -213,17 +225,6 @@ with st.form("form_acta", clear_on_submit=True):
         index=list(fechas_actas.keys()).index(numero_acta)
     )
 
-    tipo = st.selectbox("Elija actividad", [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Jornada de Investigación",
-        "Convocatoria de Investigación",
-        "Convocatoria a Proyectos de investigación",
-        "Creación de Semillero de Investigación",
-        "Categorización Docente"
-    ])
 
     if tipo == "Categorización Docente":
         st.subheader("Categorización docente")
