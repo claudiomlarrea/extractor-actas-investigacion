@@ -228,8 +228,11 @@ with st.form("form_acta", clear_on_submit=True):
     if tipo == "Categorización Docente":
         st.subheader("Categorización docente")
 
-        apellido_nombre_docente = st.text_input("Apellido y Nombre del docente", key="nombre_docente")
-        dni_docente = st.text_input("DNI", key="dni_docente")
+        st.text_input("Apellido y Nombre del docente", key="nombre_docente")
+        st.text_input("DNI", key="dni_docente")
+
+        apellido_nombre_docente = st.session_state.get("nombre_docente", "")
+        dni_docente = st.session_state.get("dni_docente", "")
     else:
         apellido_nombre_docente = ""
         dni_docente = ""
