@@ -351,17 +351,17 @@ if submit:
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
-    # 🔹 LIMPIAR "Seleccionar"
-    if unidad == "Seleccionar":
+    # 🔹 LIMPIAR "Seleccionar" (versión robusta)
+    if unidad.strip().startswith("Seleccionar"):
         unidad = ""
 
-    if instituto == "Seleccionar":
+    if instituto.strip().startswith("Seleccionar"):
         instituto = ""
 
-    if catedra == "Seleccionar":
+    if catedra.strip().startswith("Seleccionar"):
         catedra = ""
 
-    if tipo_financiamiento in ["Seleccionar", "Seleccionar..."]:
+    if tipo_financiamiento.strip().startswith("Seleccionar"):
         tipo_financiamiento = ""
 
     fila = [
