@@ -208,7 +208,8 @@ tipo = st.selectbox("Elija actividad", [
         "Categorización Docente",
         "Cronograma",
         "Llamado a Concurso de Becas",
-        "Llamado a Concurso de Proyectos"
+        "Llamado a Concurso de Proyectos",
+        "Otra"
     ])
 
 with st.form("form_acta", clear_on_submit=True):
