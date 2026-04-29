@@ -447,7 +447,7 @@ if generar:
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
     ]
 
-    # =========================
+ # =========================
     # 🔹 ORDENAR POR UNIDAD ACADÉMICA
     # =========================
 
@@ -493,14 +493,23 @@ if generar:
 
         doc.add_heading('Orden del Día', level=1)
 
-        for i, r in enumerate(registros, 1):
+        contador = 1
+        unidad_actual = None
 
-            # 🔹 Normalización de claves
+        for r in registros:
+
             r = {k.lower().strip(): v for k, v in r.items()}
+
+            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+
+            if unidad != unidad_actual:
+                doc.add_paragraph("")
+                doc.add_heading(unidad, level=2)
+                unidad_actual = unidad
 
             p = doc.add_paragraph()
 
-            p.add_run(f"{i}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
             p.add_run(
                 f"   Director: {r.get('director', '')} ({r.get('cat_director', '')})\n"
@@ -514,18 +523,13 @@ if generar:
             if r.get("equipo"):
                 p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
 
-            p.add_run(
-                f"   Unidad Académica: {r.get('unidad académica', r.get('unidad', ''))}\n"
-            )
-            # =========================
-            # 🎯 PUNTAJE ROBUSTO
-            # =========================
+            p.add_run(f"   Unidad Académica: {unidad}\n")
 
             puntaje_valor = r.get("puntaje", 0)
 
             try:
                 puntaje_num = float(puntaje_valor)
-            except (TypeError, ValueError):
+            except:
                 puntaje_num = 0
 
             if puntaje_num > 0:
@@ -562,6 +566,8 @@ if generar:
                 p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
 
             doc.add_paragraph("")
+
+            contador += 1
 
         buffer = BytesIO()
         doc.save(buffer)
