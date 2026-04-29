@@ -429,134 +429,136 @@ if generar:
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
     ]
 
- # =========================
-    # 🔹 ORDENAR POR UNIDAD ACADÉMICA
-    # =========================
+# =========================
+# 🔹 ORDENAR POR UNIDAD ACADÉMICA
+# =========================
 
-    orden_unidades = [
-        "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-        "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-        "FCVSL- Facultad de Veterinaria Sede San Luis",
-        "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-        "FBOSCO- Facultad Don Bosco",
-        "FCEESJ- Facultad de Ciencias Económicas San Juan",
-        "FFyHSJ- Facultad de Filosofía y Humanidades",
-        "ISDSM- Instituto Universitario Santa María",
-        "ECRyPSJ- Escuela Cultura Religiosa",
-        "FDCSSJ- Facultad de Derecho San Juan",
-        "FCMSJ- Facultad de Ciencias Médicas San Juan",
-        "FEDSJ- Facultad de Educación",
-        "ESEGSJ- Escuela de Seguridad",
-        "FCQyTSJ- Facultad de Ciencias Químicas",
-        "ISB- Instituto San Buenaventura"
-    ]
+orden_unidades = [
+    "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+    "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+    "FCVSL- Facultad de Veterinaria Sede San Luis",
+    "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+    "FBOSCO- Facultad Don Bosco",
+    "FCEESJ- Facultad de Ciencias Económicas San Juan",
+    "FFyHSJ- Facultad de Filosofía y Humanidades",
+    "ISDSM- Instituto Universitario Santa María",
+    "ECRyPSJ- Escuela Cultura Religiosa",
+    "FDCSSJ- Facultad de Derecho San Juan",
+    "FCMSJ- Facultad de Ciencias Médicas San Juan",
+    "FEDSJ- Facultad de Educación",
+    "ESEGSJ- Escuela de Seguridad",
+    "FCQyTSJ- Facultad de Ciencias Químicas",
+    "ISB- Instituto San Buenaventura"
+]
 
-    orden_dict = {u: i for i, u in enumerate(orden_unidades)}
+orden_dict = {u: i for i, u in enumerate(orden_unidades)}
 
-    def obtener_unidad(r):
-        r_norm = {k.lower().strip(): v for k, v in r.items()}
-        return r_norm.get("unidad académica", "").strip()
+def obtener_unidad(r):
+    r_norm = {k.lower().strip(): v for k, v in r.items()}
+    return r_norm.get("unidad académica", "").strip()
 
-    registros = sorted(
-        registros,
-        key=lambda r: orden_dict.get(obtener_unidad(r), 999)
-    )
+registros = sorted(
+    registros,
+    key=lambda r: orden_dict.get(obtener_unidad(r), 999)
+)
 
-    if not registros:
-        st.warning("No hay registros para esta acta")
-    else:
-        doc = Document()
+if not registros:
+    st.warning("No hay registros para esta acta")
+else:
+    doc = Document()
 
-        doc.add_heading('Consejo de Investigación', 0)
-        doc.add_paragraph(f'Acta N° {acta_num}')
+    doc.add_heading('Consejo de Investigación', 0)
+    doc.add_paragraph(f'Acta N° {acta_num}')
 
-        fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
-        doc.add_paragraph(f'Fecha: {fecha_real}')
+    fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
+    doc.add_paragraph(f'Fecha: {fecha_real}')
 
-        doc.add_heading('Orden del Día', level=1)
+    doc.add_heading('Orden del Día', level=1)
 
-        contador = 1
-        unidad_actual = None
+    contador = 1
+    unidad_actual = None
 
-        for r in registros:
+    for r in registros:
 
-            r = {k.lower().strip(): v for k, v in r.items()}
+        r = {k.lower().strip(): v for k, v in r.items()}
 
-            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+        unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
-            if unidad != unidad_actual:
-                doc.add_paragraph("")
-                doc.add_heading(unidad, level=2)
-                unidad_actual = unidad
-
-            p = doc.add_paragraph()
-
-            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
-
-            p.add_run(
-                f"   Director: {r.get('director', '')} ({r.get('cat_director', '')})\n"
-            )
-
-            if r.get("codirector"):
-                p.add_run(
-                    f"   Codirector: {r.get('codirector', '')} ({r.get('cat_codirector', '')})\n"
-                )
-
-            if r.get("equipo"):
-                p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
-
-            p.add_run(f"   Unidad Académica: {unidad}\n")
-
-            puntaje_valor = r.get("puntaje", 0)
-
-            try:
-                puntaje_num = float(puntaje_valor)
-            except:
-                puntaje_num = 0
-
-            if puntaje_num > 0:
-                p.add_run(f"   Puntaje: {int(puntaje_num)}\n")
-
-            if r.get("resolucion cd"):
-                p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
-
-            if r.get("resolucion cs"):
-                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion cs')}\n")
-
-            if r.get("instituto"):
-                p.add_run(f"   Instituto: {r.get('instituto')}\n")
-
-            if r.get("catedra"):
-                p.add_run(f"   Cátedra: {r.get('catedra')}\n")
-
-            if r.get("tipo de financiamiento"):
-                p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
-
-            if r.get("fuente de financiamiento"):
-                p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
-
-            if r.get("monto del financiamiento"):
-                try:
-                    monto = int(float(r.get("monto del financiamiento")))
-                    monto = f"${monto:,}".replace(",", ".")
-                except:
-                    monto = r.get("monto del financiamiento")
-
-                p.add_run(f"   Monto: {monto}\n")
-
-            if r.get("alumnos"):
-                p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
-
+        if unidad != unidad_actual:
             doc.add_paragraph("")
+            doc.add_heading(unidad, level=2)
+            unidad_actual = unidad
 
-            contador += 1
+        p = doc.add_paragraph()
 
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+        p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-        st.download_button(
-            "Descargar Word",
-            data=buffer,
-            file_name=f"Acta_{acta_num}.docx"
-        )
+        cat = r.get('cat_director', '')
+        if cat == "Seleccionar" or cat == "":
+            p.add_run(f"   Director: {r.get('director', '')}\n")
+        else:
+            p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
+
+        cat_codir = r.get('cat_codirector', '')
+        if cat_codir == "Seleccionar" or cat_codir == "":
+            p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
+        else:
+            p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
+
+        if r.get("equipo"):
+            p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
+
+        p.add_run(f"   Unidad Académica: {unidad}\n")
+
+        puntaje_valor = r.get("puntaje", 0)
+        try:
+            puntaje_num = float(puntaje_valor)
+        except:
+            puntaje_num = 0
+
+        if puntaje_num > 0:
+            p.add_run(f"   Puntaje: {int(puntaje_num)}\n")
+
+        if r.get("resolucion cd"):
+            p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
+
+        if r.get("resolucion cs"):
+            p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion cs')}\n")
+
+        if r.get("instituto"):
+            p.add_run(f"   Instituto: {r.get('instituto')}\n")
+
+        if r.get("catedra"):
+            p.add_run(f"   Cátedra: {r.get('catedra')}\n")
+
+        if r.get("tipo de financiamiento"):
+            p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
+
+        if r.get("fuente de financiamiento"):
+            p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
+
+        if r.get("monto del financiamiento"):
+            try:
+                monto = int(float(r.get("monto del financiamiento")))
+                monto = f"${monto:,}".replace(",", ".")
+            except:
+                monto = r.get("monto del financiamiento")
+
+            p.add_run(f"   Monto: {monto}\n")
+
+        if r.get("alumnos"):
+            p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
+
+        doc.add_paragraph("")
+
+        contador += 1
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    st.download_button(
+        "Descargar Word",
+        data=buffer,
+        file_name=f"Acta_{acta_num}.docx"
+    )
