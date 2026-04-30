@@ -278,7 +278,7 @@ with st.form("form_acta", clear_on_submit=True):
     # 🧾 RESTO DEL FORMULARIO
     # =========================
 
-    descripcion = st.text_area("🟢 Descripción")
+    descripcion = st.text_area("🟢 Descripción en no más de 30 palabras")
 
     director = st.text_input("🟢 Director")
     cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
