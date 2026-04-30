@@ -3,6 +3,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
+from docx.shared import Pt
 
 # =========================
 # ⚙ CONFIGURACIÓN
@@ -436,49 +437,20 @@ if generar:
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
     ]
 
-    # =========================
-    # 🔹 ORDENAR POR UNIDAD ACADÉMICA
-    # =========================
-
-    orden_unidades = [
-        "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-        "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-        "FCVSL- Facultad de Veterinaria Sede San Luis",
-        "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-        "FBOSCO- Facultad Don Bosco",
-        "FCEESJ- Facultad de Ciencias Económicas San Juan",
-        "FFyHSJ- Facultad de Filosofía y Humanidades",
-        "ISDSM- Instituto Universitario Santa María",
-        "ECRyPSJ- Escuela Cultura Religiosa",
-        "FDCSSJ- Facultad de Derecho San Juan",
-        "FCMSJ- Facultad de Ciencias Médicas San Juan",
-        "FEDSJ- Facultad de Educación",
-        "ESEGSJ- Escuela de Seguridad",
-        "FCQyTSJ- Facultad de Ciencias Químicas",
-        "ISB- Instituto San Buenaventura"
-    ]
-
-    orden_dict = {u: i for i, u in enumerate(orden_unidades)}
-
-    def obtener_unidad(r):
-        r_norm = {k.lower().strip(): v for k, v in r.items()}
-        return r_norm.get("unidad académica", "").strip()
-
-    registros = sorted(
-        registros,
-        key=lambda r: orden_dict.get(obtener_unidad(r), 999)
-    )
-
     if not registros:
         st.warning("No hay registros para esta acta")
+
     else:
         doc = Document()
 
         doc.add_heading('Consejo de Investigación', 0)
-        doc.add_paragraph(f'Acta N° {acta_num}')
+
+        p_acta = doc.add_paragraph(f'Acta N° {acta_num}')
+        p_acta.paragraph_format.space_after = Pt(0)
 
         fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
-        doc.add_paragraph(f'Fecha: {fecha_real}')
+        p_fecha = doc.add_paragraph(f'Fecha: {fecha_real}')
+        p_fecha.paragraph_format.space_after = Pt(0)
 
         doc.add_heading('Orden del Día', level=1)
 
@@ -492,11 +464,20 @@ if generar:
             unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
             if unidad != unidad_actual:
-                doc.add_paragraph("")
-                doc.add_heading(unidad, level=2)
+                h = doc.add_paragraph()
+                h.paragraph_format.space_before = Pt(6)
+                h.paragraph_format.space_after = Pt(2)
+                h.paragraph_format.line_spacing = 1
+
+                run_h = h.add_run(unidad)
+                run_h.bold = True
+
                 unidad_actual = unidad
 
             p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.line_spacing = 1
 
             p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
@@ -507,7 +488,6 @@ if generar:
                 
             tipo_actividad = r.get("tipo", "")
 
-            # 🔹 CATEGORIZACIÓN DOCENTE
             if tipo_actividad == "Categorización Docente":
 
                 nombre_doc = r.get("apellido_nombre_docente", "")
@@ -519,7 +499,6 @@ if generar:
                 if dni_doc:
                     p.add_run(f"   DNI: {dni_doc}\n")
 
-            # 🔹 DIRECTOR / CODIRECTOR
             tipos_con_director = [
                 "Proyecto de Investigación",
                 "Proyecto de Cátedra",
@@ -584,8 +563,6 @@ if generar:
 
             if r.get("alumnos"):
                 p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
-
-            doc.add_paragraph("")
 
             contador += 1
 
