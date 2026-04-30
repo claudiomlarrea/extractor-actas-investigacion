@@ -315,7 +315,8 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Cantidad de Alumnos")
-    responsable_de_carga = st.text_input("Responsable de carga")
+    st.markdown("### 🔴 **Responsable de carga (OBLIGATORIO)**")
+    responsable_de_carga = st.text_input("")
 
     # =========================
     # 💰 FINANCIAMIENTO
