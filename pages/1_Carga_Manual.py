@@ -277,18 +277,18 @@ with st.form("form_acta", clear_on_submit=True):
     # 🧾 RESTO DEL FORMULARIO
     # =========================
 
-    descripcion = st.text_area("Descripción")
+    descripcion = st.text_area("🟢 Descripción")
 
-    director = st.text_input("Director")
-    cat_director = st.selectbox("Categoría del Director", categoria_opciones)
+    director = st.text_input("🟢 Director")
+    cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
 
-    codirector = st.text_input("Codirector")
-    categoria_codirector = st.selectbox("Categoría del Codirector", categoria_opciones)
+    codirector = st.text_input("🟢 Codirector")
+    categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
 
-    equipo = st.text_area("Equipo de Investigación: Apellido, Nombre, Categoría")
+    equipo = st.text_area("🟢 Equipo de Investigación: Apellido, Nombre, Categoría")
 
     unidad = st.selectbox(
-        "Unidad Académica",
+        "🟢 Unidad Académica",
         [
             "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
             "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
@@ -310,10 +310,10 @@ with st.form("form_acta", clear_on_submit=True):
         ]
     )
 
-    resolucion_cd = st.text_input("Resolución CD")
-    resolucion_cs = st.text_input("Resolución CS del Proyecto (ej: Res-367-CS) solo para la presentación de Informes Finales y de Avances")
-    instituto = st.text_input("Instituto")
-    catedra = st.text_input("Cátedra")
+    resolucion_cd = st.text_input("🟢 Resolución CD")
+    resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para la presentación de Informes Finales y de Avances")
+    instituto = st.text_input("🟢 Instituto")
+    catedra = st.text_input("🟢 Cátedra")
     alumnos = st.text_input("Cantidad de Alumnos")
     responsable_de_carga = st.text_input("🔴 Responsable de carga (obligatorio)")
 
@@ -322,7 +322,7 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     tipo_financiamiento = st.selectbox(
-        "Tipo de financiamiento",
+        "🟢 Tipo de financiamiento",
         ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"]
     )
 
