@@ -4,6 +4,7 @@ from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
 from docx.shared import Pt
+from docx.shared import Pt, RGBColor
 
 # =========================
 # ⚙ CONFIGURACIÓN
@@ -471,6 +472,7 @@ if generar:
 
                 run_h = h.add_run(unidad)
                 run_h.bold = True
+                run_h.font.color.rgb = RGBColor(0, 102, 204)
 
                 unidad_actual = unidad
 
