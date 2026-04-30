@@ -334,7 +334,7 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-    st.caption("Complete estos campos solo si corresponde")
+    st.markdown("**Complete estos campos solo si corresponde**")
 
 
 
