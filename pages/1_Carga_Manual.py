@@ -292,7 +292,7 @@ with st.form("form_acta", clear_on_submit=True):
         [
             "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
             "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-            "FCVSL- Facultad de Veterinaria Sede San Luis",
+            "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
             "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
             "FBOSCO- Facultad Don Bosco",
             "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
