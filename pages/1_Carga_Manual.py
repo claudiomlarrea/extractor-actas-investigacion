@@ -334,7 +334,7 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-    st.markdown("**Complete estos campos solo si corresponde**")
+    st.markdown("<br><span style='color:#333;'>🔹 Complete estos campos solo si corresponde</span>", unsafe_allow_html=True)
 
 
 
