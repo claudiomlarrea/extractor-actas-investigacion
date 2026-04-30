@@ -598,6 +598,13 @@ if generar_responsables:
         and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
     ]
 
+    registros = sorted(
+        registros,
+        key=lambda r: str(
+            r.get("unidad académica", r.get("unidad", ""))
+        ).strip()
+    )
+
     if not responsable_reporte.strip():
         st.warning("Debe ingresar el responsable de carga")
 
