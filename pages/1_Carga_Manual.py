@@ -198,7 +198,7 @@ categoria_opciones = [
 
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 
-tipo = st.selectbox("Elija actividad", [
+tipo = st.selectbox("🟢 Elija actividad", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
@@ -217,17 +217,17 @@ tipo = st.selectbox("Elija actividad", [
 
 with st.form("form_acta", clear_on_submit=True):
 
-    anio = st.text_input("Año", "2026")
+    anio = st.text_input("🟢 Año", "2026")
 
     acta_label = st.selectbox(
-        "Número de Acta",
+        "🟢 Número de Acta",
         options=[f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict]
     )
 
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
     fecha = st.selectbox(
-        "Fecha",
+        "🟢 Fecha",
         options=list(fechas_actas.values()),
         index=list(fechas_actas.keys()).index(numero_acta)
     )
@@ -314,7 +314,7 @@ with st.form("form_acta", clear_on_submit=True):
     resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para la presentación de Informes Finales y de Avances")
     instituto = st.text_input("🟢 Instituto")
     catedra = st.text_input("🟢 Cátedra")
-    alumnos = st.text_input("Cantidad de Alumnos")
+    alumnos = st.text_input("🟢 Cantidad de Alumnos")
     responsable_de_carga = st.text_input("🔴 Responsable de carga (obligatorio)")
 
     # =========================
