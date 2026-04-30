@@ -247,7 +247,7 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     titulo = st.text_input(
-        "Denominación de la Actividad: Título del proyecto o informe, nombre de la jornada, semillero, etc"
+        "🟢 Denominación de la Actividad: Título del proyecto o informe, nombre de la jornada, semillero, etc"
     )
 
     # =========================
@@ -265,7 +265,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     if tipo in tipos_con_puntaje:
         puntaje = st.number_input(
-            "Puntaje del Proyecto o Informe",
+            "🟢 Puntaje del Proyecto o Informe",
             min_value=0,
             max_value=1000,
             step=1,
