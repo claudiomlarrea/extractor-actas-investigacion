@@ -579,3 +579,80 @@ if generar:
             data=buffer,
             file_name=f"Acta_{acta_num}.docx"
         )
+        
+st.markdown("### 🧾 Generar informe por responsable")
+
+responsable_reporte = st.text_input("Responsable de carga para generar informe")
+
+generar_responsables = st.button("Generar informe del responsable")
+
+if generar_responsables:
+
+    datos = sheet.get_all_records()
+
+    acta_num = int(acta_word.split(" - ")[0])
+
+    registros = [
+        r for r in datos
+        if str(r.get("numero_acta", "")).strip() == str(acta_num)
+        and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
+    ]
+
+    if not responsable_reporte.strip():
+        st.warning("Debe ingresar el responsable de carga")
+
+    elif not registros:
+        st.warning("No hay registros cargados por ese responsable para esta acta")
+
+    else:
+        doc = Document()
+
+        doc.add_heading("Informe de temas cargados", 0)
+        doc.add_paragraph(f"Acta N° {acta_num}")
+        doc.add_paragraph(f"Responsable de carga: {responsable_reporte}")
+
+        contador = 1
+        unidad_actual = None
+
+        for r in registros:
+
+            r = {k.lower().strip(): v for k, v in r.items()}
+
+            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+
+            if unidad != unidad_actual:
+                h = doc.add_paragraph()
+                h.paragraph_format.space_before = Pt(6)
+                h.paragraph_format.space_after = Pt(2)
+
+                run_h = h.add_run(unidad)
+                run_h.bold = True
+                run_h.font.color.rgb = RGBColor(0, 102, 204)
+
+                unidad_actual = unidad
+
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.line_spacing = 1
+
+            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+
+            descripcion = r.get("descripcion") or r.get("descripción") or ""
+
+            if descripcion:
+                p.add_run(f"   Descripción: {descripcion}\n")
+
+            p.add_run(f"   Unidad Académica: {unidad}\n")
+
+            contador += 1
+
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            "Descargar informe del responsable",
+            data=buffer,
+            file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
+        )
