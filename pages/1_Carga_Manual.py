@@ -335,7 +335,6 @@ with st.form("form_acta", clear_on_submit=True):
         step=1000
     )
 
-    st.markdown("<br><span style='color:#333;'>🔹 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
 
 
