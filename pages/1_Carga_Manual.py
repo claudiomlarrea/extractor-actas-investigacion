@@ -198,7 +198,7 @@ categoria_opciones = [
 
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 
-tipo = st.selectbox("🟢 Elija actividad", [
+tipo = st.selectbox("➡️ Elija actividad", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
