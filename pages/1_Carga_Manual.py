@@ -315,6 +315,7 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = st.text_input("Instituto")
     catedra = st.text_input("Cátedra")
     alumnos = st.text_input("Cantidad de Alumnos")
+    responsable_de_carga = st.text_input("Responsable de carga")
 
     # =========================
     # 💰 FINANCIAMIENTO
@@ -394,8 +395,9 @@ if submit:
         fuente_financiamiento,
         monto_financiamiento,
         alumnos,
-        puntaje
-    ]
+        puntaje,
+        responsable_de_carga
+        ]
 
     # VALIDACIONES
     if not anio.strip():
