@@ -601,7 +601,7 @@ if generar_responsables:
     registros = sorted(
         registros,
         key=lambda r: str(
-            r.get("unidad académica", r.get("unidad", ""))
+            {k.lower().strip(): v for k, v in r.items()}.get("unidad académica", "")
         ).strip()
     )
 
