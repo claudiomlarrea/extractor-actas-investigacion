@@ -284,9 +284,13 @@ with st.form("form_acta", clear_on_submit=True):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    titulo = st.text_input(
-        "🟢 Denominación de la Actividad: Título del proyecto o informe, nombre de la jornada, semillero, etc"
-    )
+    titulo = st.text_input("🟢 Denominación de la actividad")
+    
+    st.caption("""
+    Título del proyecto de investigación  
+    Título del Informe Final o de Avance  
+    Nombre de la jornada, semillero, instituto, etc.
+    """)
 
     # =========================
     # 🎯 PUNTAJE (CONDICIONAL)
