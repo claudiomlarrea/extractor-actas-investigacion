@@ -199,7 +199,10 @@ categoria_opciones = [
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 st.markdown("<span style='color:black; font-weight:600;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
-st.markdown("🟢 **Elija actividad**")
+st.markdown(
+    "<span style='color:black; font-weight:600;'>🟢 Elija actividad</span>",
+    unsafe_allow_html=True
+)
 tipo = st.selectbox("", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
