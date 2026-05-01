@@ -235,7 +235,7 @@ with st.form("form_acta", clear_on_submit=True):
     # CAMPOS SEGÚN ACTIVIDAD
     # =========================
     
-    # 🔴 INICIALIZACIÓN (AGREGAR ESTO)
+    # 🔴 INICIALIZACIÓN
     director = ""
     cat_director = ""
     codirector = ""
@@ -255,8 +255,7 @@ with st.form("form_acta", clear_on_submit=True):
         "Informe de Avance",
         "Otra"
     ]:
-    
-        
+        pass
     
     # -------- CATEGORIZACIÓN DOCENTE --------
     elif tipo == "Categorización Docente":
@@ -273,7 +272,6 @@ with st.form("form_acta", clear_on_submit=True):
         "Creación de Semillero de Investigación"
     ]:
         pass
-    
     
     # -------- CRONOGRAMA / LÍNEAS --------
     elif tipo in [
