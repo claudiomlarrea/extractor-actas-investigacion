@@ -438,9 +438,11 @@ with st.form("form_acta", clear_on_submit=True):
     submit = st.form_submit_button("Guardar")
     
     # -------- UNIDAD (SIEMPRE) --------
-    unidad = st.selectbox(
-        "🟢 Unidad Académica",
-        [
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Unidad Académica</div>",
+        unsafe_allow_html=True
+    )
+    unidad = st.selectbox("", opciones_unidades, key="unidad")
             "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
             "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
             "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
