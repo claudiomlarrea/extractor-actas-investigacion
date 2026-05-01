@@ -361,7 +361,11 @@ with st.form("form_acta", clear_on_submit=True):
     # 🧾 RESTO DEL FORMULARIO
     # =========================
     
-    descripcion = st.text_area("🟢 Descripción en no más de 30 palabras")
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Descripción en no más de 30 palabras</div>",
+        unsafe_allow_html=True
+    )
+    descripcion = st.text_area("")
     
     # 🔴 INICIALIZACIÓN
     director = ""
