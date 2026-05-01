@@ -285,7 +285,6 @@ with st.form("form_acta", clear_on_submit=True):
     ]:
         pass
     
-        resolucion_cd = st.text_input("🟢 Resolución CD")
     
     # -------- CRONOGRAMA / LÍNEAS --------
     elif tipo in [
