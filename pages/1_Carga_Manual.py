@@ -283,6 +283,7 @@ with st.form("form_acta", clear_on_submit=True):
         "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación"
     ]:
+        pass
     
         resolucion_cd = st.text_input("🟢 Resolución CD")
     
