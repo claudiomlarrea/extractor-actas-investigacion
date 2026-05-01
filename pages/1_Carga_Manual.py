@@ -220,6 +220,10 @@ tipo = st.selectbox("", [
 
 with st.form("form_acta", clear_on_submit=True):
 
+    st.markdown(
+        "<span style='color:black; font-weight:600;'>🟢 Año</span>",
+        unsafe_allow_html=True
+    )
     anio = st.text_input("🟢 Año", "2026")
 
     acta_label = st.selectbox(
