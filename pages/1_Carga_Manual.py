@@ -389,12 +389,12 @@ with st.form("form_acta", clear_on_submit=True):
     
         st.markdown(
             "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Director</div>",
-        unsafe_allow_html=True
+            unsafe_allow_html=True
         )
         director = st.text_input("")
         st.markdown(
             "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Director</div>",
-        unsafe_allow_html=True
+            unsafe_allow_html=True
         )
         cat_director = st.selectbox("", categoria_opciones)
     
