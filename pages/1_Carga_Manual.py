@@ -231,15 +231,67 @@ with st.form("form_acta", clear_on_submit=True):
         index=list(fechas_actas.keys()).index(numero_acta)
     )
 
-    if tipo == "Categorización Docente":
+    # =========================
+    # CAMPOS SEGÚN ACTIVIDAD
+    # =========================
+    
+    # 🔴 INICIALIZACIÓN (AGREGAR ESTO)
+    director = ""
+    cat_director = ""
+    codirector = ""
+    categoria_codirector = ""
+    equipo = ""
+    instituto = ""
+    catedra = ""
+    alumnos = ""
+    apellido_nombre_docente = ""
+    dni_docente = ""
+    
+    # -------- PROYECTOS / INFORMES / OTRA --------
+    if tipo in [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Otra"
+    ]:
+    
+        director = st.text_input("🟢 Director")
+        cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
+    
+        codirector = st.text_input("🟢 Codirector")
+        categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
+    
+        equipo = st.text_area("🟢 Equipo de Investigación")
+    
+        instituto = st.text_input("🟢 Instituto")
+        catedra = st.text_input("🟢 Cátedra")
+    
+        alumnos = st.text_input("🟢 Cantidad de Alumnos")
+    
+    # -------- CATEGORIZACIÓN DOCENTE --------
+    elif tipo == "Categorización Docente":
+    
         st.subheader("Categorización docente")
-
-        apellido_nombre_docente = st.text_input("Apellido y Nombre del docente", key="nombre_docente")
-        dni_docente = st.text_input("DNI", key="dni_docente")
-    else:
-        apellido_nombre_docente = ""
-        dni_docente = ""
-
+    
+        apellido_nombre_docente = st.text_input("Apellido y Nombre del docente")
+        dni_docente = st.text_input("DNI")
+    
+    # -------- JORNADAS / CONVOCATORIAS / SEMILLEROS --------
+    elif tipo in [
+        "Jornada de Investigación",
+        "Convocatoria a Proyectos de investigación",
+        "Creación de Semillero de Investigación"
+    ]:
+    
+        resolucion_cd = st.text_input("🟢 Resolución CD")
+    
+    # -------- CRONOGRAMA / LÍNEAS --------
+    elif tipo in [
+        "Cronograma",
+        "Líneas prioritarias de investigación"
+    ]:
+        pass
 
     # =========================
     # 📌 IDENTIFICACIÓN
