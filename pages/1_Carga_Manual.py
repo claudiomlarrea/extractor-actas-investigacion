@@ -6,15 +6,6 @@ from io import BytesIO
 from docx.shared import Pt
 from docx.shared import Pt, RGBColor
 
-# 🔵 ESTILO GLOBAL
-st.markdown("""
-<style>
-label {
-    font-weight: bold !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
 # =========================
 # ⚙ CONFIGURACIÓN
 # =========================
@@ -208,7 +199,8 @@ categoria_opciones = [
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 st.markdown("<span style='color:black; font-weight:600;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
-tipo = st.selectbox("🟢 Elija actividad", [
+st.markdown("🟢 **Elija actividad**")
+tipo = st.selectbox("", [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
