@@ -210,7 +210,6 @@ tipo = st.selectbox("🟢 Elija actividad", [
         "Categorización Docente",
         "Cronograma",
         "Llamado a Concurso de Becas",
-        "Llamado a Concurso de Proyectos",
         "Líneas prioritarias de investigación",
         "Otra"
     ])
