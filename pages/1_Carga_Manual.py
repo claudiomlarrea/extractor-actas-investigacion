@@ -311,20 +311,46 @@ with st.form("form_acta", clear_on_submit=True):
             help="Ingrese el puntaje asignado según la evaluación"
         )
 
-    # =========================
+       # =========================
     # 🧾 RESTO DEL FORMULARIO
     # =========================
-
+    
     descripcion = st.text_area("🟢 Descripción en no más de 30 palabras")
-
-    director = st.text_input("🟢 Director")
-    cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
-
-    codirector = st.text_input("🟢 Codirector")
-    categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
-
-    equipo = st.text_area("🟢 Equipo de Investigación: Apellido, Nombre, Categoría")
-
+    
+    # 🔴 INICIALIZACIÓN
+    director = ""
+    cat_director = ""
+    codirector = ""
+    categoria_codirector = ""
+    equipo = ""
+    instituto = ""
+    catedra = ""
+    alumnos = ""
+    resolucion_cs = ""
+    
+    # -------- CAMPOS SOLO PARA PROYECTOS / INFORMES --------
+    if tipo in [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Otra"
+    ]:
+    
+        director = st.text_input("🟢 Director")
+        cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
+    
+        codirector = st.text_input("🟢 Codirector")
+        categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
+    
+        equipo = st.text_area("🟢 Equipo de Investigación")
+    
+        instituto = st.text_input("🟢 Instituto")
+        catedra = st.text_input("🟢 Cátedra")
+    
+        alumnos = st.text_input("🟢 Cantidad de Alumnos")
+    
+    # -------- UNIDAD (SIEMPRE) --------
     unidad = st.selectbox(
         "🟢 Unidad Académica",
         [
@@ -347,12 +373,21 @@ with st.form("form_acta", clear_on_submit=True):
             "Unidad de Vinculación Tecnológica"
         ]
     )
-
+    
+    # -------- CAMPOS GENERALES --------
     resolucion_cd = st.text_input("🟢 Resolución CD")
-    resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para la presentación de Informes Finales y de Avances")
-    instituto = st.text_input("🟢 Instituto")
-    catedra = st.text_input("🟢 Cátedra")
-    alumnos = st.text_input("🟢 Cantidad de Alumnos")
+    
+    # SOLO PARA PROYECTOS / INFORMES
+    if tipo in [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Otra"
+    ]:
+        resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS)")
+    
+    # SIEMPRE
     responsable_de_carga = st.text_input("🔴 Responsable de carga (obligatorio)")
 
     # =========================
