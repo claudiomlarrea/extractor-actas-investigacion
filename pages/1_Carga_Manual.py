@@ -205,7 +205,6 @@ tipo = st.selectbox("🟢 Elija actividad", [
         "Informe Final",
         "Informe de Avance",
         "Jornada de Investigación",
-        "Convocatoria de Investigación",
         "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación",
         "Categorización Docente",
