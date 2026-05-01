@@ -467,7 +467,11 @@ with st.form("form_acta", clear_on_submit=True):
     
 
     # -------- CAMPOS GENERALES --------
-    resolucion_cd = st.text_input("🟢 Resolución CD")
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
+        unsafe_allow_html=True
+    )
+    resolucion_cd = st.text_input("")
     
     # SOLO PARA PROYECTOS / INFORMES
     if tipo in [
@@ -477,24 +481,44 @@ with st.form("form_acta", clear_on_submit=True):
         "Informe de Avance",
         "Otra"
     ]:
-        resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances")
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances</div>",
+            unsafe_allow_html=True
+        )
+    resolucion_cs = st.text_input("")
     
     # SIEMPRE
-    responsable_de_carga = st.text_input("🔴 Responsable de carga (obligatorio)")
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
+        unsafe_allow_html=True
+    )
+    responsable_de_carga = st.text_input("")
 
     # =========================
     # 💰 FINANCIAMIENTO
     # =========================
 
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Tipo de financiamiento</div>",
+        unsafe_allow_html=True
+    )
     tipo_financiamiento = st.selectbox(
-        "🟢 Tipo de financiamiento",
+        "",
         ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"]
     )
 
-    fuente_financiamiento = st.text_input("Fuente de financiamiento")
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fuente de financiamiento</div>",
+        unsafe_allow_html=True
+    )
+    fuente_financiamiento = st.text_input("")
 
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Monto del financiamiento</div>",
+        unsafe_allow_html=True
+    )
     monto_financiamiento = st.number_input(
-        "Monto del financiamiento",
+        "",
         min_value=0,
         step=1000
     )
