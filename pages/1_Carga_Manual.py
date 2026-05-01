@@ -346,16 +346,16 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown(
             "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Puntaje del Proyecto o Informe</div>",
             unsafe_allow_html=True
-    )
+        )
     
-    puntaje = st.number_input(
-         "",
-         min_value=0,
-         max_value=1000,
-         step=1,
-         key="puntaje",
+        puntaje = st.number_input(
+             "",
+             min_value=0,
+             max_value=1000,
+             step=1,
+                 key="puntaje",
          help="Ingrese el puntaje asignado según la evaluación"
-    )
+        )
 
     # =========================
     # 🧾 RESTO DEL FORMULARIO
@@ -468,10 +468,10 @@ with st.form("form_acta", clear_on_submit=True):
 
     # -------- CAMPOS GENERALES --------
    st.markdown(
-    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
-    unsafe_allow_html=True
-)
-resolucion_cd = st.text_input("", key="resolucion_cd")
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
+        unsafe_allow_html=True
+    )
+    resolucion_cd = st.text_input("", key="resolucion_cd")
 
 # SOLO PARA PROYECTOS / INFORMES
 if tipo in [
