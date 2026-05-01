@@ -6,6 +6,15 @@ from io import BytesIO
 from docx.shared import Pt
 from docx.shared import Pt, RGBColor
 
+# 🔵 ESTILO GLOBAL
+st.markdown("""
+<style>
+label {
+    font-weight: bold !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # =========================
 # ⚙ CONFIGURACIÓN
 # =========================
