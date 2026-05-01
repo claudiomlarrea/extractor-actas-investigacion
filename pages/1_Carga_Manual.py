@@ -387,8 +387,16 @@ with st.form("form_acta", clear_on_submit=True):
         "Otra"
     ]:
     
-        director = st.text_input("🟢 Director")
-        cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Director</div>",
+        unsafe_allow_html=True
+        )
+        director = st.text_input("")
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Director</div>",
+        unsafe_allow_html=True
+        )
+        cat_director = st.selectbox("", categoria_opciones)
     
         codirector = st.text_input("🟢 Codirector")
         categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
