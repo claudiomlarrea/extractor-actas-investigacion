@@ -467,62 +467,65 @@ with st.form("form_acta", clear_on_submit=True):
     
 
     # -------- CAMPOS GENERALES --------
+   st.markdown(
+    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
+    unsafe_allow_html=True
+)
+resolucion_cd = st.text_input("", key="resolucion_cd")
+
+# SOLO PARA PROYECTOS / INFORMES
+if tipo in [
+    "Proyecto de Investigación",
+    "Proyecto de Cátedra",
+    "Informe Final",
+    "Informe de Avance",
+    "Otra"
+]:
     st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances</div>",
         unsafe_allow_html=True
     )
-    resolucion_cd = st.text_input("")
-    
-    # SOLO PARA PROYECTOS / INFORMES
-    if tipo in [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Otra"
-    ]:
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances</div>",
-            unsafe_allow_html=True
-        )
-        resolucion_cs = st.text_input("")
-    
-    # SIEMPRE
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
-            unsafe_allow_html=True
-        )
-        responsable_de_carga = st.text_input("")
+    resolucion_cs = st.text_input("", key="resolucion_cs")
+else:
+    resolucion_cs = ""
 
-    # =========================
-    # 💰 FINANCIAMIENTO
-    # =========================
+# SIEMPRE
+st.markdown(
+    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
+    unsafe_allow_html=True
+)
+responsable_de_carga = st.text_input("", key="responsable_de_carga")
 
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Tipo de financiamiento</div>",
-        unsafe_allow_html=True
-    )
-    tipo_financiamiento = st.selectbox(
-        "",
-        ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"]
-    )
+# =========================
+# 💰 FINANCIAMIENTO
+# =========================
 
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fuente de financiamiento</div>",
-        unsafe_allow_html=True
-    )
-    fuente_financiamiento = st.text_input("")
+st.markdown(
+    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Tipo de financiamiento</div>",
+    unsafe_allow_html=True
+)
+tipo_financiamiento = st.selectbox(
+    "",
+    ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"],
+    key="tipo_financiamiento"
+)
 
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Monto del financiamiento</div>",
-        unsafe_allow_html=True
-    )
-    monto_financiamiento = st.number_input(
-        "",
-        min_value=0,
-        step=1000
-    )
+st.markdown(
+    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fuente de financiamiento</div>",
+    unsafe_allow_html=True
+)
+fuente_financiamiento = st.text_input("", key="fuente_financiamiento")
 
+st.markdown(
+    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Monto del financiamiento</div>",
+    unsafe_allow_html=True
+)
+monto_financiamiento = st.number_input(
+    "",
+    min_value=0,
+    step=1000,
+    key="monto_financiamiento"
+)
 
 
 
@@ -530,7 +533,7 @@ with st.form("form_acta", clear_on_submit=True):
     # 🔘 SUBMIT
     # =========================
 
-    submit = st.form_submit_button("Guardar en Google Sheets")
+submit = st.form_submit_button("Guardar en Google Sheets")
 
 # =========================
 # 💾 GUARDAR
