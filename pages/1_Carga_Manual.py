@@ -224,17 +224,25 @@ with st.form("form_acta", clear_on_submit=True):
         "<span style='color:black; font-weight:600;'>🟢 Año</span>",
         unsafe_allow_html=True
     )
-    anio = st.text_input("🟢 Año", "2026")
+    anio = st.text_input("", "2026")  # 👈 SIN TEXTO ACÁ
 
+    st.markdown(
+        "<span style='color:black; font-weight:600;'>🟢 Número de Acta</span>",
+        unsafe_allow_html=True
+    )
     acta_label = st.selectbox(
-        "🟢 Número de Acta",
+        "",  # 👈 SIN LABEL
         options=[f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict]
     )
 
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
+    st.markdown(
+        "<span style='color:black; font-weight:600;'>🟢 Fecha</span>",
+        unsafe_allow_html=True
+    )
     fecha = st.selectbox(
-        "🟢 Fecha",
+        "",  # 👈 SIN LABEL
         options=list(fechas_actas.values()),
         index=list(fechas_actas.keys()).index(numero_acta)
     )
