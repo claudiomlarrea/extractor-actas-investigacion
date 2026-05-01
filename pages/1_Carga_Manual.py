@@ -333,17 +333,23 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     puntaje = 0
-
+    
     tipos_con_puntaje = [
         "Proyecto de Investigación",
         "Proyecto de Cátedra",
         "Informe Final",
         "Informe de Avance"
     ]
-
+    
     if tipo in tipos_con_puntaje:
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Puntaje del Proyecto o Informe</div>",
+            unsafe_allow_html=True
+        )
+    
         puntaje = st.number_input(
-            "🟢 Puntaje del Proyecto o Informe",
+            "",
             min_value=0,
             max_value=1000,
             step=1,
