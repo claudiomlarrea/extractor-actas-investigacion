@@ -288,16 +288,20 @@ with st.form("form_acta", clear_on_submit=True):
     
     st.markdown("""
     <div style="
+        margin-top:-25px;
+        margin-bottom:5px;
         background-color:#E6E6E6;
         padding:10px;
         border-radius:5px;
-        font-size:14px;
+        font-size:13px;
         color:#000000;
     ">
-    <b>Indicaciones:</b><br>
-    • Título del proyecto de investigación<br>
-    • Título del Informe Final o de Avance<br>
-    • Nombre de la jornada, semillero, instituto, etc.
+    <b>Indicaciones:</b>
+    <ul style="margin-top:5px; margin-bottom:0;">
+    <li>Título del proyecto de investigación</li>
+    <li>Título del Informe Final o de Avance</li>
+    <li>Nombre de la jornada, semillero, instituto, etc.</li>
+    </ul>
     </div>
     """, unsafe_allow_html=True)
 
