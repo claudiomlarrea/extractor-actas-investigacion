@@ -379,63 +379,63 @@ with st.form("form_acta", clear_on_submit=True):
     resolucion_cs = ""
     
     # -------- CAMPOS SOLO PARA PROYECTOS / INFORMES --------
-    if tipo in [
-    "Proyecto de Investigación",
-    "Proyecto de Cátedra",
-    "Informe Final",
-    "Informe de Avance",
-    "Otra"
-]:
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Director</div>",
-        unsafe_allow_html=True
-    )
-    director = st.text_input("", key="director")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Director</div>",
-        unsafe_allow_html=True
-    )
-    cat_director = st.selectbox("", categoria_opciones, key="cat_director")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Codirector</div>",
-        unsafe_allow_html=True
-    )
-    codirector = st.text_input("", key="codirector")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Codirector</div>",
-        unsafe_allow_html=True
-    )
-    categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Equipo de Investigación</div>",
-        unsafe_allow_html=True
-    )
-    equipo = st.text_area("", key="equipo")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Instituto</div>",
-        unsafe_allow_html=True
-    )
-    instituto = st.text_input("", key="instituto")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cátedra</div>",
-        unsafe_allow_html=True
-    )
-    catedra = st.text_input("", key="catedra")
-
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cantidad de Alumnos</div>",
-        unsafe_allow_html=True
-    )
-    alumnos = st.text_input("", key="alumnos")
-
-submit = st.form_submit_button("Guardar")
+        if tipo in [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Otra"
+    ]:
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Director</div>",
+            unsafe_allow_html=True
+        )
+        director = st.text_input("", key="director")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Director</div>",
+            unsafe_allow_html=True
+        )
+        cat_director = st.selectbox("", categoria_opciones, key="cat_director")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Codirector</div>",
+            unsafe_allow_html=True
+        )
+        codirector = st.text_input("", key="codirector")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Codirector</div>",
+            unsafe_allow_html=True
+        )
+        categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Equipo de Investigación</div>",
+            unsafe_allow_html=True
+        )
+        equipo = st.text_area("", key="equipo")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Instituto</div>",
+            unsafe_allow_html=True
+        )
+        instituto = st.text_input("", key="instituto")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cátedra</div>",
+            unsafe_allow_html=True
+        )
+        catedra = st.text_input("", key="catedra")
+    
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cantidad de Alumnos</div>",
+            unsafe_allow_html=True
+        )
+        alumnos = st.text_input("", key="alumnos")
+    
+    submit = st.form_submit_button("Guardar")
     
     # -------- UNIDAD (SIEMPRE) --------
     unidad = st.selectbox(
