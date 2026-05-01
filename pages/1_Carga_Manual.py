@@ -438,35 +438,35 @@ with st.form("form_acta", clear_on_submit=True):
     submit = st.form_submit_button("Guardar")
     
     # -------- UNIDAD (SIEMPRE) --------
-       st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Unidad Académica</div>",
-            unsafe_allow_html=True
+           st.markdown(
+                "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Unidad Académica</div>",
+                unsafe_allow_html=True
+            )
+        
+            unidad = st.selectbox(
+                "",
+                [
+                "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+                "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+                "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
+                "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+                "FBOSCO- Facultad Don Bosco",
+                "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
+                "FFyHSJ- Facultad de Filosofía y Humanidades",
+                "ISDSM- Instituto Universitario Santa María",
+                "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
+                "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
+                "FCMSJ- Facultad de Ciencias Médicas San Juan",
+                "FEDSJ- Facultad de Educación",
+                "ESEGSJ- Escuela de Seguridad",
+                "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
+                "ISB- Instituto San Buenaventura",
+                "Secretaría de Investigación",
+                "Unidad de Vinculación Tecnológica"
+            ],
+            key="unidad"
         )
-    
-        unidad = st.selectbox(
-            "",
-            [
-            "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-            "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-            "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
-            "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-            "FBOSCO- Facultad Don Bosco",
-            "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
-            "FFyHSJ- Facultad de Filosofía y Humanidades",
-            "ISDSM- Instituto Universitario Santa María",
-            "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
-            "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
-            "FCMSJ- Facultad de Ciencias Médicas San Juan",
-            "FEDSJ- Facultad de Educación",
-            "ESEGSJ- Escuela de Seguridad",
-            "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
-            "ISB- Instituto San Buenaventura",
-            "Secretaría de Investigación",
-            "Unidad de Vinculación Tecnológica"
-        ],
-        key="unidad"
-    )
-    
+        submit = st.form_submit_button("Guardar")
     # -------- CAMPOS GENERALES --------
     resolucion_cd = st.text_input("🟢 Resolución CD")
     
