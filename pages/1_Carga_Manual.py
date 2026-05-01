@@ -485,14 +485,14 @@ with st.form("form_acta", clear_on_submit=True):
             "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances</div>",
             unsafe_allow_html=True
         )
-    resolucion_cs = st.text_input("")
+        resolucion_cs = st.text_input("")
     
     # SIEMPRE
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
-        unsafe_allow_html=True
-    )
-    responsable_de_carga = st.text_input("")
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
+            unsafe_allow_html=True
+        )
+        responsable_de_carga = st.text_input("")
 
     # =========================
     # 💰 FINANCIAMIENTO
