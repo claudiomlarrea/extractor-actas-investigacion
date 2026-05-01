@@ -286,11 +286,20 @@ with st.form("form_acta", clear_on_submit=True):
 
     titulo = st.text_input("🟢 Denominación de la actividad")
     
-    st.caption("""
-    Título del proyecto de investigación  
-    Título del Informe Final o de Avance  
-    Nombre de la jornada, semillero, instituto, etc.
-    """)
+    st.markdown("""
+    <div style="
+        background-color:#E6E6E6;
+        padding:10px;
+        border-radius:5px;
+        font-size:14px;
+        color:#000000;
+    ">
+    <b>Indicaciones:</b><br>
+    • Título del proyecto de investigación<br>
+    • Título del Informe Final o de Avance<br>
+    • Nombre de la jornada, semillero, instituto, etc.
+    </div>
+    """, unsafe_allow_html=True)
 
     # =========================
     # 🎯 PUNTAJE (CONDICIONAL)
