@@ -385,7 +385,7 @@ with st.form("form_acta", clear_on_submit=True):
         "Informe de Avance",
         "Otra"
     ]:
-        resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS)")
+        resolucion_cs = st.text_input("🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances")
     
     # SIEMPRE
     responsable_de_carga = st.text_input("🔴 Responsable de carga (obligatorio)")
