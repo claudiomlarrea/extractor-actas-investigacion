@@ -303,7 +303,11 @@ with st.form("form_acta", clear_on_submit=True):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    titulo = st.text_input("🟢 Denominación de la actividad")
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Denominación de la actividad</div>",
+        unsafe_allow_html=True
+    )
+    titulo = st.text_input("")
     
     st.markdown("""
     <div style="
