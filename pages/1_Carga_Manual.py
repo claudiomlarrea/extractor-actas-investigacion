@@ -256,18 +256,7 @@ with st.form("form_acta", clear_on_submit=True):
         "Otra"
     ]:
     
-        director = st.text_input("🟢 Director")
-        cat_director = st.selectbox("🟢 Categoría del Director", categoria_opciones)
-    
-        codirector = st.text_input("🟢 Codirector")
-        categoria_codirector = st.selectbox("🟢 Categoría del Codirector", categoria_opciones)
-    
-        equipo = st.text_area("🟢 Equipo de Investigación")
-    
-        instituto = st.text_input("🟢 Instituto")
-        catedra = st.text_input("🟢 Cátedra")
-    
-        alumnos = st.text_input("🟢 Cantidad de Alumnos")
+        
     
     # -------- CATEGORIZACIÓN DOCENTE --------
     elif tipo == "Categorización Docente":
