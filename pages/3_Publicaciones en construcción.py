@@ -97,7 +97,7 @@ with tab1:
             anio = st.session_state["año_revista"]
             unidad = st.session_state["unidad_revista"]
     
-            indexacion = st.session_state["indexacion"]
+        indexacion = st.session_state["indexacion"]
         if indexacion == "Otra":
             indexacion = st.session_state.get("indexacion_otra", "Otra")
     
@@ -115,7 +115,7 @@ with tab1:
         sheet_pub.append_row(fila)
     
         st.success("Artículo guardado en Google Sheets")
-            st.success("Artículo registrado")
+        st.success("Artículo registrado")
 
 # =========================
 # 2. LIBROS
