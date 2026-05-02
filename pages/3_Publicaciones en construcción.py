@@ -9,21 +9,24 @@ st.title("📊 Producción Científica")
 # =========================
 
 UNIDADES = [
+    "Seleccionar unidad académica",
     "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
     "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-    "FCVSL- Facultad de Veterinaria Sede San Luis",
+    "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
     "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
     "FBOSCO- Facultad Don Bosco",
-    "FCEESJ- Facultad de Ciencias Económicas San Juan",
+    "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
     "FFyHSJ- Facultad de Filosofía y Humanidades",
     "ISDSM- Instituto Universitario Santa María",
-    "ECRyPSJ- Escuela Cultura Religiosa",
-    "FDCSSJ- Facultad de Derecho San Juan",
+    "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
+    "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
     "FCMSJ- Facultad de Ciencias Médicas San Juan",
     "FEDSJ- Facultad de Educación",
     "ESEGSJ- Escuela de Seguridad",
-    "FCQyTSJ- Facultad de Ciencias Químicas",
-    "ISB- Instituto San Buenaventura"
+    "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
+    "ISB- Instituto San Buenaventura",
+    "Secretaría de Investigación",
+    "Unidad de Vinculación Tecnológica",
 ]
 
 # =========================
