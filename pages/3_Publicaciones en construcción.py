@@ -138,7 +138,33 @@ with tab2:
         st.selectbox("Unidad Académica", UNIDADES, key="unidad_libro")
 
     if st.button("Guardar libro/capítulo", key="btn_libro"):
-        st.success("Registro guardado")
+    
+        titulo = st.session_state["titulo_libro"]
+        autores = st.session_state["autores_libro"]
+        tipo_libro = st.session_state["tipo_libro"]   # Libro o Capítulo
+        editorial = st.session_state["editorial"]
+        isbn = st.session_state["isbn"]
+        anio = st.session_state["año_libro"]
+        unidad = st.session_state["unidad_libro"]
+    
+        fila = [
+            tipo_libro,   # Tipo
+            titulo,
+            autores,
+            "",           # Revista
+            "",           # DOI
+            anio,
+            unidad,
+            "",           # Indexación
+            editorial,
+            isbn,
+            tipo_libro,   # Tipo publicación
+            "", "", "", "", "", "", ""   # resto vacío
+        ]
+    
+        sheet_pub.append_row(fila)
+    
+        st.success("Libro / capítulo guardado en Google Sheets")
 
 # =========================
 # 3. REPOSITORIOS
