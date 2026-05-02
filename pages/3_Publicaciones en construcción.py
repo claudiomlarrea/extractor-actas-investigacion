@@ -203,7 +203,37 @@ with tab3:
         st.selectbox("Unidad Académica", UNIDADES, key="unidad_repo")
 
     if st.button("Guardar en repositorio", key="btn_repo"):
-        st.success("Registro guardado")
+    
+        titulo = st.session_state["titulo_repo"]
+        autores = st.session_state["autores_repo"]
+        tipo = st.session_state["tipo_repo"]   # Artículo, informe, tesis, etc.
+        repositorio = st.session_state["repositorio"]
+        link = st.session_state["link_repo"]
+        anio = st.session_state["año_repo"]
+        unidad = st.session_state["unidad_repo"]
+    
+        # Si es "Otro"
+        if repositorio == "Otro":
+            repositorio = st.session_state.get("repositorio_otro", "Otro")
+    
+        fila = [
+            "Repositorio",
+            titulo,
+            autores,
+            "", "",           # Revista, DOI
+            anio,
+            unidad,
+            "",               # Indexación
+            "", "",           # Editorial, ISBN
+            tipo,             # Tipo publicación
+            link,
+            "", "", "", "",   # Evento, Lugar, Fecha, Resumen
+            repositorio
+        ]
+    
+        sheet_pub.append_row(fila)
+    
+        st.success("Registro en repositorio guardado en Google Sheets")
 
 # =========================
 # 4. REUNIONES CIENTÍFICAS
