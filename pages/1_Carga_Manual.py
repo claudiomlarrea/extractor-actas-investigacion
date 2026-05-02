@@ -4,8 +4,27 @@ from pathlib import Path
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
-from docx.shared import Pt
 from docx.shared import Pt, RGBColor
+
+
+def _fila_sheet_normalizada(r):
+    return {k.lower().strip(): v for k, v in r.items()}
+
+
+def _unidad_academica_clave(r):
+    """Misma fuente que los encabezados de Word: columna «unidad académica» o «unidad»."""
+    row = _fila_sheet_normalizada(r)
+    return str(row.get("unidad académica") or row.get("unidad") or "").strip()
+
+
+def ordenar_registros_por_unidad_academica(registros):
+    """Orden estable por unidad; dentro de cada unidad conserva el orden del sheet."""
+    if not registros:
+        return registros
+    indexed = list(enumerate(registros))
+    indexed.sort(key=lambda t: (_unidad_academica_clave(t[1]).casefold(), t[0]))
+    return [r for _, r in indexed]
+
 
 # =========================
 # ⚙ CONFIGURACIÓN
@@ -509,6 +528,7 @@ if generar:
         r for r in datos
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
     ]
+    registros = ordenar_registros_por_unidad_academica(registros)
 
     if not registros:
         st.warning("No hay registros para esta acta")
@@ -667,13 +687,7 @@ if generar_responsables:
         if str(r.get("numero_acta", "")).strip() == str(acta_num)
         and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
     ]
-
-    registros = sorted(
-        registros,
-        key=lambda r: str(
-            {k.lower().strip(): v for k, v in r.items()}.get("unidad académica", "")
-        ).strip()
-    )
+    registros = ordenar_registros_por_unidad_academica(registros)
 
     if not responsable_reporte.strip():
         st.warning("Debe ingresar el responsable de carga")
