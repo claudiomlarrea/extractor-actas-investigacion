@@ -320,7 +320,38 @@ with tab5:
     st.text_area("Resumen", key="resumen_diario")
 
     if st.button("Guardar publicación en diario", key="btn_diario"):
-        st.success("Publicación registrada")
+    
+        titulo = st.session_state["titulo_diario"]
+        medio = st.session_state["medio"]
+        autores = st.session_state["autor_diario"]
+        fecha = st.session_state["fecha_diario"]
+        link = st.session_state["link_diario"]
+        unidad = st.session_state["unidad_diario"]
+        resumen = st.session_state["resumen_diario"]
+    
+        anio = fecha.year if fecha else ""
+    
+        fila = [
+            "Diario",
+            titulo,
+            autores,
+            medio,          # va en Revista
+            "",             # DOI
+            anio,
+            unidad,
+            "",             # Indexación
+            "", "",         # Editorial, ISBN
+            "Artículo periodístico",
+            link,
+            "", "",         # Evento, Lugar
+            str(fecha),
+            resumen,
+            ""              # Repositorio
+        ]
+    
+        sheet_pub.append_row(fila)
+    
+        st.success("Publicación en diario guardada en Google Sheets")
 
 # =========================
 # FIN
