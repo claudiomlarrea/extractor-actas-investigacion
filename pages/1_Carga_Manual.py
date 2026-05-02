@@ -192,6 +192,28 @@ categoria_opciones = [
     "Becario/a de Iniciación VI",
     "Sin categorización / Externo"
 ]
+
+opciones_unidades = [
+    "Seleccionar unidad académica",
+    "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
+    "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
+    "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
+    "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
+    "FBOSCO- Facultad Don Bosco",
+    "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
+    "FFyHSJ- Facultad de Filosofía y Humanidades",
+    "ISDSM- Instituto Universitario Santa María",
+    "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
+    "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
+    "FCMSJ- Facultad de Ciencias Médicas San Juan",
+    "FEDSJ- Facultad de Educación",
+    "ESEGSJ- Escuela de Seguridad",
+    "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
+    "ISB- Instituto San Buenaventura",
+    "Secretaría de Investigación",
+    "Unidad de Vinculación Tecnológica",
+]
+
 # =========================
 # 📝 FORMULARIO
 # =========================
@@ -292,6 +314,14 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = ""
     catedra = ""
     alumnos = ""
+    apellido_nombre_docente = ""
+    dni_docente = ""
+
+    if tipo == "Categorización Docente":
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Apellido y nombre del docente</div>", unsafe_allow_html=True)
+        apellido_nombre_docente = st.text_input("", key="apellido_nombre_docente")
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 DNI</div>", unsafe_allow_html=True)
+        dni_docente = st.text_input("", key="dni_docente")
 
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
