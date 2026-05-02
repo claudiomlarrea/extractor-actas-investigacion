@@ -332,7 +332,7 @@ with st.form("form_acta", clear_on_submit=True):
     puntaje = 0
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance"]:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
-        puntaje = st.number_input("", min_value=0, max_value=1000, step=1, key="puntaje")
+        puntaje = st.number_input("", min_value=0, max_value=1000, step=1, value=None, key="puntaje")
 
     # =========================
     # 🧾 DESCRIPCIÓN
@@ -431,7 +431,7 @@ with st.form("form_acta", clear_on_submit=True):
         fuente_financiamiento = st.text_input("", key="fuente")
     
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto</div>", unsafe_allow_html=True)
-        monto_financiamiento = st.number_input("", min_value=0, step=1000, key="monto")
+        monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
     
     else:
         tipo_financiamiento = ""
