@@ -122,11 +122,19 @@ div[data-baseweb="select"] [contenteditable="true"] {
 .stTextInput > div > div > input {
     background-color: white !important;
     color: black !important;
+    caret-color: #111111 !important;
 }
 
 .stTextArea textarea {
     background-color: white !important;
     color: black !important;
+    caret-color: #111111 !important;
+}
+
+/* Números: mismo cursor oscuro sobre fondo blanco */
+.stNumberInput input,
+[data-testid="stNumberInputField"] {
+    caret-color: #111111 !important;
 }
 
 </style>
