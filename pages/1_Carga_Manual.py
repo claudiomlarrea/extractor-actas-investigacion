@@ -225,6 +225,7 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Año</div>", unsafe_allow_html=True)
+    anio = st.text_input("", "2026", key="anio")
 
     st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Número de Acta</div>", unsafe_allow_html=True)
     acta_label = st.selectbox("", [f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict])
