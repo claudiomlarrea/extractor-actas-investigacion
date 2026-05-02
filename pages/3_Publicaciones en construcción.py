@@ -1,4 +1,20 @@
 import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
+
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"], scopes=scope
+)
+
+client = gspread.authorize(creds)
+
+# 🔥 ESTA ES LA CLAVE
+sheet_pub = client.open("Datos Consejo Investigación").worksheet("publicaciones_sheet")
 
 st.set_page_config(page_title="Producción Científica", layout="wide")
 
@@ -72,8 +88,34 @@ with tab1:
         st.number_input("Año", 2000, 2030, 2025, key="año_revista")
         st.selectbox("Unidad Académica", UNIDADES, key="unidad_revista")
 
-    if st.button("Guardar artículo", key="btn_revista"):
-        st.success("Artículo registrado")
+        if st.button("Guardar artículo", key="btn_revista"):
+    
+            titulo = st.session_state["titulo_revista"]
+            autores = st.session_state["autores_revista"]
+            revista = st.session_state["revista"]
+            doi = st.session_state["doi"]
+            anio = st.session_state["año_revista"]
+            unidad = st.session_state["unidad_revista"]
+    
+        indexacion = st.session_state["indexacion"]
+        if indexacion == "Otra":
+            indexacion = st.session_state.get("indexacion_otra", "Otra")
+    
+        fila = [
+            "Revista",   # tipo
+            titulo,
+            autores,
+            revista,
+            doi,
+            anio,
+            unidad,
+            indexacion
+        ]
+    
+        sheet_pub.append_row(fila)
+    
+        st.success("Artículo guardado en Google Sheets")
+            st.success("Artículo registrado")
 
 # =========================
 # 2. LIBROS
