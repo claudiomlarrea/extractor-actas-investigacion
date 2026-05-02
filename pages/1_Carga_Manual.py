@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Labels */
 label {
     color: black !important;
-    font-weight: 500;
+    font-weight: 700 !important;
 }
 
 /* INPUTS */
@@ -197,10 +197,10 @@ categoria_opciones = [
 # =========================
 
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
-st.markdown("<span style='color:black; font-weight:600;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
+st.markdown("<span style='color:black; font-weight:700;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
 st.markdown(
-    "<div style='margin-bottom:-15px; color:black; font-weight:600;'>🟢 Elija actividad</div>",
+    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija actividad</div>",
     unsafe_allow_html=True
 )
 tipo = st.selectbox("", [
@@ -224,10 +224,10 @@ with st.form("form_acta", clear_on_submit=True):
     # 📅 DATOS BÁSICOS
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Año</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Año</div>", unsafe_allow_html=True)
     anio = st.text_input("", "2026", key="anio")
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Número de Acta</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Acta</div>", unsafe_allow_html=True)
 
     acta_label = st.selectbox(
         "",
@@ -237,7 +237,7 @@ with st.form("form_acta", clear_on_submit=True):
 
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fecha</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fecha</div>", unsafe_allow_html=True)
     
     fecha = st.selectbox(
         "",
@@ -250,7 +250,7 @@ with st.form("form_acta", clear_on_submit=True):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
     titulo = st.text_input("")
 
     st.markdown("""
@@ -270,14 +270,14 @@ with st.form("form_acta", clear_on_submit=True):
 
     puntaje = 0
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance"]:
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Puntaje</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
         puntaje = st.number_input("", min_value=0, max_value=1000, step=1, key="puntaje")
 
     # =========================
     # 🧾 DESCRIPCIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Descripción</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción</div>", unsafe_allow_html=True)
     descripcion = st.text_area("")
 
     # =========================
@@ -295,46 +295,46 @@ with st.form("form_acta", clear_on_submit=True):
 
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Director</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Director</div>", unsafe_allow_html=True)
         director = st.text_input("", key="director")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Categoría del Director</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Director</div>", unsafe_allow_html=True)
         cat_director = st.selectbox("", categoria_opciones, key="cat_director")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Codirector</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Codirector</div>", unsafe_allow_html=True)
         codirector = st.text_input("", key="codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
         categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Equipo</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Instituto</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Instituto</div>", unsafe_allow_html=True)
         instituto = st.text_input("", key="instituto")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Cátedra</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra</div>", unsafe_allow_html=True)
         catedra = st.text_input("", key="catedra")
 
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Alumnos</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Alumnos</div>", unsafe_allow_html=True)
         alumnos = st.text_input("", key="alumnos")
 
     # =========================
     # 🏫 UNIDAD
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
     unidad = st.selectbox("", opciones_unidades, key="unidad")
 
     # =========================
     # 📄 RESOLUCIONES
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
     resolucion_cd = st.text_input("", key="resolucion_cd")
 
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
-        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
         resolucion_cs = st.text_input("", key="resolucion_cs")
     else:
         resolucion_cs = ""
@@ -343,20 +343,20 @@ with st.form("form_acta", clear_on_submit=True):
     # 👤 RESPONSABLE
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
     responsable_de_carga = st.text_input("", key="responsable")
 
     # =========================
     # 💰 FINANCIAMIENTO
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
     tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo"], key="fin")
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Fuente</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente</div>", unsafe_allow_html=True)
     fuente_financiamiento = st.text_input("", key="fuente")
 
-    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Monto</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto</div>", unsafe_allow_html=True)
     monto_financiamiento = st.number_input("", min_value=0, step=1000, key="monto")
 
     # =========================
