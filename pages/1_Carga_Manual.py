@@ -235,7 +235,7 @@ with st.form("form_acta", clear_on_submit=True):
         key="acta"
     )
 
-numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
+    numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
     st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Fecha</div>", unsafe_allow_html=True)
     fecha = st.selectbox(
