@@ -97,7 +97,7 @@ with tab1:
             anio = st.session_state["año_revista"]
             unidad = st.session_state["unidad_revista"]
     
-        indexacion = st.session_state["indexacion"]
+            indexacion = st.session_state["indexacion"]
         if indexacion == "Otra":
             indexacion = st.session_state.get("indexacion_otra", "Otra")
     
