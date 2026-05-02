@@ -106,6 +106,14 @@ div[role="option"]:hover {
     background-color: #e6e6e6 !important;
 }
 
+/* Barra vertical al final del texto en selects = caret del combobox Base Web */
+div[data-baseweb="select"] input,
+div[data-baseweb="select"] [data-baseweb="input"] input,
+div[data-baseweb="select"] [role="combobox"],
+div[data-baseweb="select"] [contenteditable="true"] {
+    caret-color: transparent !important;
+}
+
 /* Placeholder */
 ::placeholder {
     color: #777 !important;
