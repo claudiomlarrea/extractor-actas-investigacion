@@ -265,7 +265,38 @@ with tab4:
         st.selectbox("Unidad Académica", UNIDADES, key="unidad_evento")
 
     if st.button("Guardar evento", key="btn_evento"):
-        st.success("Evento registrado")
+    
+        evento = st.session_state["evento"]
+        tipo_evento = st.session_state["tipo_evento"]   # Congreso, Jornada, etc.
+        rol = st.session_state["rol"]
+        trabajo = st.session_state["trabajo"]
+        lugar = st.session_state["lugar"]
+        fecha = st.session_state["fecha"]
+        unidad = st.session_state["unidad_evento"]
+    
+        anio = fecha.year if fecha else ""
+    
+        fila = [
+            "Evento",
+            trabajo,
+            "",               # Autores (no está en el form)
+            "", "",           # Revista, DOI
+            anio,
+            unidad,
+            "",               # Indexación
+            "", "",           # Editorial, ISBN
+            tipo_evento,      # Tipo publicación
+            "",               # Link
+            evento,
+            lugar,
+            str(fecha),
+            "",               # Resumen
+            ""                # Repositorio
+        ]
+    
+        sheet_pub.append_row(fila)
+    
+        st.success("Evento guardado en Google Sheets")
 
 # =========================
 # 5. DIARIOS
