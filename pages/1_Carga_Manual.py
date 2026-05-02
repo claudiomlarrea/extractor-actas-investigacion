@@ -1,5 +1,6 @@
 import streamlit as st
 import gspread
+from pathlib import Path
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
@@ -12,6 +13,9 @@ from docx.shared import Pt, RGBColor
 
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 
+_APP_ROOT = Path(__file__).resolve().parent.parent
+_LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
+
 # =========================
 # 🎨 HEADER
 # =========================
@@ -19,10 +23,10 @@ st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 col1, col2 = st.columns([1, 8], vertical_alignment="center")
 
 with col1:
-    st.image(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Logo_placeholder.png/300px-Logo_placeholder.png",
-        width=120
-    )
+    if _LOGO_PATH.is_file():
+        st.image(str(_LOGO_PATH), width=120)
+    else:
+        st.caption("Logo no encontrado (assets/logo_uccuyo.png)")
 
 with col2:
     st.markdown("""
