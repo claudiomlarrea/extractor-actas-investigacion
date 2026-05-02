@@ -88,21 +88,21 @@ with tab1:
         st.number_input("Año", 2000, 2030, 2025, key="año_revista")
         st.selectbox("Unidad Académica", UNIDADES, key="unidad_revista")
 
-        if st.button("Guardar artículo", key="btn_revista"):
+    if st.button("Guardar artículo", key="btn_revista"):
     
-            titulo = st.session_state["titulo_revista"]
-            autores = st.session_state["autores_revista"]
-            revista = st.session_state["revista"]
-            doi = st.session_state["doi"]
-            anio = st.session_state["año_revista"]
-            unidad = st.session_state["unidad_revista"]
+        titulo = st.session_state["titulo_revista"]
+        autores = st.session_state["autores_revista"]
+        revista = st.session_state["revista"]
+        doi = st.session_state["doi"]
+        anio = st.session_state["año_revista"]
+        unidad = st.session_state["unidad_revista"]
     
         indexacion = st.session_state["indexacion"]
         if indexacion == "Otra":
             indexacion = st.session_state.get("indexacion_otra", "Otra")
     
         fila = [
-            "Revista",   # tipo
+            "Revista",
             titulo,
             autores,
             revista,
@@ -115,7 +115,7 @@ with tab1:
         sheet_pub.append_row(fila)
     
         st.success("Artículo guardado en Google Sheets")
-        st.success("Artículo registrado")
+       
 
 # =========================
 # 2. LIBROS
