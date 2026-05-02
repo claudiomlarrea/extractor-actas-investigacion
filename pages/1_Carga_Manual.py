@@ -399,13 +399,16 @@ with st.form("form_acta", clear_on_submit=True):
     # 📄 RESOLUCIONES
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
-    resolucion_cd = st.text_input("", key="resolucion_cd")
-
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
+
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
+        resolucion_cd = st.text_input("", key="resolucion_cd")
+
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
         resolucion_cs = st.text_input("", key="resolucion_cs")
+
     else:
+        resolucion_cd = ""
         resolucion_cs = ""
 
     # =========================
