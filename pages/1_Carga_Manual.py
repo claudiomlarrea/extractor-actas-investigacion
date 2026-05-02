@@ -534,7 +534,7 @@ if generar:
 
             r = {k.lower().strip(): v for k, v in r.items()}
 
-            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+            unidad = str(r.get("unidad académica", r.get("unidad", ""))).strip().lower()
 
             if unidad != unidad_actual:
                 h = doc.add_paragraph()
@@ -670,7 +670,7 @@ if generar_responsables:
 
     registros = sorted(
         registros,
-        key=lambda r: str(r.get("unidad académica", r.get("unidad", ""))).strip()
+        key=lambda r: str(r.get("unidad académica", r.get("unidad", ""))).strip().lower()
     )
 
     if not responsable_reporte.strip():
