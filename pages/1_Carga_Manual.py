@@ -670,9 +670,7 @@ if generar_responsables:
 
     registros = sorted(
         registros,
-        key=lambda r: str(
-            {k.lower().strip(): v for k, v in r.items()}.get("unidad académica", "")
-        ).strip()
+        key=lambda r: str(r.get("unidad académica", "")).strip()
     )
 
     if not responsable_reporte.strip():
