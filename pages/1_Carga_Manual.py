@@ -220,154 +220,62 @@ tipo = st.selectbox("", [
 
 with st.form("form_acta", clear_on_submit=True):
 
-    # Año
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Año</div>",
-        unsafe_allow_html=True
-    )
+    # =========================
+    # 📅 DATOS BÁSICOS
+    # =========================
+
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Año</div>", unsafe_allow_html=True)
     anio = st.text_input("", "2026")
 
-    # Número de Acta
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Número de Acta</div>",
-        unsafe_allow_html=True
-    )
-    acta_label = st.selectbox(
-        "",
-        options=[f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict]
-    )
-
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Número de Acta</div>", unsafe_allow_html=True)
+    acta_label = st.selectbox("", [f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict])
     numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
 
-    # Fecha
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fecha</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Fecha</div>", unsafe_allow_html=True)
     fecha = st.selectbox(
         "",
-        options=list(fechas_actas.values()),
+        list(fechas_actas.values()),
         index=list(fechas_actas.keys()).index(numero_acta)
     )
-
-    # =========================
-    # CAMPOS SEGÚN ACTIVIDAD
-    # =========================
-    
-    # 🔴 INICIALIZACIÓN
-    director = ""
-    cat_director = ""
-    codirector = ""
-    categoria_codirector = ""
-    equipo = ""
-    instituto = ""
-    catedra = ""
-    alumnos = ""
-    apellido_nombre_docente = ""
-    dni_docente = ""
-    
-    # -------- PROYECTOS / INFORMES / OTRA --------
-    if tipo in [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Otra"
-    ]:
-        pass
-    
-    # -------- CATEGORIZACIÓN DOCENTE --------
-    elif tipo == "Categorización Docente":
-    
-        st.subheader("Categorización docente")
-    
-        apellido_nombre_docente = st.text_input("Apellido y Nombre del docente")
-        dni_docente = st.text_input("DNI")
-    
-    # -------- JORNADAS / CONVOCATORIAS / SEMILLEROS --------
-    elif tipo in [
-        "Jornada de Investigación",
-        "Convocatoria a Proyectos de investigación",
-        "Creación de Semillero de Investigación"
-    ]:
-        pass
-    
-    # -------- CRONOGRAMA / LÍNEAS --------
-    elif tipo in [
-        "Cronograma",
-        "Líneas prioritarias de investigación"
-    ]:
-        pass
 
     # =========================
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Denominación de la actividad</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
     titulo = st.text_input("")
-    
+
     st.markdown("""
-    <div style="
-        margin-top:-25px;
-        margin-bottom:5px;
-        background-color:#E6E6E6;
-        padding:10px;
-        border-radius:5px;
-        font-size:13px;
-        color:#000000;
-    ">
+    <div style="margin-top:-25px; margin-bottom:5px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px;">
     <b>Indicaciones:</b>
     <ul style="margin-top:5px; margin-bottom:0;">
-    <li>Título del proyecto de investigación</li>
-    <li>Título del Informe Final o de Avance</li>
-    <li>Nombre de la jornada, semillero, instituto, etc.</li>
+    <li>Título del proyecto</li>
+    <li>Informe Final o de Avance</li>
+    <li>Jornada / semillero / instituto</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
 
     # =========================
-    # 🎯 PUNTAJE (CONDICIONAL)
+    # 🎯 PUNTAJE
     # =========================
 
     puntaje = 0
-    
-    tipos_con_puntaje = [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance"
-    ]
-    
-    if tipo in tipos_con_puntaje:
-    
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Puntaje del Proyecto o Informe</div>",
-            unsafe_allow_html=True
-        )
-    
-        puntaje = st.number_input(
-             "",
-            min_value=0,
-            max_value=1000,
-            step=1,
-            key="puntaje",
-            help="Ingrese el puntaje asignado según la evaluación"
-        )
+    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance"]:
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Puntaje</div>", unsafe_allow_html=True)
+        puntaje = st.number_input("", min_value=0, max_value=1000, step=1, key="puntaje")
 
     # =========================
-    # 🧾 RESTO DEL FORMULARIO
+    # 🧾 DESCRIPCIÓN
     # =========================
-    
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Descripción en no más de 30 palabras</div>",
-        unsafe_allow_html=True
-    )
+
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Descripción</div>", unsafe_allow_html=True)
     descripcion = st.text_area("")
-    
-    # 🔴 INICIALIZACIÓN
+
+    # =========================
+    # 👥 EQUIPO (CONDICIONAL)
+    # =========================
+
     director = ""
     cat_director = ""
     codirector = ""
@@ -376,165 +284,78 @@ with st.form("form_acta", clear_on_submit=True):
     instituto = ""
     catedra = ""
     alumnos = ""
-    resolucion_cs = ""
-    
-    # -------- CAMPOS SOLO PARA PROYECTOS / INFORMES --------
-    if tipo in [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Otra"
-    ]:
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Director</div>",
-            unsafe_allow_html=True
-        )
+    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
+
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Director</div>", unsafe_allow_html=True)
         director = st.text_input("", key="director")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Director</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Categoría del Director</div>", unsafe_allow_html=True)
         cat_director = st.selectbox("", categoria_opciones, key="cat_director")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Codirector</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Codirector</div>", unsafe_allow_html=True)
         codirector = st.text_input("", key="codirector")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Categoría del Codirector</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
         categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Equipo de Investigación</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Equipo</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Instituto</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Instituto</div>", unsafe_allow_html=True)
         instituto = st.text_input("", key="instituto")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cátedra</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Cátedra</div>", unsafe_allow_html=True)
         catedra = st.text_input("", key="catedra")
 
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Cantidad de Alumnos</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Alumnos</div>", unsafe_allow_html=True)
         alumnos = st.text_input("", key="alumnos")
-    
-    # -------- UNIDAD (SIEMPRE) --------
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Unidad Académica</div>",
-        unsafe_allow_html=True
-    )
 
-    unidad = st.selectbox(
-        "",
-        [
-            "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
-            "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
-            "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
-            "FCEESL- Facultad de Ciencias Económicas y Empresariales Sede San Luis",
-            "FBOSCO- Facultad Don Bosco",
-            "FCEESJ- Facultad de Ciencias Económicas y Empresariales Sede San Juan",
-            "FFyHSJ- Facultad de Filosofía y Humanidades",
-            "ISDSM- Instituto Universitario Santa María",
-            "ECRyPSJ- Escuela Cultura Religiosa y Pastoral",
-            "FDCSSJ- Facultad de Derecho y Ciencias Sociales Sede San Juan",
-            "FCMSJ- Facultad de Ciencias Médicas San Juan",
-            "FEDSJ- Facultad de Educación",
-            "ESEGSJ- Escuela de Seguridad",
-            "FCQyTSJ- Facultad de Ciencias Químicas y Tecnológicas",
-            "ISB- Instituto San Buenaventura",
-            "Secretaría de Investigación",
-            "Unidad de Vinculación Tecnológica"
-        ],
-        key="unidad"
-    )
-    
+    # =========================
+    # 🏫 UNIDAD
+    # =========================
 
-    # -------- CAMPOS GENERALES --------
-   st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CD</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
+    unidad = st.selectbox("", opciones_unidades, key="unidad")
+
+    # =========================
+    # 📄 RESOLUCIONES
+    # =========================
+
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
     resolucion_cd = st.text_input("", key="resolucion_cd")
 
-# SOLO PARA PROYECTOS / INFORMES
-if tipo in [
-    "Proyecto de Investigación",
-    "Proyecto de Cátedra",
-    "Informe Final",
-    "Informe de Avance",
-    "Otra"
-]:
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Resolución CS del Proyecto (ej: Res-367-CS) solo para Informes Finales y de Avances</div>",
-        unsafe_allow_html=True
-    )
-    resolucion_cs = st.text_input("", key="resolucion_cs")
-else:
-    resolucion_cs = ""
+    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
+        st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
+        resolucion_cs = st.text_input("", key="resolucion_cs")
+    else:
+        resolucion_cs = ""
 
-# SIEMPRE
-st.markdown(
-    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🔴 Responsable de carga (obligatorio)</div>",
-    unsafe_allow_html=True
-)
-responsable_de_carga = st.text_input("", key="responsable_de_carga")
+    # =========================
+    # 👤 RESPONSABLE
+    # =========================
 
-# =========================
-# 💰 FINANCIAMIENTO
-# =========================
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
+    responsable_de_carga = st.text_input("", key="responsable")
 
-st.markdown(
-    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Tipo de financiamiento</div>",
-    unsafe_allow_html=True
-)
-tipo_financiamiento = st.selectbox(
-    "",
-    ["Seleccionar...", "Sin financiamiento", "Interno", "Externo"],
-    key="tipo_financiamiento"
-)
+    # =========================
+    # 💰 FINANCIAMIENTO
+    # =========================
 
-st.markdown(
-    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Fuente de financiamiento</div>",
-    unsafe_allow_html=True
-)
-fuente_financiamiento = st.text_input("", key="fuente_financiamiento")
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
+    tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo"], key="fin")
 
-st.markdown(
-    "<div style='margin-bottom:-10px; color:black; font-weight:600;'>🟢 Monto del financiamiento</div>",
-    unsafe_allow_html=True
-)
-monto_financiamiento = st.number_input(
-    "",
-    min_value=0,
-    step=1000,
-    key="monto_financiamiento"
-)
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Fuente</div>", unsafe_allow_html=True)
+    fuente_financiamiento = st.text_input("", key="fuente")
 
-
+    st.markdown("<div style='margin-bottom:-10px; font-weight:600;'>🟢 Monto</div>", unsafe_allow_html=True)
+    monto_financiamiento = st.number_input("", min_value=0, step=1000, key="monto")
 
     # =========================
     # 🔘 SUBMIT
     # =========================
 
-submit = st.form_submit_button("Guardar en Google Sheets")
-
+    submit = st.form_submit_button("Guardar en Google Sheets")
 # =========================
 # 💾 GUARDAR
 # =========================
