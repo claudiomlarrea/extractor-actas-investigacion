@@ -422,17 +422,17 @@ with st.form("form_acta", clear_on_submit=True):
     # 💰 FINANCIAMIENTO
     # =========================
 
-    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
-
+    if tipo != "Categorización Docente":
+    
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
         tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo"], key="fin")
-
+    
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente</div>", unsafe_allow_html=True)
         fuente_financiamiento = st.text_input("", key="fuente")
-
+    
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto</div>", unsafe_allow_html=True)
         monto_financiamiento = st.number_input("", min_value=0, step=1000, key="monto")
-
+    
     else:
         tipo_financiamiento = ""
         fuente_financiamiento = ""
