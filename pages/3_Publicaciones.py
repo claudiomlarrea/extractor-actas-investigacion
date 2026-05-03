@@ -53,7 +53,7 @@ input, textarea, select {
 }
 
 .stButton > button {
-    background-color: #064a3f !important;
+    background-color: #111111 !important;
     color: white !important;
     border-radius: 8px;
 }
