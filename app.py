@@ -14,10 +14,21 @@ st.markdown("""
     background-color: #F4F6F8 !important;
 }
 
+/* TEXTO GENERAL */
 h1, h2, h3, p {
     color: #1A1A1A !important;
 }
 
+/* SIDEBAR (ARREGLADO) */
+[data-testid="stSidebar"] {
+    background-color: #1C1F26 !important;
+}
+
+[data-testid="stSidebar"] * {
+    color: #EAEAEA !important;
+}
+
+/* HEADER */
 .header-uccuyo {
     background-color: #064a3f;
     padding: 20px;
