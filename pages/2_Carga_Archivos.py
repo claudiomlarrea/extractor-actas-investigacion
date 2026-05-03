@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
 
 # =========================
 # CONFIG
@@ -60,17 +61,31 @@ h1, h2, h3, p, li {
 }
 </style>
 """, unsafe_allow_html=True)
+
 # =========================
 # HEADER
 # =========================
 
-st.markdown("""
-<div class='header-uccuyo'>
-    <h2>Universidad Católica de Cuyo</h2>
-    <p>Secretaría de Investigación</p>
-</div>
-""", unsafe_allow_html=True)
+_APP_ROOT = Path(__file__).resolve().parents[1]
+_LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
 
+col1, col2 = st.columns([1, 6])
+
+with col1:
+    if _LOGO_PATH.exists():
+        st.image(str(_LOGO_PATH), width=110)
+    else:
+        st.warning("Logo no encontrado")
+
+with col2:
+    st.markdown("""
+    <div class='header-uccuyo'>
+        <h2>Universidad Católica de Cuyo</h2>
+        <p>Secretaría de Investigación</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# TÍTULO
 st.title("📂 Carga de Actas del Consejo de Investigación")
 
 st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo directamente en Google Drive")
