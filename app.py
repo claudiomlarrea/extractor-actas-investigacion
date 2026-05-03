@@ -50,7 +50,7 @@ h1, h2, h3, p {
 }
 
 /* OPCIÓN ACTIVA (app) */
-[data-testid="stSidebarNav"] a[aria-current="page"] {
+[data-testid="stSidebarNav"] li[aria-current="page"] a {
     background-color: #064a3f !important;
     color: white !important;
     font-weight: bold;
