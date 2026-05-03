@@ -61,6 +61,22 @@ input, textarea, select {
 .stButton > button p {
     color: white !important;
 }
+/* SIDEBAR EN VERDE */
+[data-testid="stSidebarNav"] a {
+    background-color: #064a3f !important;
+    color: white !important;
+    font-size: 16px !important;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+/* OPCIÓN ACTIVA */
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background-color: #0B6B5D !important;
+    color: white !important;
+    font-weight: bold;
+}
 
 </style>
 """, unsafe_allow_html=True)
