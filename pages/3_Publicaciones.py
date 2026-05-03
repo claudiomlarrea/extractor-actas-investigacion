@@ -14,53 +14,53 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-# 🔥 ESTA ES LA CLAVE
-    sheet_pub = client.open("Datos Consejo Investigación").worksheet("publicaciones_sheet")
+sheet_pub = client.open("Datos Consejo Investigación").worksheet("publicaciones_sheet")
 
-    st.markdown("""
-    <style>
-    
-    [data-testid="stAppViewContainer"] {
-        background-color: #F4F6F8 !important;
-    }
-    
-    h1, h2, h3, p, label {
-        color: #1A1A1A !important;
-    }
-    
-    [data-testid="stSidebar"] {
-        background-color: #1C1F26;
-    }
-    [data-testid="stSidebar"] * {
-        color: #EAEAEA !important;
-    }
-    
-    .header-uccuyo {
-        background-color: #064a3f;
-        padding: 20px;
-        border-radius: 10px;
-    }
-    
-    .header-uccuyo h2,
-    .header-uccuyo p {
-        color: white !important;
-        margin: 0;
-    }
-    
-    input, textarea, select {
-        background-color: white !important;
-        color: black !important;
-    }
-    
-    button[kind="primary"] {
-        background-color: #064a3f !important;
-        color: white !important;
-    }
-    
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("""
+<style>
 
-    st.title("📊 Producción Científica")
+
+[data-testid="stAppViewContainer"] {
+    background-color: #F4F6F8 !important;
+}
+
+h1, h2, h3, p, label {
+    color: #1A1A1A !important;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #1C1F26;
+}
+[data-testid="stSidebar"] * {
+    color: #EAEAEA !important;
+}
+
+.header-uccuyo {
+    background-color: #064a3f;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.header-uccuyo h2,
+.header-uccuyo p {
+    color: white !important;
+    margin: 0;
+}
+
+input, textarea, select {
+    background-color: white !important;
+    color: black !important;
+}
+
+button[kind="primary"] {
+    background-color: #064a3f !important;
+    color: white !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+st.title("📊 Producción Científica")
 
 # =========================
 # UNIDADES ACADÉMICAS
