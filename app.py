@@ -49,7 +49,7 @@ h1, h2, h3, p {
     padding: 8px 10px;
 }
 
-/* OPCIÓN ACTIVA */
+/* OPCIÓN ACTIVA (app) */
 [data-testid="stSidebarNav"] li[aria-current="page"] a {
     background-color: #064a3f !important;
     color: white !important;
