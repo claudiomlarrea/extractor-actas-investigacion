@@ -77,11 +77,9 @@ with col2:
 st.title("📊 Sistema de Actas - Consejo de Investigación")
 
 st.markdown("""
-Bienvenido al sistema.
-
 Usá el menú de la izquierda para:
-• Cargar los temas que van a Consejo de Investigación 
-• Cargar archivos de los temas
-• Cargar Publicaciones
 
+• Cargar los temas que van a Consejo de Investigación  
+• Cargar archivos de los temas  
+• Cargar Publicaciones
 """)
