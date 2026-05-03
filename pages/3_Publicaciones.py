@@ -65,6 +65,27 @@ input, textarea, select {
 </style>
 """, unsafe_allow_html=True)
 
+# =========================
+# HEADER
+# =========================
+
+_APP_ROOT = Path(__file__).resolve().parents[1]
+_LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
+
+col1, col2 = st.columns([1, 6])
+
+with col1:
+    if _LOGO_PATH.exists():
+        st.image(str(_LOGO_PATH), width=110)
+
+with col2:
+    st.markdown("""
+    <div class='header-uccuyo'>
+        <h2>Universidad Católica de Cuyo</h2>
+        <p>Secretaría de Investigación</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 st.title("📊 Producción Científica")
 
 # =========================
