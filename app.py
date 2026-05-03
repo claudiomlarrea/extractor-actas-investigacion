@@ -40,21 +40,14 @@ h1, h2, h3, p {
     color: white !important;
     margin: 0;
 }
-/* OPCIONES NORMALES */
+/* TODAS LAS OPCIONES EN VERDE */
 [data-testid="stSidebarNav"] a {
-    background-color: transparent !important;
-    color: white !important;
-    font-size: 16px !important;
-    margin-bottom: 5px;
-    padding: 8px 10px;
-}
-
-/* OPCIÓN ACTIVA (app) */
-[data-testid="stSidebarNav"] li[aria-current="page"] a {
     background-color: #064a3f !important;
     color: white !important;
-    font-weight: bold;
-    border-radius: 8px;
+    font-size: 16px !important;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 </style>
