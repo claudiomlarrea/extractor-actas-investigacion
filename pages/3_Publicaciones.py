@@ -52,9 +52,10 @@ input, textarea, select {
     color: black !important;
 }
 
-button[kind="primary"] {
+.stButton > button {
     background-color: #064a3f !important;
     color: white !important;
+    border-radius: 8px;
 }
 
 </style>
