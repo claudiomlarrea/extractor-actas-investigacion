@@ -40,6 +40,22 @@ h1, h2, h3, p {
     color: white !important;
     margin: 0;
 }
+/* OPCIONES DEL MENÚ */
+[data-testid="stSidebarNav"] a {
+    background-color: white !important;
+    color: black !important;
+    font-size: 16px !important;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    padding: 8px 10px;
+}
+
+/* OPCIÓN ACTIVA */
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background-color: #064a3f !important;
+    color: white !important;
+    font-weight: bold;
+}
 
 </style>
 """, unsafe_allow_html=True)
