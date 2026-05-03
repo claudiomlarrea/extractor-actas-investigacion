@@ -58,6 +58,10 @@ input, textarea, select {
     border-radius: 8px;
 }
 
+.stButton > button p {
+    color: white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
