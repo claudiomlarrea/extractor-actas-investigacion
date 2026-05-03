@@ -80,8 +80,8 @@ st.markdown("""
 Bienvenido al sistema.
 
 Usá el menú de la izquierda para:
-
-• Cargar datos manualmente  
-• Normalizar actas  
+• Cargar los temas que van a Consejo de Investigación 
+• Cargar archivos de los temas
+• Cargar Publicaciones
 
 """)
