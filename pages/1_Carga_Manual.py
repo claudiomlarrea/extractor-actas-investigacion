@@ -648,8 +648,11 @@ if generar:
                 else:
                     p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
 
-            if r.get("equipo"):
-                p.add_run(f"   Equipo: {r.get('equipo', '')}\n")
+            equipo_txt = r.get("equipo", "")
+
+            if equipo_txt:
+                equipo_txt = equipo_txt.replace("\n", "; ")
+                p.add_run(f"   Equipo: {equipo_txt}\n")
 
             p.add_run(f"   Unidad Académica: {unidad}\n")
 
