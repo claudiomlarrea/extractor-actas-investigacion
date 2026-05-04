@@ -680,6 +680,9 @@ if generar:
             if r.get("fuente de financiamiento"):
                 p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
 
+            if r.get("responsable_de_carga"):
+                p.add_run(f"   Responsable de carga: {r.get('responsable_de_carga')}\n")
+
             if r.get("monto del financiamiento"):
                 try:
                     monto = int(float(r.get("monto del financiamiento")))
