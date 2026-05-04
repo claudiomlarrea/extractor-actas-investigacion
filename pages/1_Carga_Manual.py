@@ -467,6 +467,18 @@ with st.form("form_acta", clear_on_submit=True):
     # =========================
 
     submit = st.form_submit_button("Clic para Enviar al Consejo de Investigación (Google Sheets)")
+    st.markdown("""
+        <style>
+        div[data-testid="stFormSubmitButton"] button {
+            background-color: #7D1C1C !important;
+            color: white !important;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
 # =========================
 # 💾 GUARDAR
 # =========================
