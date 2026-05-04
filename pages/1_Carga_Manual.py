@@ -362,7 +362,7 @@ with st.form("form_acta", clear_on_submit=True):
     # 🧾 DESCRIPCIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 30 palabras)</div>", unsafe_allow_html=True)
     descripcion = st.text_area("")
 
     # =========================
