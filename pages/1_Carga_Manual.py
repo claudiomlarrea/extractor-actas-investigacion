@@ -466,7 +466,7 @@ with st.form("form_acta", clear_on_submit=True):
     # 🔘 SUBMIT
     # =========================
 
-    submit = st.form_submit_button("Clic para Enviar al Consejo de Investigación (Google Sheets")
+    submit = st.form_submit_button("Clic para Enviar al Consejo de Investigación (Google Sheets)")
 # =========================
 # 💾 GUARDAR
 # =========================
