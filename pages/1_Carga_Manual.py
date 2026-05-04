@@ -535,6 +535,9 @@ if submit:
     elif not tipo:
         st.error("Debe elegir la actividad")
 
+    elif not responsable_de_carga.strip():
+        st.warning("Debe completar el Responsable de carga. Los datos ingresados se mantienen.")
+
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
