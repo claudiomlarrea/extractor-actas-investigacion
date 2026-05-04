@@ -400,7 +400,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
         categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo")
 
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Instituto</div>", unsafe_allow_html=True)
@@ -409,7 +409,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra</div>", unsafe_allow_html=True)
         catedra = st.text_input("", key="catedra")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cantidad de Alumnos</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cantidad de Alumnos en el proyecto</div>", unsafe_allow_html=True)
         alumnos = st.text_input("", key="alumnos")
 
     # =========================
@@ -428,7 +428,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
         resolucion_cd = st.text_input("", key="resolucion_cd")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS (solo para Informes Finales y de Avances)</div>", unsafe_allow_html=True)
         resolucion_cs = st.text_input("", key="resolucion_cs")
 
     else:
