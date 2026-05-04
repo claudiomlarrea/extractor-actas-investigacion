@@ -171,6 +171,8 @@ div[data-baseweb="select"] [contenteditable="true"] {
     color: white !important;
     font-weight: bold;
 }
+/* 🔥 SOLUCIÓN DEFINITIVA */
+[data-testid="stSidebarNav"] * { color: white !important; }
 
 </style>
 """, unsafe_allow_html=True)
