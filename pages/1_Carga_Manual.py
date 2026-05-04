@@ -198,7 +198,7 @@ st.markdown(
     """
     <div style='background-color:#d4edda; padding:15px; border-radius:10px'>
         <a href='https://docs.google.com/spreadsheets/d/17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8' target='_blank' style='text-decoration:none; color:#155724; font-weight:bold; font-size:18px;'>
-            ✔ Base de datos del Orden del Día del Consejo de Investigación (abrir)
+            ✔ Base de datos de Órdenes del Día del Consejo de Investigación (abrir)
         </a>
     </div>
     """,
