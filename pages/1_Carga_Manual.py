@@ -409,7 +409,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra</div>", unsafe_allow_html=True)
         catedra = st.text_input("", key="catedra")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Alumnos</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cantidad de Alumnos</div>", unsafe_allow_html=True)
         alumnos = st.text_input("", key="alumnos")
 
     # =========================
