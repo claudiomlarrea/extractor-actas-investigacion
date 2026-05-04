@@ -451,7 +451,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
         tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
     
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>", unsafe_allow_html=True)
         fuente_financiamiento = st.text_input("", key="fuente")
     
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
