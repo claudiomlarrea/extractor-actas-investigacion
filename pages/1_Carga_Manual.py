@@ -549,9 +549,17 @@ if submit:
     elif not tipo:
         st.error("Debe elegir la actividad")
 
+    elif not titulo.strip():
+        st.error("Debe completar la Denominación de la actividad")
+
+    elif not responsable_de_carga.strip():
+        st.error("Debe completar el Responsable de carga")
+
     else:
         sheet.append_row(fila)
         st.success("Registro guardado correctamente")
+
+        st.rerun()
     
 # =========================
 # 📄 GENERAR WORD
