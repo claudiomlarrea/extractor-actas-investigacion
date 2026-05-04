@@ -662,11 +662,11 @@ if generar:
             if puntaje_num > 0:
                 p.add_run(f"   Puntaje: {int(puntaje_num)}\n")
 
-            if r.get("resolucion cd"):
-                p.add_run(f"   Resolución CD: {r.get('resolucion cd')}\n")
+            if r.get("resolucion_cd"):
+                p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
 
-            if r.get("resolucion cs"):
-                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion cs')}\n")
+            if r.get("resolucion_cs"):
+                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion_cs')}\n")
 
             if r.get("instituto"):
                 p.add_run(f"   Instituto: {r.get('instituto')}\n")
