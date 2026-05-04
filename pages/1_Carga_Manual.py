@@ -297,7 +297,7 @@ tipo = st.selectbox("", [
         "Otra"
     ])
 
-with st.form("form_acta", clear_on_submit=True):
+with st.form("form_acta", clear_on_submit=False):
 
     # =========================
     # 📅 DATOS BÁSICOS
