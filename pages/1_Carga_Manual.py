@@ -454,7 +454,7 @@ with st.form("form_acta", clear_on_submit=True):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente</div>", unsafe_allow_html=True)
         fuente_financiamiento = st.text_input("", key="fuente")
     
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
         monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
     
     else:
