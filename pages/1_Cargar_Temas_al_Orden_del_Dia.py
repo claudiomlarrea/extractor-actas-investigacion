@@ -337,8 +337,8 @@ with st.form("form_acta", clear_on_submit=False):
     <span style="font-weight:700;">Indicaciones:</span>
     <ul style="margin-top:5px; margin-bottom:0;">
     <li>Título del proyecto</li>
-    <li>Informe Final o de Avance</li>
-    <li>Jornada / semillero / instituto</li>
+    <li>Título del Informe Final o de Avance</li>
+    <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
