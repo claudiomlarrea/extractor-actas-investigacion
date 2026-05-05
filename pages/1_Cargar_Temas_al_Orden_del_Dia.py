@@ -574,7 +574,7 @@ acta_word = st.selectbox(
     options=[f"{n} - {actas_dict[n]['mes']}" for n in actas_dict]
 )
 
-generar = st.button("Generar Word")
+generar = st.button("Generar Orden del Día")
 
 if generar:
 
@@ -738,7 +738,7 @@ st.markdown("### 🧾 Generar informe por responsable")
 
 responsable_reporte = st.text_input("Responsable de carga para generar informe")
 
-generar_responsables = st.button("Generar informe del responsable")
+generar_responsables = st.button("Generar informe del responsable de carga")
 
 if generar_responsables:
 
