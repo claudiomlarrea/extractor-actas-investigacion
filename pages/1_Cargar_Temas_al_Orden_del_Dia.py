@@ -331,18 +331,19 @@ with st.form("form_acta", clear_on_submit=False):
     # =========================
 
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
-    titulo = st.text_input("")
-
+    
     st.markdown("""
-    <div style="margin-top:-25px; margin-bottom:5px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
-    <span style="font-weight:700; color:#000000;">Indicaciones:</span>
-    <ul style="margin-top:5px; margin-bottom:0; color:#000000;">
-    <li style="color:#000000;">Título del proyecto</li>
-    <li style="color:#000000;">Informe Final o de Avance</li>
-    <li style="color:#000000;">Jornada / semillero / instituto</li>
+    <div style="margin-top:5px; margin-bottom:10px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
+    <span style="font-weight:700;">Indicaciones:</span>
+    <ul style="margin-top:5px; margin-bottom:0;">
+    <li>Título del proyecto</li>
+    <li>Informe Final o de Avance</li>
+    <li>Jornada / semillero / instituto</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
+    
+    titulo = st.text_input("")
 
     # =========================
     # 🎯 PUNTAJE
