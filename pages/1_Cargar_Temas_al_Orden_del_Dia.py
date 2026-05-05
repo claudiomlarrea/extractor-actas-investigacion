@@ -729,7 +729,7 @@ if generar:
         buffer.seek(0)
 
         st.download_button(
-            "Descargar Word",
+            "Descargar Orden del Día",
             data=buffer,
             file_name=f"Acta_{acta_num}.docx"
         )
