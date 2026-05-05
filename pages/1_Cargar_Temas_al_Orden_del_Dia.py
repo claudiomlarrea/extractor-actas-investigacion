@@ -330,7 +330,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>", unsafe_allow_html=True)
     
     st.markdown("""
     <div style="margin-top:5px; margin-bottom:-15px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
@@ -407,13 +407,13 @@ with st.form("form_acta", clear_on_submit=False):
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Instituto</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Instituto de Investigación</div>", unsafe_allow_html=True)
         instituto = st.text_input("", key="instituto")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
         catedra = st.text_input("", key="catedra")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cantidad de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
         alumnos = st.text_input("", key="alumnos")
 
     # =========================
