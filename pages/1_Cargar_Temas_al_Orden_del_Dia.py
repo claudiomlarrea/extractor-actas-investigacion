@@ -280,7 +280,7 @@ st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 st.markdown("<span style='color:black; font-weight:700;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
 st.markdown(
-    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija actividad</div>",
+    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad</div>",
     unsafe_allow_html=True
 )
 tipo = st.selectbox("", [
