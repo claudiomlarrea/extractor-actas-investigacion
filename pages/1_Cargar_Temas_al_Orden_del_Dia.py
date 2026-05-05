@@ -333,7 +333,7 @@ with st.form("form_acta", clear_on_submit=False):
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad</div>", unsafe_allow_html=True)
     
     st.markdown("""
-    <div style="margin-top:5px; margin-bottom:-5px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
+    <div style="margin-top:5px; margin-bottom:-10px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
     <span style="font-weight:700;">Indicaciones:</span>
     <ul style="margin-top:5px; margin-bottom:0;">
     <li>Título del proyecto</li>
