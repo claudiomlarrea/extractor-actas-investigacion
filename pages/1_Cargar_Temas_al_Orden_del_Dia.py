@@ -810,7 +810,7 @@ if generar_responsables:
         buffer.seek(0)
 
         st.download_button(
-            "Descargar informe del responsable",
+            "Descargar informe del responsable de carga",
             data=buffer,
             file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
         )
