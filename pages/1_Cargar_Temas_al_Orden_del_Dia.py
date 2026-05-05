@@ -487,7 +487,10 @@ with st.form("form_acta", clear_on_submit=False):
 # 💾 GUARDAR
 # =========================
 
-if submit:
+if "enviado" not in st.session_state:
+    st.session_state.enviado = False
+
+if submit and not st.session_state.enviado:
 
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
@@ -559,8 +562,8 @@ if submit:
 
     else:
         sheet.append_row(fila)
+        st.session_state.enviado = True
         st.success("Registro guardado correctamente")
-
         st.rerun()
     
 # =========================
