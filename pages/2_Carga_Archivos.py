@@ -143,6 +143,7 @@ for nombre, link in actas.items():
 
     <ol>
         <li>Se abrirá Google Drive</li>
+        <li>Hacer clic en la Carpeta de su Unidad Académica</li>
         <li>Hacer clic en <strong>Nuevo → Subir archivo</strong></li>
         <li>Seleccionar el archivo correspondiente</li>
         <li>Verificar que quede dentro de la carpeta</li>
