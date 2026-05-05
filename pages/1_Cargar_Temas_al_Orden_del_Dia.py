@@ -280,7 +280,7 @@ st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 st.markdown("<span style='color:black; font-weight:700;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
 st.markdown(
-    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad</div>",
+    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True
 )
 tipo = st.selectbox("", [
@@ -307,7 +307,7 @@ with st.form("form_acta", clear_on_submit=False):
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Año</div>", unsafe_allow_html=True)
     anio = st.text_input("", "2026", key="anio")
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Acta</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Acta de Consejo de Investigación</div>", unsafe_allow_html=True)
 
     acta_label = st.selectbox(
         "",
