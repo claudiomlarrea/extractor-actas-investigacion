@@ -127,6 +127,7 @@ UNIDADES = [
     "ISB- Instituto San Buenaventura",
     "Secretaría de Investigación",
     "Unidad de Vinculación Tecnológica",
+    "OIA- Observatorio de Inteligencia Artificial"
 ]
 
 # =========================
