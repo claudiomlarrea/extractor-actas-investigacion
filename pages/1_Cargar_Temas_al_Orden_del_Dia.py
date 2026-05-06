@@ -566,7 +566,7 @@ if submit and not st.session_state.enviado:
         st.session_state.enviado = True
         st.success("Registro guardado correctamente")
         import time
-        time.sleep(2)
+        time.sleep(5)
         st.rerun()
     
 # =========================
