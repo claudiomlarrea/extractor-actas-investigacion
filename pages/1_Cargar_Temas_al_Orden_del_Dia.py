@@ -174,6 +174,12 @@ div[data-baseweb="select"] [contenteditable="true"] {
 /* 🔥 SOLUCIÓN DEFINITIVA */
 [data-testid="stSidebarNav"] * { color: white !important; }
 
+/* MENSAJE VERDE */
+[data-testid="stAlert"] {
+    color: black !important;
+    font-weight: 600 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
