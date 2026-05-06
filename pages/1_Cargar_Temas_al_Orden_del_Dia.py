@@ -572,7 +572,7 @@ if submit and not st.session_state.enviado:
         st.session_state.enviado = True
         st.success("Registro guardado correctamente. Refresque la página para cargar otro tema.")
         import time
-        time.sleep(5)
+        time.sleep(7)
         st.rerun()
     
 # =========================
