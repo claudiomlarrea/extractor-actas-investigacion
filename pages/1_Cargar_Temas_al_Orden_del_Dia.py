@@ -330,6 +330,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>", unsafe_allow_html=True)
     
     st.markdown("""
