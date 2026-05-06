@@ -315,7 +315,7 @@ with st.form("form_acta", clear_on_submit=False):
         key="acta"
     )
 
-    numero_acta = int(acta_label.split(" ")[1].replace("N°", ""))
+    numero_acta = int(acta_label.split("Acta ")[1])
 
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
     
