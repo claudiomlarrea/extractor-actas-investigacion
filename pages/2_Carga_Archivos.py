@@ -102,7 +102,7 @@ with col2:
     """, unsafe_allow_html=True)
 
 # TÍTULO
-st.title("📂 Carga de Actas del Consejo de Investigación")
+st.title("📂 Carga de Archivos para el Consejo de Investigación")
 
 st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo directamente en Google Drive")
 
