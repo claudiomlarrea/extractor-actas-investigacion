@@ -587,6 +587,9 @@ if submit and not st.session_state.enviado:
             </button>
         </a>
         """, unsafe_allow_html=True)
+        
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        
         import time
         time.sleep(7)
         st.rerun()
