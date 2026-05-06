@@ -477,7 +477,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 🔘 SUBMIT
     # =========================
 
-    submit = st.form_submit_button("Clic para Enviar al Consejo de Investigación (Google Sheets)")
+    submit = st.form_submit_button("Clic para enviar al Consejo de Investigación (Google Sheets)")
     st.markdown("""
         <style>
         div[data-testid="stFormSubmitButton"] button {
