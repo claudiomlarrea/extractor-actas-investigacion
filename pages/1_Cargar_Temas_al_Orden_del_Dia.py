@@ -288,11 +288,11 @@ tipo = st.selectbox("", [
         "Proyecto de Cátedra",
         "Informe Final",
         "Informe de Avance",
+        "Resumen",
         "Jornada de Investigación",
         "Convocatoria a Proyectos de investigación",
         "Creación de Semillero de Investigación",
         "Categorización Docente",
-        "Cronograma",
         "Llamado a Concurso de Becas",
         "Líneas prioritarias de investigación",
         "Otra"
