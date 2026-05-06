@@ -572,7 +572,7 @@ if submit and not st.session_state.enviado:
         st.session_state.enviado = True
         st.success("Registro guardado correctamente. 🔄 Recargue la página para enviar otro tema.")
         st.markdown("""
-        <a href="/Carga_Archivos" target="_self">
+        <a href="/Carga_de_Archivos" target="_self">
             <button style="
                 background-color:#7D1C1C;
                 color:white;
