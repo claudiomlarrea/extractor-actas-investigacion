@@ -571,6 +571,22 @@ if submit and not st.session_state.enviado:
         sheet.append_row(fila)
         st.session_state.enviado = True
         st.success("Registro guardado correctamente. 🔄 Recargue la página para enviar otro tema.")
+        st.markdown("""
+        <a href="/Carga_Archivos" target="_self">
+            <button style="
+                background-color:#7D1C1C;
+                color:white;
+                padding:12px 20px;
+                border:none;
+                border-radius:10px;
+                font-size:17px;
+                font-weight:600;
+                margin-top:10px;
+                cursor:pointer;">
+                📂 Ahora cargue el archivo correspondiente
+            </button>
+        </a>
+        """, unsafe_allow_html=True)
         import time
         time.sleep(7)
         st.rerun()
