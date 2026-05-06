@@ -175,9 +175,9 @@ div[data-baseweb="select"] [contenteditable="true"] {
 [data-testid="stSidebarNav"] * { color: white !important; }
 
 /* MENSAJE VERDE */
-[data-testid="stAlert"] {
+[data-testid="stAlert"] * {
     color: black !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
 }
 
 </style>
