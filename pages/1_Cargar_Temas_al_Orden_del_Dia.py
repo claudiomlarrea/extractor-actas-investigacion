@@ -576,11 +576,14 @@ if submit and not st.session_state.enviado:
             <button style="
                 background-color:#7D1C1C;
                 color:white;
+                width:840px;
+                text-align:left;
                 padding:12px 20px;
+                padding-left:25px;
                 border:none;
                 border-radius:10px;
                 font-size:17px;
-                font-weight:600;
+                font-weight:700;
                 margin-top:10px;
                 cursor:pointer;">
                 📂 Ahora cargue el archivo correspondiente
