@@ -576,10 +576,10 @@ if submit and not st.session_state.enviado:
             <button style="
                 background-color:#7D1C1C;
                 color:white;
-                width:840px;
+                width:auto;
+                display:inline-block;
                 text-align:left;
                 padding:12px 20px;
-                padding-left:25px;
                 border:none;
                 border-radius:10px;
                 font-size:17px;
