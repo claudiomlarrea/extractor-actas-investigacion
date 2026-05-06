@@ -565,6 +565,8 @@ if submit and not st.session_state.enviado:
         sheet.append_row(fila)
         st.session_state.enviado = True
         st.success("Registro guardado correctamente")
+        import time
+        time.sleep(2)
         st.rerun()
     
 # =========================
