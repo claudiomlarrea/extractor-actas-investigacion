@@ -307,11 +307,11 @@ with st.form("form_acta", clear_on_submit=False):
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Año</div>", unsafe_allow_html=True)
     anio = st.text_input("", "2026", key="anio")
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Acta de Consejo de Investigación</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
 
     acta_label = st.selectbox(
         "",
-        [f"Acta N°{n} - {actas_dict[n]['mes']}" for n in actas_dict],
+        [f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict],
         key="acta"
     )
 
