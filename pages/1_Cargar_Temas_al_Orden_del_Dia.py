@@ -5,6 +5,9 @@ from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
 from docx.shared import Pt, RGBColor
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 
 def _fila_sheet_normalizada(r):
@@ -489,6 +492,52 @@ with st.form("form_acta", clear_on_submit=False):
         </style>
         """, unsafe_allow_html=True)
 
+def enviar_correo_tema(fila):
+
+    destinatarios = [
+        "investigacion@uccuyo.edu.ar",
+        "vincutec@uccuyo.edu.ar",
+        "asistente.inv@uccuyo.edu.ar"
+    ]
+
+    cuerpo = f"""
+Se ha cargado un nuevo tema para el Consejo de Investigación.
+
+Número de Acta: {fila[0]}
+Fecha: {fila[1]}
+Año: {fila[2]}
+Tipo: {fila[3]}
+Título: {fila[4]}
+Descripción: {fila[5]}
+Director: {fila[6]}
+Codirector: {fila[8]}
+Equipo: {fila[10]}
+Unidad Académica: {fila[13]}
+Resolución CD: {fila[14]}
+Resolución CS: {fila[15]}
+Instituto: {fila[16]}
+Cátedra: {fila[17]}
+Financiamiento: {fila[18]}
+Fuente: {fila[19]}
+Monto: {fila[20]}
+Alumnos: {fila[21]}
+Puntaje: {fila[22]}
+Responsable de carga: {fila[23]}
+"""
+
+    msg = EmailMessage()
+    msg["Subject"] = "Nuevo tema cargado - Consejo de Investigación"
+    msg["From"] = st.secrets["EMAIL_USER"]
+    msg["To"] = ", ".join(destinatarios)
+    msg.set_content(cuerpo)
+
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls(context=context)
+        server.login(st.secrets["EMAIL_USER"], st.secrets["EMAIL_PASS"])
+        server.send_message(msg)
+
 # =========================
 # 💾 GUARDAR
 # =========================
@@ -568,6 +617,12 @@ if submit and not st.session_state.enviado:
 
     else:
         sheet.append_row(fila)
+
+        try:
+            enviar_correo_tema(fila)
+        except Exception as e:
+            st.warning(f"No se pudo enviar el correo automático: {e}")
+
         st.session_state.enviado = True
         st.success("Registro guardado correctamente. 🔄 Recargue la página para enviar otro tema.")
         st.markdown("""
