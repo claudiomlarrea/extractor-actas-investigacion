@@ -527,15 +527,20 @@ Responsable de carga: {fila[23]}
 
     msg = EmailMessage()
     msg["Subject"] = "Nuevo tema cargado - Consejo de Investigación"
-    msg["From"] = st.secrets["EMAIL_USER"]
+    msg["From"] = st.secrets["email"]["EMAIL_USER"]
     msg["To"] = ", ".join(destinatarios)
     msg.set_content(cuerpo)
-
+    
     context = ssl.create_default_context()
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls(context=context)
-        server.login(st.secrets["EMAIL_USER"], st.secrets["EMAIL_PASS"])
+
+        server.login(
+            st.secrets["email"]["EMAIL_USER"],
+            st.secrets["email"]["EMAIL_PASS"]
+        )
+
         server.send_message(msg)
 
 # =========================
