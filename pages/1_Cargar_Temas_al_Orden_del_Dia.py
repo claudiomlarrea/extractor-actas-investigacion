@@ -629,7 +629,7 @@ if submit and not st.session_state.enviado:
             st.warning(f"No se pudo enviar el correo automático: {e}")
 
         st.session_state.enviado = True
-        st.success("✅ Registro guardado correctamente.\n\n📂 Ahora cargue el archivo correspondiente.\n\n🔄 Finalmente, recargue la página para enviar otro tema.")
+        st.success("✅ Registro guardado correctamente.\n\n📂 Ahora cargue el archivo correspondiente.\n\n🔄 Finalmente, vuelva a la página principal del sistema y recárgela para enviar otro tema.")
         st.markdown("""
         <a href="/Carga_de_Archivos" target="_self">
             <button style="
