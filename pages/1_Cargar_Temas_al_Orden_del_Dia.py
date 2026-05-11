@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import streamlit as st
 import gspread
 from pathlib import Path
@@ -27,6 +29,60 @@ def ordenar_registros_por_unidad_academica(registros):
     indexed = list(enumerate(registros))
     indexed.sort(key=lambda t: (_unidad_academica_clave(t[1]).casefold(), t[0]))
     return [r for _, r in indexed]
+
+
+TIPOS_CON_PUNTAJE = [
+    "Proyecto de Investigación",
+    "Proyecto de Cátedra",
+    "Informe Final",
+    "Informe de Avance",
+]
+
+
+def parse_puntaje_valor(val):
+    """Número desde Sheets o texto; admite coma o punto decimal (AR / US)."""
+    if val is None or val == "":
+        return None
+    if isinstance(val, (int, float)):
+        x = float(val)
+        if x != x:  # NaN
+            return None
+        return x
+    s = str(val).strip().replace(" ", "")
+    if not s:
+        return None
+    if "," in s and "." in s:
+        if s.rfind(",") > s.rfind("."):
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    else:
+        s = s.replace(",", ".")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
+    """Vacío → 0.0. Devuelve (valor, mensaje_error o None)."""
+    if s is None or not str(s).strip():
+        return 0.0, None
+    n = parse_puntaje_valor(s)
+    if n is None:
+        return 0.0, "Use solo números; decimales con coma o punto (ej: 87,9 o 87.9)."
+    if n < 0 or n > 1000:
+        return 0.0, "El puntaje debe estar entre 0 y 1000."
+    return n, None
+
+
+def format_puntaje_doc_es(x: float) -> str:
+    """Texto para Word/correo con coma decimal si hay decimales."""
+    x = float(x)
+    if abs(x - round(x)) < 1e-9:
+        return str(int(round(x)))
+    t = f"{x:.2f}".rstrip("0").rstrip(".")
+    return t.replace(".", ",")
 
 
 # =========================
@@ -356,19 +412,18 @@ with st.form("form_acta", clear_on_submit=False):
     # 🎯 PUNTAJE
     # =========================
 
-    puntaje = 0
-    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance"]:
+    puntaje = 0.0
+    if tipo in TIPOS_CON_PUNTAJE:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
-    
-        puntaje = st.number_input(
+        st.caption("Decimales con coma o punto (ej: 87,9 o 87.9).")
+        puntaje_raw = st.text_input(
             "",
-            min_value=0.0,
-            max_value=1000.0,
-            step=0.1,
-            format="%.2f",
-            value=0.0,
-            key="puntaje"
+            placeholder="Ej: 87,9",
+            key="puntaje_txt",
+            label_visibility="collapsed",
         )
+        _pv = parse_puntaje_valor(puntaje_raw)
+        puntaje = _pv if _pv is not None else 0.0
     # =========================
     # 🧾 DESCRIPCIÓN
     # =========================
@@ -550,6 +605,14 @@ if "enviado" not in st.session_state:
 
 if submit and not st.session_state.enviado:
 
+    if tipo in TIPOS_CON_PUNTAJE:
+        puntaje_fila, err_puntaje = parse_puntaje_campo_formulario(
+            st.session_state.get("puntaje_txt", "")
+        )
+    else:
+        puntaje_fila = 0.0
+        err_puntaje = None
+
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
@@ -595,7 +658,7 @@ if submit and not st.session_state.enviado:
         fuente_financiamiento,
         monto_financiamiento,
         alumnos,
-        puntaje,
+        puntaje_fila,
         responsable_de_carga
         ]
 
@@ -620,6 +683,9 @@ if submit and not st.session_state.enviado:
 
     elif not responsable_de_carga.strip():
         st.error("Debe completar el Responsable de carga")
+
+    elif err_puntaje:
+        st.error(err_puntaje)
 
     else:
         sheet.append_row(fila)
@@ -772,14 +838,9 @@ if generar:
 
             p.add_run(f"   Unidad Académica: {unidad}\n")
 
-            puntaje_valor = r.get("puntaje", 0)
-            try:
-                puntaje_num = float(puntaje_valor)
-            except:
-                puntaje_num = 0
-
-            if puntaje_num > 0:
-                p.add_run(f"   Puntaje: {int(puntaje_num)}\n")
+            puntaje_num = parse_puntaje_valor(r.get("puntaje", 0))
+            if puntaje_num is not None and puntaje_num > 0:
+                p.add_run(f"   Puntaje: {format_puntaje_doc_es(puntaje_num)}\n")
 
             if r.get("resolucion_cd"):
                 p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
