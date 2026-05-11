@@ -498,16 +498,7 @@ with st.form("form_acta", clear_on_submit=False):
     puntaje = 0.0
     if tipo in TIPOS_CON_PUNTAJE:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
-        st.markdown(
-            "<p style='color:#1a1a1a !important; font-size:0.9rem; line-height:1.45; margin:4px 0 8px 0;'>"
-            "<strong style='color:#1a1a1a !important;'>Nota:</strong> "
-            "Decimales con coma o punto (ej: 87,9 o 87.9). En Google Sheets, la columna PUNTAJE conviene que sea "
-            "<strong style='color:#1a1a1a !important;'>Número</strong> (1–2 decimales) o <strong style='color:#1a1a1a !important;'>Texto plano</strong>; "
-            "si está como <strong style='color:#1a1a1a !important;'>Porcentaje</strong> u otro formato, los valores pueden verse multiplicados "
-            "(ej. 8850 en lugar de 88,5)."
-            "</p>",
-            unsafe_allow_html=True,
-        )
+        st.info("Decimales con coma o punto (ej: 87,9 o 87.9).")
         puntaje_raw = st.text_input(
             "",
             placeholder="Ej: 87,9",
