@@ -288,24 +288,6 @@ opciones_unidades = [
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
 st.markdown("<span style='color:black; font-weight:700;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
-st.markdown(
-    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
-    unsafe_allow_html=True
-)
-tipo = st.selectbox("", [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Jornada de Investigación",
-        "Convocatoria a Proyectos de investigación",
-        "Creación de Semillero de Investigación",
-        "Categorización Docente",
-        "Llamado a Concurso de Becas",
-        "Líneas prioritarias de investigación",
-        "Otra"
-    ])
-
 # Fuera del form: cada cambio dispara rerun. Dentro de st.form, los widgets no
 # actualizan el script hasta enviar, y la fecha quedaba desfasada del desplegable de acta.
 st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Año</div>", unsafe_allow_html=True)
@@ -323,6 +305,29 @@ fecha = fechas_actas.get(numero_acta, "")
 st.markdown(
     f"<p style='color:black; margin-top:4px; margin-bottom:0;'><strong>{fecha}</strong></p>",
     unsafe_allow_html=True,
+)
+
+st.markdown(
+    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
+    unsafe_allow_html=True,
+)
+tipo = st.selectbox(
+    "Tipo de actividad",
+    [
+        "Proyecto de Investigación",
+        "Proyecto de Cátedra",
+        "Informe Final",
+        "Informe de Avance",
+        "Jornada de Investigación",
+        "Convocatoria a Proyectos de investigación",
+        "Creación de Semillero de Investigación",
+        "Categorización Docente",
+        "Llamado a Concurso de Becas",
+        "Líneas prioritarias de investigación",
+        "Otra",
+    ],
+    key="tipo_actividad",
+    label_visibility="collapsed",
 )
 
 with st.form("form_acta", clear_on_submit=False):
