@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import re
+import unicodedata
+
 import streamlit as st
 import gspread
 from pathlib import Path
@@ -48,9 +51,35 @@ def parse_puntaje_valor(val):
         if x != x:  # NaN
             return None
         return x
-    s = str(val).strip().replace(" ", "")
-    if not s:
+    s = unicodedata.normalize("NFKC", str(val))
+    s = re.sub(r"\s+", "", s)
+    if not s or s.lower() in ("nan", "none"):
         return None
+    # Patrón claro: parte entera + un separador + parte decimal (evita ambigüedades)
+    m = re.match(r"^(\d{1,4})([.,])(\d{1,4})$", s)
+    if m:
+        whole, _sep, frac = m.groups()
+        try:
+            return float(f"{whole}.{frac}")
+        except ValueError:
+            return None
+    # Miles con punto y decimal con coma: 1.234,56
+    m2 = re.match(r"^(\d{1,3}(?:\.\d{3})+),(\d+)$", s)
+    if m2:
+        whole = m2.group(1).replace(".", "")
+        frac = m2.group(2)
+        try:
+            return float(f"{whole}.{frac}")
+        except ValueError:
+            return None
+    # Solo dígitos (entero)
+    m3 = re.match(r"^(\d{1,4})$", s)
+    if m3:
+        try:
+            return float(m3.group(1))
+        except ValueError:
+            return None
+    # Fallback: un solo tipo de separador
     if "," in s and "." in s:
         if s.rfind(",") > s.rfind("."):
             s = s.replace(".", "").replace(",", ".")
@@ -62,6 +91,14 @@ def parse_puntaje_valor(val):
         return float(s)
     except ValueError:
         return None
+
+
+def puntaje_a_texto_celda_sheet(x: float) -> str:
+    """Texto con punto ASCII para la celda: evita que Sheets (locale ES) reinterprete comas."""
+    x = float(x)
+    if abs(x - round(x)) < 1e-9:
+        return str(int(round(x)))
+    return f"{x:.4f}".rstrip("0").rstrip(".")
 
 
 def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
@@ -406,7 +443,7 @@ with st.form("form_acta", clear_on_submit=False):
     </div>
     """, unsafe_allow_html=True)
     
-    titulo = st.text_input("")
+    titulo = st.text_input("", key="titulo_actividad_consejo")
 
     # =========================
     # 🎯 PUNTAJE
@@ -419,7 +456,7 @@ with st.form("form_acta", clear_on_submit=False):
         puntaje_raw = st.text_input(
             "",
             placeholder="Ej: 87,9",
-            key="puntaje_txt",
+            key="puntaje_informe_consejo",
             label_visibility="collapsed",
         )
         _pv = parse_puntaje_valor(puntaje_raw)
@@ -607,7 +644,7 @@ if submit and not st.session_state.enviado:
 
     if tipo in TIPOS_CON_PUNTAJE:
         puntaje_fila, err_puntaje = parse_puntaje_campo_formulario(
-            st.session_state.get("puntaje_txt", "")
+            st.session_state.get("puntaje_informe_consejo", "")
         )
     else:
         puntaje_fila = 0.0
@@ -635,6 +672,9 @@ if submit and not st.session_state.enviado:
     if str(categoria_codirector).strip().startswith("Seleccionar"):
         categoria_codirector = ""
 
+    if monto_financiamiento is None:
+        monto_financiamiento = ""
+
     fila = [
         numero_acta,
         fecha,
@@ -658,7 +698,7 @@ if submit and not st.session_state.enviado:
         fuente_financiamiento,
         monto_financiamiento,
         alumnos,
-        puntaje_fila,
+        puntaje_a_texto_celda_sheet(puntaje_fila),
         responsable_de_carga
         ]
 
