@@ -300,15 +300,15 @@ acta_label = st.selectbox(
     key="acta",
 )
 numero_acta = int(acta_label.split("Acta ")[1])
-st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom:6px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
 fecha = fechas_actas.get(numero_acta, "")
 st.markdown(
-    f"<p style='color:black; margin-top:4px; margin-bottom:0;'><strong>{fecha}</strong></p>",
+    f"<p style='color:black; margin:0 0 20px 0; padding-bottom:4px;'><strong>{fecha}</strong></p>",
     unsafe_allow_html=True,
 )
 
 st.markdown(
-    "<div style='margin-bottom:-15px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
+    "<div style='margin-bottom:8px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True,
 )
 tipo = st.selectbox(
