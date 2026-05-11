@@ -617,6 +617,9 @@ if submit and not st.session_state.enviado:
     elif not titulo.strip():
         st.error("Debe completar la Denominación de la actividad")
 
+    elif not unidad.strip():
+        st.error("Debe seleccionar la Unidad Académica")
+
     elif not responsable_de_carga.strip():
         st.error("Debe completar el Responsable de carga")
 
