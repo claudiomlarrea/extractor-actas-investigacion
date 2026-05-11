@@ -127,12 +127,9 @@ def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
 
 
 def format_puntaje_doc_es(x: float) -> str:
-    """Texto para Word/correo con coma decimal si hay decimales."""
+    """Texto para Word/correo: siempre 2 decimales y coma (ej. 86,00 como en la hoja)."""
     x = _normalizar_puntaje_desde_hoja(float(x))
-    if abs(x - round(x)) < 1e-9:
-        return str(int(round(x)))
-    t = f"{x:.2f}".rstrip("0").rstrip(".")
-    return t.replace(".", ",")
+    return f"{x:.2f}".replace(".", ",")
 
 
 def puntaje_texto_para_word(raw) -> str | None:
@@ -158,10 +155,8 @@ def puntaje_texto_para_word(raw) -> str | None:
         x = x / 100.0
     if x <= 0 or x > 1000:
         return None
-    if abs(x - round(x)) < 1e-4:
-        return str(int(round(x)))
-    t = f"{x:.4f}".rstrip("0").rstrip(".").replace(".", ",")
-    return t
+    # Siempre dos decimales y coma decimal (alineado a Google Sheets: 86,00)
+    return f"{x:.2f}".replace(".", ",")
 
 
 # =========================
