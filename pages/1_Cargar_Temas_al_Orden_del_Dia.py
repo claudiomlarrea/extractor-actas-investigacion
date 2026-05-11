@@ -326,12 +326,12 @@ with st.form("form_acta", clear_on_submit=False):
     numero_acta = int(acta_label.split("Acta ")[1])
 
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
-    
-    fecha = st.selectbox(
-        "",
-        list(fechas_actas.values()),
-        index=list(fechas_actas.keys()).index(numero_acta),
-        key="fecha"
+
+    # Una sola fuente de verdad: la fecha sale siempre del número de acta elegido arriba.
+    fecha = fechas_actas.get(numero_acta, "")
+    st.markdown(
+        f"<p style='color:black; margin-top:4px; margin-bottom:0;'><strong>{fecha}</strong></p>",
+        unsafe_allow_html=True,
     )
 
     # =========================
