@@ -43,7 +43,7 @@ TIPOS_CON_PUNTAJE = [
 
 
 def _normalizar_puntaje_desde_hoja(x: float) -> float:
-    """Sheets a veces devuelve x100 (columna % o formato numérico). Ej: 8850 → 88.5, 7600 → 76."""
+    """Corrige escalas x100 típicas de Google Sheets (columna %, formato numérico). Ej: 8850 → 88.5."""
     if x != x or x <= 0:
         return x
     x = float(x)
@@ -128,7 +128,7 @@ def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
 
 def format_puntaje_doc_es(x: float) -> str:
     """Texto para Word/correo con coma decimal si hay decimales."""
-    x = float(x)
+    x = _normalizar_puntaje_desde_hoja(float(x))
     if abs(x - round(x)) < 1e-9:
         return str(int(round(x)))
     t = f"{x:.2f}".rstrip("0").rstrip(".")
@@ -895,7 +895,11 @@ if generar:
 
             p.add_run(f"   Unidad Académica: {unidad}\n")
 
-            puntaje_num = parse_puntaje_valor(r.get("puntaje", 0))
+            raw_punt = r.get("puntaje")
+            if raw_punt in (None, ""):
+                puntaje_num = None
+            else:
+                puntaje_num = parse_puntaje_valor(raw_punt)
             if puntaje_num is not None and puntaje_num > 0:
                 p.add_run(f"   Puntaje: {format_puntaje_doc_es(puntaje_num)}\n")
 
