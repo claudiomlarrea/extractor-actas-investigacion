@@ -42,6 +42,19 @@ TIPOS_CON_PUNTAJE = [
 ]
 
 
+def _normalizar_puntaje_desde_hoja(x: float) -> float:
+    """Sheets a veces devuelve x100 (columna % o formato numérico). Ej: 8850 → 88.5, 7600 → 76."""
+    if x != x or x <= 0:
+        return x
+    x = float(x)
+    while x > 1000 and abs(x - round(x)) < 1e-9:
+        ri = int(round(x))
+        if ri % 100 != 0:
+            break
+        x = x / 100.0
+    return x
+
+
 def parse_puntaje_valor(val):
     """Número desde Sheets o texto; admite coma o punto decimal (AR / US)."""
     if val is None or val == "":
@@ -50,7 +63,7 @@ def parse_puntaje_valor(val):
         x = float(val)
         if x != x:  # NaN
             return None
-        return x
+        return _normalizar_puntaje_desde_hoja(x)
     s = unicodedata.normalize("NFKC", str(val))
     s = re.sub(r"\s+", "", s)
     if not s or s.lower() in ("nan", "none"):
@@ -60,7 +73,7 @@ def parse_puntaje_valor(val):
     if m:
         whole, _sep, frac = m.groups()
         try:
-            return float(f"{whole}.{frac}")
+            return _normalizar_puntaje_desde_hoja(float(f"{whole}.{frac}"))
         except ValueError:
             return None
     # Miles con punto y decimal con coma: 1.234,56
@@ -69,14 +82,14 @@ def parse_puntaje_valor(val):
         whole = m2.group(1).replace(".", "")
         frac = m2.group(2)
         try:
-            return float(f"{whole}.{frac}")
+            return _normalizar_puntaje_desde_hoja(float(f"{whole}.{frac}"))
         except ValueError:
             return None
     # Solo dígitos (entero)
     m3 = re.match(r"^(\d{1,4})$", s)
     if m3:
         try:
-            return float(m3.group(1))
+            return _normalizar_puntaje_desde_hoja(float(m3.group(1)))
         except ValueError:
             return None
     # Fallback: un solo tipo de separador
@@ -88,7 +101,7 @@ def parse_puntaje_valor(val):
     else:
         s = s.replace(",", ".")
     try:
-        return float(s)
+        return _normalizar_puntaje_desde_hoja(float(s))
     except ValueError:
         return None
 
@@ -452,7 +465,11 @@ with st.form("form_acta", clear_on_submit=False):
     puntaje = 0.0
     if tipo in TIPOS_CON_PUNTAJE:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
-        st.caption("Decimales con coma o punto (ej: 87,9 o 87.9).")
+        st.caption(
+            "Decimales con coma o punto (ej: 87,9 o 87.9). "
+            "En Google Sheets, la columna PUNTAJE conviene que sea Número (1–2 decimales) o Texto plano; "
+            "si está como Porcentaje u otro formato, los valores pueden verse multiplicados (ej. 8850 en lugar de 88,5)."
+        )
         puntaje_raw = st.text_input(
             "",
             placeholder="Ej: 87,9",
