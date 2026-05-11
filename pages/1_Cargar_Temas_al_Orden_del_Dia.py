@@ -322,6 +322,13 @@ section.main [data-testid="stCaption"] {
     color: #1a1a1a !important;
 }
 
+/* Ayuda puntaje: gris neutro, sin fondo celeste de st.info */
+[data-testid="stForm"] .puntaje-ayuda-inline {
+    background-color: #e4e4e4 !important;
+    color: #111111 !important;
+    border: 1px solid #c8c8c8 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -498,7 +505,14 @@ with st.form("form_acta", clear_on_submit=False):
     puntaje = 0.0
     if tipo in TIPOS_CON_PUNTAJE:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
-        st.info("Decimales con coma o punto (ej: 87,9 o 87.9).")
+        st.markdown(
+            "<div class='puntaje-ayuda-inline' style='background:#e4e4e4 !important;color:#111111 !important;"
+            "padding:10px 12px;border-radius:6px;font-size:0.95rem;line-height:1.45;margin:4px 0 10px 0;"
+            "border:1px solid #c8c8c8 !important;'>"
+            "Decimales con coma o punto (ej: 87,9 o 87.9)."
+            "</div>",
+            unsafe_allow_html=True,
+        )
         puntaje_raw = st.text_input(
             "",
             placeholder="Ej: 87,9",
