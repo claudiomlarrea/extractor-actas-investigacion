@@ -47,7 +47,7 @@ def _normalizar_puntaje_desde_hoja(x: float) -> float:
     if x != x or x <= 0:
         return x
     x = float(x)
-    while x > 1000 and abs(x - round(x)) < 1e-9:
+    while x > 1000 and abs(x - round(x)) < 1e-4:
         ri = int(round(x))
         if ri % 100 != 0:
             break
@@ -133,6 +133,35 @@ def format_puntaje_doc_es(x: float) -> str:
         return str(int(round(x)))
     t = f"{x:.2f}".rstrip("0").rstrip(".")
     return t.replace(".", ",")
+
+
+def puntaje_texto_para_word(raw) -> str | None:
+    """
+    Texto final para la línea «Puntaje: …» del Word.
+    Refuerza la corrección x100 (hoja mal formateada / API) y evita mostrar 8780 tal cual.
+    """
+    if raw in (None, ""):
+        return None
+    n = parse_puntaje_valor(raw)
+    if n is None or n <= 0:
+        return None
+    x = float(n)
+    for _ in range(10):
+        if x <= 1000:
+            break
+        # tolerancia por floats de la API (8780.000000001)
+        if abs(x - round(x)) >= 1e-4:
+            break
+        ri = int(round(x))
+        if ri % 100 != 0:
+            break
+        x = x / 100.0
+    if x <= 0 or x > 1000:
+        return None
+    if abs(x - round(x)) < 1e-4:
+        return str(int(round(x)))
+    t = f"{x:.4f}".rstrip("0").rstrip(".").replace(".", ",")
+    return t
 
 
 # =========================
@@ -628,7 +657,7 @@ Financiamiento: {fila[18]}
 Fuente: {fila[19]}
 Monto: {fila[20]}
 Alumnos: {fila[21]}
-Puntaje: {fila[22]}
+Puntaje: {puntaje_texto_para_word(fila[22]) or "N/D"}
 Responsable de carga: {fila[23]}
 """
 
@@ -896,12 +925,9 @@ if generar:
             p.add_run(f"   Unidad Académica: {unidad}\n")
 
             raw_punt = r.get("puntaje")
-            if raw_punt in (None, ""):
-                puntaje_num = None
-            else:
-                puntaje_num = parse_puntaje_valor(raw_punt)
-            if puntaje_num is not None and puntaje_num > 0:
-                p.add_run(f"   Puntaje: {format_puntaje_doc_es(puntaje_num)}\n")
+            txt_puntaje = puntaje_texto_para_word(raw_punt)
+            if txt_puntaje:
+                p.add_run(f"   Puntaje: {txt_puntaje}\n")
 
             if r.get("resolucion_cd"):
                 p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
