@@ -4,7 +4,6 @@ import re
 import unicodedata
 
 import streamlit as st
-import streamlit.components.v1 as components
 import gspread
 from pathlib import Path
 from google.oauth2.service_account import Credentials
@@ -33,11 +32,6 @@ def ordenar_registros_por_unidad_academica(registros):
     indexed = list(enumerate(registros))
     indexed.sort(key=lambda t: (_unidad_academica_clave(t[1]).casefold(), t[0]))
     return [r for _, r in indexed]
-
-
-def _ayuda_en_iframe(html: str, alto: int) -> None:
-    """HTML aislado del CSS del tema (evita texto blanco en markdown dentro del form)."""
-    components.html(html, height=alto, scrolling=False)
 
 
 TIPOS_CON_PUNTAJE = [
@@ -328,24 +322,15 @@ section.main [data-testid="stCaptionContainer"],
 section.main [data-testid="stCaptionContainer"] p,
 section.main [data-testid="stCaptionContainer"] small,
 section.main [data-testid="stCaptionContainer"] span,
-section.main [data-testid="stCaption"],
-[data-testid="stMain"] [data-testid="stCaptionContainer"],
-[data-testid="stMain"] [data-testid="stCaptionContainer"] p,
-[data-testid="stMain"] [data-testid="stCaptionContainer"] small,
-[data-testid="stMain"] [data-testid="stCaptionContainer"] span {
+section.main [data-testid="stCaption"] {
     color: #1a1a1a !important;
 }
 
-/* Caption dentro del formulario */
-[data-testid="stForm"] [data-testid="stCaptionContainer"] {
-    margin-top: 0 !important;
-    margin-bottom: 0.35rem !important;
-    padding-top: 0 !important;
-}
-[data-testid="stForm"] [data-testid="stCaptionContainer"],
-[data-testid="stForm"] [data-testid="stCaptionContainer"] * {
-    color: #1a1a1a !important;
-    -webkit-text-fill-color: #1a1a1a !important;
+/* Ayuda puntaje: gris neutro, sin fondo celeste de st.info */
+[data-testid="stForm"] .puntaje-ayuda-inline {
+    background-color: #e4e4e4 !important;
+    color: #111111 !important;
+    border: 1px solid #c8c8c8 !important;
 }
 
 </style>
@@ -504,74 +489,37 @@ with col_tipo_1:
         label_visibility="collapsed",
     )
 
-# Responsable y tipo de financiamiento FUERA del form: dentro de st.form los cambios
-# no re-ejecutan el script hasta "Enviar", y no se pueden mostrar Fuente/Monto al
-# elegir Interno o Externo.
-fuente_financiamiento = ""
-monto_financiamiento = None
-
-if tipo != "Categorización Docente":
-    _ext_f1, _ext_f2 = st.columns(2)
-    with _ext_f1:
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>",
-            unsafe_allow_html=True,
-        )
-        tipo_financiamiento = st.selectbox(
-            "",
-            ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"],
-            key="fin",
-            label_visibility="collapsed",
-        )
-    with _ext_f2:
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
-            unsafe_allow_html=True,
-        )
-        responsable_de_carga = st.text_input("", key="responsable")
-else:
-    tipo_financiamiento = ""
-    fuente_financiamiento = ""
-    monto_financiamiento = 0
-    st.markdown(
-        "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
-        unsafe_allow_html=True,
-    )
-    responsable_de_carga = st.text_input("", key="responsable")
-
 with st.form("form_acta", clear_on_submit=False):
 
     # =========================
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="top")
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="margin-top:5px; margin-bottom:-15px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
+    <span style="font-weight:700;">Indicaciones:</span>
+    <ul style="margin-top:5px; margin-bottom:0;">
+    <li>Título del proyecto</li>
+    <li>Título del Informe Final o de Avance</li>
+    <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
     with col_tema_1:
-        st.markdown(
-            "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
-            unsafe_allow_html=True,
-        )
-        _ayuda_en_iframe(
-            "<div style=\"box-sizing:border-box;margin:0;padding:6px 10px;font:12px/1.35 system-ui,sans-serif;"
-            "color:#111;background:#dedede;border-radius:6px;border-left:4px solid #0b6b5d;\">"
-            "<strong>Indicaciones:</strong> "
-            "Título del proyecto; Título del Informe Final o de Avance; "
-            "Título de Jornada / Semillero / Instituto u otra actividad</div>",
-            alto=88,
-        )
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Puntaje</div>",
+                "<div style='color:#111111 !important;font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;'>"
+                "Decimales con coma o punto (ej: 87,9 o 87.9)."
+                "</div>",
                 unsafe_allow_html=True,
-            )
-            _ayuda_en_iframe(
-                "<div style=\"box-sizing:border-box;margin:0;padding:6px 8px;font:13px/1.35 system-ui,sans-serif;"
-                "color:#111;background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
-                "Decimales con coma o punto (ej: 87,9 o 87.9).</div>",
-                alto=48,
             )
             puntaje_raw = st.text_input(
                 "",
@@ -667,24 +615,35 @@ with st.form("form_acta", clear_on_submit=False):
         resolucion_cd = ""
         resolucion_cs = ""
 
-    # Fuente y monto (solo si ya se eligió Interno/Externo fuera del form)
-    if tipo != "Categorización Docente" and tipo_financiamiento in ("Interno", "Externo"):
-        row_f2_1, row_f2_2 = st.columns(2)
-        with row_f2_1:
-            st.markdown(
-                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>",
-                unsafe_allow_html=True,
-            )
+    # =========================
+    # 👤 RESPONSABLE
+    # =========================
+
+    col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
+    with col_fin_1:
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
+        responsable_de_carga = st.text_input("", key="responsable")
+
+    # =========================
+    # 💰 FINANCIAMIENTO
+    # =========================
+
+    if tipo != "Categorización Docente":
+    
+        with col_fin_2:
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
+            tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
+        with col_fin_3:
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>", unsafe_allow_html=True)
             fuente_financiamiento = st.text_input("", key="fuente")
-        with row_f2_2:
-            st.markdown(
-                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>",
-                unsafe_allow_html=True,
-            )
+        with col_fin_4:
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
             monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
-    elif tipo != "Categorización Docente":
+    
+    else:
+        tipo_financiamiento = ""
         fuente_financiamiento = ""
-        monto_financiamiento = None
+        monto_financiamiento = 0
 
     # =========================
     # 🔘 SUBMIT
