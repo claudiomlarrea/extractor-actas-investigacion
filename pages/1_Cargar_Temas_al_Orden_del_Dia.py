@@ -586,7 +586,7 @@ with st.form("form_acta", clear_on_submit=False):
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
             catedra = st.text_input("", key="catedra")
         with col_eq_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700; font-size:0.92rem; line-height:1.2;'>🟢 Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
             alumnos = st.text_input("", key="alumnos")
 
     # =========================
