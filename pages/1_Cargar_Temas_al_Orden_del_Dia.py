@@ -633,31 +633,50 @@ with st.form("form_acta", clear_on_submit=False):
         resolucion_cs = ""
 
     # =========================
-    # 👤 RESPONSABLE
-    # =========================
-
-    col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
-    with col_fin_1:
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
-        responsable_de_carga = st.text_input("", key="responsable")
-
-    # =========================
-    # 💰 FINANCIAMIENTO
+    # 👤 RESPONSABLE + 💰 FINANCIAMIENTO
     # =========================
 
     if tipo != "Categorización Docente":
-    
-        with col_fin_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
-            tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
-        with col_fin_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>", unsafe_allow_html=True)
-            fuente_financiamiento = st.text_input("", key="fuente")
-        with col_fin_4:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
-            monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
-    
+        row_f1_1, row_f1_2 = st.columns(2)
+        with row_f1_1:
+            st.markdown(
+                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
+                unsafe_allow_html=True,
+            )
+            responsable_de_carga = st.text_input("", key="responsable")
+        with row_f1_2:
+            st.markdown(
+                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>",
+                unsafe_allow_html=True,
+            )
+            tipo_financiamiento = st.selectbox(
+                "",
+                ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"],
+                key="fin",
+            )
+        if tipo_financiamiento in ("Interno", "Externo"):
+            row_f2_1, row_f2_2 = st.columns(2)
+            with row_f2_1:
+                st.markdown(
+                    "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>",
+                    unsafe_allow_html=True,
+                )
+                fuente_financiamiento = st.text_input("", key="fuente")
+            with row_f2_2:
+                st.markdown(
+                    "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>",
+                    unsafe_allow_html=True,
+                )
+                monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
+        else:
+            fuente_financiamiento = ""
+            monto_financiamiento = None
     else:
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
+            unsafe_allow_html=True,
+        )
+        responsable_de_carga = st.text_input("", key="responsable")
         tipo_financiamiento = ""
         fuente_financiamiento = ""
         monto_financiamiento = 0
