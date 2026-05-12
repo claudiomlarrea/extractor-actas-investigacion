@@ -504,6 +504,41 @@ with col_tipo_1:
         label_visibility="collapsed",
     )
 
+# Responsable y tipo de financiamiento FUERA del form: dentro de st.form los cambios
+# no re-ejecutan el script hasta "Enviar", y no se pueden mostrar Fuente/Monto al
+# elegir Interno o Externo.
+fuente_financiamiento = ""
+monto_financiamiento = None
+
+if tipo != "Categorización Docente":
+    _ext_f1, _ext_f2 = st.columns(2)
+    with _ext_f1:
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>",
+            unsafe_allow_html=True,
+        )
+        tipo_financiamiento = st.selectbox(
+            "",
+            ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"],
+            key="fin",
+            label_visibility="collapsed",
+        )
+    with _ext_f2:
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
+            unsafe_allow_html=True,
+        )
+        responsable_de_carga = st.text_input("", key="responsable")
+else:
+    tipo_financiamiento = ""
+    fuente_financiamiento = ""
+    monto_financiamiento = 0
+    st.markdown(
+        "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
+        unsafe_allow_html=True,
+    )
+    responsable_de_carga = st.text_input("", key="responsable")
+
 with st.form("form_acta", clear_on_submit=False):
 
     # =========================
@@ -632,54 +667,24 @@ with st.form("form_acta", clear_on_submit=False):
         resolucion_cd = ""
         resolucion_cs = ""
 
-    # =========================
-    # 👤 RESPONSABLE + 💰 FINANCIAMIENTO
-    # =========================
-
-    if tipo != "Categorización Docente":
-        row_f1_1, row_f1_2 = st.columns(2)
-        with row_f1_1:
+    # Fuente y monto (solo si ya se eligió Interno/Externo fuera del form)
+    if tipo != "Categorización Docente" and tipo_financiamiento in ("Interno", "Externo"):
+        row_f2_1, row_f2_2 = st.columns(2)
+        with row_f2_1:
             st.markdown(
-                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
+                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>",
                 unsafe_allow_html=True,
             )
-            responsable_de_carga = st.text_input("", key="responsable")
-        with row_f1_2:
+            fuente_financiamiento = st.text_input("", key="fuente")
+        with row_f2_2:
             st.markdown(
-                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>",
+                "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>",
                 unsafe_allow_html=True,
             )
-            tipo_financiamiento = st.selectbox(
-                "",
-                ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"],
-                key="fin",
-            )
-        if tipo_financiamiento in ("Interno", "Externo"):
-            row_f2_1, row_f2_2 = st.columns(2)
-            with row_f2_1:
-                st.markdown(
-                    "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>",
-                    unsafe_allow_html=True,
-                )
-                fuente_financiamiento = st.text_input("", key="fuente")
-            with row_f2_2:
-                st.markdown(
-                    "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>",
-                    unsafe_allow_html=True,
-                )
-                monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
-        else:
-            fuente_financiamiento = ""
-            monto_financiamiento = None
-    else:
-        st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>",
-            unsafe_allow_html=True,
-        )
-        responsable_de_carga = st.text_input("", key="responsable")
-        tipo_financiamiento = ""
+            monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
+    elif tipo != "Categorización Docente":
         fuente_financiamiento = ""
-        monto_financiamiento = 0
+        monto_financiamiento = None
 
     # =========================
     # 🔘 SUBMIT
