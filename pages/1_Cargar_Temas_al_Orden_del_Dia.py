@@ -629,7 +629,7 @@ with st.form("form_acta", clear_on_submit=False):
     # =========================
 
     if tipo != "Categorización Docente":
-    
+
         with col_fin_2:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
             tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
@@ -639,7 +639,7 @@ with st.form("form_acta", clear_on_submit=False):
         with col_fin_4:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
             monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
-    
+
     else:
         tipo_financiamiento = ""
         fuente_financiamiento = ""
