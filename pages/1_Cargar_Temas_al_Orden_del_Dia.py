@@ -326,15 +326,28 @@ section.main [data-testid="stCaption"] {
     color: #1a1a1a !important;
 }
 
-/* Ayuda puntaje: gris neutro; texto forzado a negro (el tema a veces deja markdown en blanco) */
-section.main [data-testid="stForm"] .puntaje-ayuda-inline,
-section.main [data-testid="stForm"] .puntaje-ayuda-inline * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+/* Ayuda puntaje: usar st.caption; compactar dentro del formulario */
+section.main [data-testid="stForm"] [data-testid="stCaptionContainer"] {
+    margin-top: 0 !important;
+    margin-bottom: 0.35rem !important;
+    padding-top: 0 !important;
 }
-section.main [data-testid="stForm"] .puntaje-ayuda-inline {
-    background-color: #e4e4e4 !important;
-    border: 1px solid #c8c8c8 !important;
+section.main [data-testid="stForm"] [data-testid="stCaptionContainer"],
+section.main [data-testid="stForm"] [data-testid="stCaptionContainer"] * {
+    color: #1a1a1a !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* Indicaciones bajo Denominación: una línea compacta */
+section.main [data-testid="stForm"] .indicaciones-denominacion {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    color: #1a1a1a !important;
+    margin: 0 0 6px 0 !important;
+    padding: 5px 8px !important;
+    background-color: #dedede !important;
+    border-radius: 5px !important;
+    border-left: 3px solid #0b6b5d !important;
 }
 
 </style>
@@ -499,36 +512,27 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    col_den_head_1, col_den_head_2 = st.columns([1.05, 1.35])
-    with col_den_head_1:
-        st.markdown(
-            "<div style='margin-bottom:4px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
-            unsafe_allow_html=True,
-        )
-    with col_den_head_2:
-        st.markdown(
-            """
-            <div style="margin:0 0 6px 0; background-color:#E6E6E6; padding:6px 10px; border-radius:6px; font-size:12px; color:#000000; line-height:1.35;">
-            <span style="font-weight:700;">Indicaciones:</span>
-            Título del proyecto; Título del Informe Final o de Avance; Título de Jornada / Semillero / Instituto u otra actividad
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
+    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="top")
     with col_tema_1:
+        st.markdown(
+            "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div class="indicaciones-denominacion"><strong>Indicaciones:</strong> '
+            "Título del proyecto; Título del Informe Final o de Avance; "
+            "Título de Jornada / Semillero / Instituto u otra actividad</div>",
+            unsafe_allow_html=True,
+        )
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
             st.markdown(
-                '<div class="puntaje-ayuda-inline" style="font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;padding:6px 8px;border-radius:6px;">'
-                "Decimales con coma o punto (ej: 87,9 o 87.9)."
-                "</div>",
+                "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Puntaje</div>",
                 unsafe_allow_html=True,
             )
+            st.caption("Decimales con coma o punto (ej: 87,9 o 87.9).")
             puntaje_raw = st.text_input(
                 "",
                 placeholder="Ej: 87,9",
