@@ -4,6 +4,7 @@ import re
 import unicodedata
 
 import streamlit as st
+import streamlit.components.v1 as components
 import gspread
 from pathlib import Path
 from google.oauth2.service_account import Credentials
@@ -32,6 +33,11 @@ def ordenar_registros_por_unidad_academica(registros):
     indexed = list(enumerate(registros))
     indexed.sort(key=lambda t: (_unidad_academica_clave(t[1]).casefold(), t[0]))
     return [r for _, r in indexed]
+
+
+def _ayuda_en_iframe(html: str, alto: int) -> None:
+    """HTML aislado del CSS del tema (evita texto blanco en markdown dentro del form)."""
+    components.html(html, height=alto, scrolling=False)
 
 
 TIPOS_CON_PUNTAJE = [
@@ -322,48 +328,24 @@ section.main [data-testid="stCaptionContainer"],
 section.main [data-testid="stCaptionContainer"] p,
 section.main [data-testid="stCaptionContainer"] small,
 section.main [data-testid="stCaptionContainer"] span,
-section.main [data-testid="stCaption"] {
+section.main [data-testid="stCaption"],
+[data-testid="stMain"] [data-testid="stCaptionContainer"],
+[data-testid="stMain"] [data-testid="stCaptionContainer"] p,
+[data-testid="stMain"] [data-testid="stCaptionContainer"] small,
+[data-testid="stMain"] [data-testid="stCaptionContainer"] span {
     color: #1a1a1a !important;
 }
 
-/* Ayuda puntaje: usar st.caption; compactar dentro del formulario */
-section.main [data-testid="stForm"] [data-testid="stCaptionContainer"] {
+/* Caption dentro del formulario */
+[data-testid="stForm"] [data-testid="stCaptionContainer"] {
     margin-top: 0 !important;
     margin-bottom: 0.35rem !important;
     padding-top: 0 !important;
 }
-section.main [data-testid="stForm"] [data-testid="stCaptionContainer"],
-section.main [data-testid="stForm"] [data-testid="stCaptionContainer"] * {
+[data-testid="stForm"] [data-testid="stCaptionContainer"],
+[data-testid="stForm"] [data-testid="stCaptionContainer"] * {
     color: #1a1a1a !important;
     -webkit-text-fill-color: #1a1a1a !important;
-}
-
-/* Indicaciones + ayuda puntaje: texto siempre negro (tema Streamlit / variables CSS) */
-section.main [data-testid="stForm"] .indicaciones-denominacion,
-section.main [data-testid="stForm"] .indicaciones-denominacion *,
-section.main [data-testid="stForm"] .puntaje-ayuda-line,
-section.main [data-testid="stForm"] .puntaje-ayuda-line * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    opacity: 1 !important;
-}
-section.main [data-testid="stForm"] .indicaciones-denominacion {
-    font-size: 11px !important;
-    line-height: 1.25 !important;
-    margin: 0 0 6px 0 !important;
-    padding: 5px 8px !important;
-    background-color: #dedede !important;
-    border-radius: 5px !important;
-    border-left: 3px solid #0b6b5d !important;
-}
-section.main [data-testid="stForm"] .puntaje-ayuda-line {
-    font-size: 0.82rem !important;
-    line-height: 1.3 !important;
-    margin: 0 0 6px 0 !important;
-    padding: 4px 8px !important;
-    background-color: #e4e4e4 !important;
-    border: 1px solid #c8c8c8 !important;
-    border-radius: 5px !important;
 }
 
 </style>
@@ -522,23 +504,6 @@ with col_tipo_1:
         label_visibility="collapsed",
     )
 
-# Reglas duplicadas con alta especificidad: el tema de Streamlit a veces deja texto
-# claro en markdown del formulario aunque el CSS global pida color oscuro.
-st.markdown(
-    """
-    <style>
-    html body section.main [data-testid="stForm"] .indicaciones-denominacion,
-    html body section.main [data-testid="stForm"] .indicaciones-denominacion strong,
-    html body section.main [data-testid="stForm"] .indicaciones-denominacion span,
-    html body section.main [data-testid="stForm"] .puntaje-ayuda-line {
-        color: rgb(0, 0, 0) !important;
-        -webkit-text-fill-color: rgb(0, 0, 0) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 with st.form("form_acta", clear_on_submit=False):
 
     # =========================
@@ -551,15 +516,13 @@ with st.form("form_acta", clear_on_submit=False):
             "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
             unsafe_allow_html=True,
         )
-        st.markdown(
-            '<div class="indicaciones-denominacion" style="color:#000000 !important;-webkit-text-fill-color:#000000 !important;'
-            'font-size:11px;line-height:1.25;margin:0 0 6px 0;padding:5px 8px;background-color:#dedede;border-radius:5px;'
-            'border-left:3px solid #0b6b5d;">'
-            '<strong style="color:#000000 !important;-webkit-text-fill-color:#000000 !important;">Indicaciones:</strong> '
-            '<span style="color:#000000 !important;-webkit-text-fill-color:#000000 !important;">'
+        _ayuda_en_iframe(
+            "<div style=\"box-sizing:border-box;margin:0;padding:6px 10px;font:12px/1.35 system-ui,sans-serif;"
+            "color:#111;background:#dedede;border-radius:6px;border-left:4px solid #0b6b5d;\">"
+            "<strong>Indicaciones:</strong> "
             "Título del proyecto; Título del Informe Final o de Avance; "
-            "Título de Jornada / Semillero / Instituto u otra actividad</span></div>",
-            unsafe_allow_html=True,
+            "Título de Jornada / Semillero / Instituto u otra actividad</div>",
+            alto=88,
         )
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
@@ -569,12 +532,11 @@ with st.form("form_acta", clear_on_submit=False):
                 "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Puntaje</div>",
                 unsafe_allow_html=True,
             )
-            st.markdown(
-                '<div class="puntaje-ayuda-line" style="color:#000000 !important;-webkit-text-fill-color:#000000 !important;'
-                "font-size:0.82rem;line-height:1.3;margin:0 0 6px 0;padding:4px 8px;background-color:#e4e4e4;"
-                'border:1px solid #c8c8c8;border-radius:5px;">'
+            _ayuda_en_iframe(
+                "<div style=\"box-sizing:border-box;margin:0;padding:6px 8px;font:13px/1.35 system-ui,sans-serif;"
+                "color:#111;background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
                 "Decimales con coma o punto (ej: 87,9 o 87.9).</div>",
-                unsafe_allow_html=True,
+                alto=48,
             )
             puntaje_raw = st.text_input(
                 "",
