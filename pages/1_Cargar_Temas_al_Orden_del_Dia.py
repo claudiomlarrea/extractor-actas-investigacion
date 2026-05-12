@@ -589,7 +589,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 🏫 UNIDAD
     # =========================
 
-    col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([3.8, 1, 1])
+    col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.6, 1.2, 1.2])
     with col_uni_res_1:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
         unidad = st.selectbox("", opciones_unidades, key="unidad")
