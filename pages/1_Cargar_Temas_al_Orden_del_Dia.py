@@ -464,24 +464,26 @@ st.markdown(
     "<div style='margin-bottom:8px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True,
 )
-tipo = st.selectbox(
-    "Tipo de actividad",
-    [
-        "Proyecto de Investigación",
-        "Proyecto de Cátedra",
-        "Informe Final",
-        "Informe de Avance",
-        "Jornada de Investigación",
-        "Convocatoria a Proyectos de investigación",
-        "Creación de Semillero de Investigación",
-        "Categorización Docente",
-        "Llamado a Concurso de Becas",
-        "Líneas prioritarias de investigación",
-        "Otra",
-    ],
-    key="tipo_actividad",
-    label_visibility="collapsed",
-)
+col_tipo_1, col_tipo_2 = st.columns([2, 3])
+with col_tipo_1:
+    tipo = st.selectbox(
+        "Tipo de actividad",
+        [
+            "Proyecto de Investigación",
+            "Proyecto de Cátedra",
+            "Informe Final",
+            "Informe de Avance",
+            "Jornada de Investigación",
+            "Convocatoria a Proyectos de investigación",
+            "Creación de Semillero de Investigación",
+            "Categorización Docente",
+            "Llamado a Concurso de Becas",
+            "Líneas prioritarias de investigación",
+            "Otra",
+        ],
+        key="tipo_actividad",
+        label_visibility="collapsed",
+    )
 
 with st.form("form_acta", clear_on_submit=False):
 
@@ -502,7 +504,7 @@ with st.form("form_acta", clear_on_submit=False):
     </div>
     """, unsafe_allow_html=True)
     
-    col_tema_1, col_tema_2 = st.columns([2, 1])
+    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
     with col_tema_1:
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
@@ -510,9 +512,7 @@ with st.form("form_acta", clear_on_submit=False):
         if tipo in TIPOS_CON_PUNTAJE:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
             st.markdown(
-                "<div class='puntaje-ayuda-inline' style='background:#e4e4e4 !important;color:#111111 !important;"
-                "padding:10px 12px;border-radius:6px;font-size:0.95rem;line-height:1.45;margin:4px 0 10px 0;"
-                "border:1px solid #c8c8c8 !important;'>"
+                "<div style='color:#111111 !important;font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;'>"
                 "Decimales con coma o punto (ej: 87,9 o 87.9)."
                 "</div>",
                 unsafe_allow_html=True,
@@ -589,10 +589,8 @@ with st.form("form_acta", clear_on_submit=False):
     # 🏫 UNIDAD
     # =========================
 
-    col_uni_1, col_uni_2 = st.columns([2, 1])
-    with col_uni_1:
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
-        unidad = st.selectbox("", opciones_unidades, key="unidad")
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
+    unidad = st.selectbox("", opciones_unidades, key="unidad")
 
     # =========================
     # 📄 RESOLUCIONES
@@ -600,9 +598,11 @@ with st.form("form_acta", clear_on_submit=False):
 
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
-        with col_uni_2:
+        col_res_1, col_res_2 = st.columns(2)
+        with col_res_1:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
             resolucion_cd = st.text_input("", key="resolucion_cd")
+        with col_res_2:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS (solo para Informes Finales y de Avances)</div>", unsafe_allow_html=True)
             resolucion_cs = st.text_input("", key="resolucion_cs")
 
@@ -614,7 +614,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 👤 RESPONSABLE
     # =========================
 
-    col_fin_1, col_fin_2, col_fin_3 = st.columns(3)
+    col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
     with col_fin_1:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
         responsable_de_carga = st.text_input("", key="responsable")
@@ -628,9 +628,10 @@ with st.form("form_acta", clear_on_submit=False):
         with col_fin_2:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
             tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
+        with col_fin_3:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>", unsafe_allow_html=True)
             fuente_financiamiento = st.text_input("", key="fuente")
-        with col_fin_3:
+        with col_fin_4:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
             monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
     
