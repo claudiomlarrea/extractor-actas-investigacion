@@ -326,10 +326,14 @@ section.main [data-testid="stCaption"] {
     color: #1a1a1a !important;
 }
 
-/* Ayuda puntaje: gris neutro, sin fondo celeste de st.info */
-[data-testid="stForm"] .puntaje-ayuda-inline {
+/* Ayuda puntaje: gris neutro; texto forzado a negro (el tema a veces deja markdown en blanco) */
+section.main [data-testid="stForm"] .puntaje-ayuda-inline,
+section.main [data-testid="stForm"] .puntaje-ayuda-inline * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+section.main [data-testid="stForm"] .puntaje-ayuda-inline {
     background-color: #e4e4e4 !important;
-    color: #111111 !important;
     border: 1px solid #c8c8c8 !important;
 }
 
@@ -524,7 +528,7 @@ with st.form("form_acta", clear_on_submit=False):
         if tipo in TIPOS_CON_PUNTAJE:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='color:#111111 !important;font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;'>"
+                '<div class="puntaje-ayuda-inline" style="font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;padding:6px 8px;border-radius:6px;">'
                 "Decimales con coma o punto (ej: 87,9 o 87.9)."
                 "</div>",
                 unsafe_allow_html=True,
