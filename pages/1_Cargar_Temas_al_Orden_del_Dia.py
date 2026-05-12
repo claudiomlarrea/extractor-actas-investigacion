@@ -7,6 +7,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import gspread
 from pathlib import Path
+from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
 from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
@@ -174,6 +175,7 @@ def puntaje_texto_para_word(raw) -> str | None:
 # =========================
 
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
+hide_streamlit_cloud_toolbar()
 
 _APP_ROOT = Path(__file__).resolve().parent.parent
 _LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"

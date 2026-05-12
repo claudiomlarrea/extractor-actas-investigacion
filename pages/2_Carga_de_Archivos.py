@@ -1,6 +1,8 @@
 import streamlit as st
 from pathlib import Path
 
+from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
+
 # =========================
 # CONFIG
 # =========================
@@ -9,6 +11,7 @@ st.set_page_config(
     page_title="Carga de Actas - Consejo de Investigación",
     layout="wide"
 )
+hide_streamlit_cloud_toolbar()
 
 # =========================
 # ESTILO

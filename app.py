@@ -1,7 +1,10 @@
 import streamlit as st
 from pathlib import Path
 
+from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
+
 st.set_page_config(page_title="Sistema de Actas", layout="wide")
+hide_streamlit_cloud_toolbar()
 
 # =========================
 # ESTILO

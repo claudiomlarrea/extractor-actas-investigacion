@@ -3,6 +3,11 @@ import gspread
 from google.oauth2.service_account import Credentials
 from pathlib import Path
 
+from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
+
+st.set_page_config(page_title="Publicaciones - Consejo de Investigación", layout="wide")
+hide_streamlit_cloud_toolbar()
+
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"

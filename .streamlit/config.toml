@@ -1,0 +1,4 @@
+# Menos UI de “desarrollador” en la esquina superior derecha para quienes visitan la app.
+# https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+[client]
+toolbarMode = "viewer"
