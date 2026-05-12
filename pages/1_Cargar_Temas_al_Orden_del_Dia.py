@@ -497,42 +497,41 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    # Fila 1: título Denominación alineado arriba con Indicaciones (misma línea).
-    # Fila 2: inputs. Todo con vertical_alignment=top para no “colgar” indicaciones solas arriba.
-    hdr_l, hdr_r = st.columns([2, 1], vertical_alignment="top")
-    with hdr_l:
-        st.markdown(
-            "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
-            unsafe_allow_html=True,
-        )
-    with hdr_r:
+    # Mockup: 3 columnas — Denominación+input | Indicaciones (solo banner) | Puntaje+input
+    _hdr_iframe_h = 100
+    col_den, col_ind, col_pun = st.columns([2.5, 2.5, 1.05], vertical_alignment="top")
+
+    with col_den:
         _ayuda_en_iframe(
-            "<div style=\"box-sizing:border-box;margin:0;padding:6px 10px 8px;font:12px/1.35 system-ui,sans-serif;"
-            "color:#111;background:#dedede;border-radius:6px;border-left:4px solid #0b6b5d;\">"
+            f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;align-items:center;"
+            "padding:8px 12px;font:bold 15px/1.2 system-ui,sans-serif;color:#111;background:#dedede;"
+            'border-radius:6px;border:1px solid #c8c8c8;">🟢 Denominación de la actividad o Tema</div>',
+            alto=_hdr_iframe_h,
+        )
+        titulo = st.text_input("", key="titulo_actividad_consejo")
+
+    with col_ind:
+        _ayuda_en_iframe(
+            f"<div style=\"box-sizing:border-box;min-height:{_hdr_iframe_h - 2}px;padding:8px 10px;font:11.5px/1.3 system-ui,sans-serif;"
+            "color:#111;background:#dedede;border-radius:6px;border-left:5px solid #0b6b5d;"
+            'border-top:1px solid #c8c8c8;border-right:1px solid #c8c8c8;border-bottom:1px solid #c8c8c8;">'
             "<strong>Indicaciones:</strong> "
             "Título del proyecto; Título del Informe Final o de Avance; "
             "Título de Jornada / Semillero / Instituto u otra actividad</div>",
-            alto=86,
+            alto=_hdr_iframe_h,
         )
 
-    st.markdown(
-        "<div style='margin-top:-8px;margin-bottom:-4px;' aria-hidden='true'></div>",
-        unsafe_allow_html=True,
-    )
-
-    inp_l, inp_r = st.columns([2, 1], vertical_alignment="top")
-    with inp_l:
-        titulo = st.text_input("", key="titulo_actividad_consejo")
-    with inp_r:
+    with col_pun:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
             _ayuda_en_iframe(
-                "<div style=\"box-sizing:border-box;margin:0 0 8px 0;padding:8px 10px 10px;font-family:system-ui,sans-serif;"
-                "background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
-                "<div style=\"font-weight:700;color:#111;font-size:14px;line-height:1.25;margin:0 0 6px 0;\">🟢 Puntaje</div>"
-                "<div style=\"font-size:12px;line-height:1.4;color:#111;\">"
+                f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;flex-direction:column;"
+                "justify-content:center;gap:6px;padding:8px 10px;font-family:system-ui,sans-serif;"
+                "background:#dedede;border-radius:6px;border:1px solid #c8c8c8;\">"
+                "<div style=\"font-weight:700;color:#111;font-size:15px;line-height:1.15;\">🟢 Puntaje</div>"
+                "<div style=\"font-size:11.5px;line-height:1.3;color:#111;\">"
                 "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
-                alto=92,
+                alto=_hdr_iframe_h,
             )
             puntaje_raw = st.text_input(
                 "",
