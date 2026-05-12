@@ -513,21 +513,19 @@ with st.form("form_acta", clear_on_submit=False):
             alto=88,
         )
 
-    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="top")
+    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
     with col_tema_1:
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
-            st.markdown(
-                "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Puntaje</div>",
-                unsafe_allow_html=True,
-            )
             _ayuda_en_iframe(
-                "<div style=\"box-sizing:border-box;margin:0;padding:6px 8px;font:13px/1.35 system-ui,sans-serif;"
-                "color:#111;background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
-                "Decimales con coma o punto (ej: 87,9 o 87.9).</div>",
-                alto=48,
+                "<div style=\"box-sizing:border-box;margin:0;padding:6px 8px;font-family:system-ui,sans-serif;"
+                "background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
+                "<div style=\"font-weight:700;color:#111;font-size:14px;line-height:1.2;margin:0 0 4px 0;\">🟢 Puntaje</div>"
+                "<div style=\"font-size:12px;line-height:1.25;color:#111;\">"
+                "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
+                alto=62,
             )
             puntaje_raw = st.text_input(
                 "",
