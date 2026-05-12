@@ -589,7 +589,7 @@ with st.form("form_acta", clear_on_submit=False):
     # 🏫 UNIDAD
     # =========================
 
-    col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.6, 1.2, 1.2])
+    col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
     with col_uni_res_1:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
         unidad = st.selectbox("", opciones_unidades, key="unidad")
@@ -602,10 +602,10 @@ with st.form("form_acta", clear_on_submit=False):
 
         with col_uni_res_2:
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
-            resolucion_cd = st.text_input("", key="resolucion_cd", max_chars=12)
+            resolucion_cd = st.text_input("", key="resolucion_cd", max_chars=10, placeholder="Ej: 665")
         with col_uni_res_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS (solo para Informes Finales y de Avances)</div>", unsafe_allow_html=True)
-            resolucion_cs = st.text_input("", key="resolucion_cs", max_chars=12)
+            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
+            resolucion_cs = st.text_input("", key="resolucion_cs", max_chars=10, placeholder="Ej: 657")
 
     else:
         resolucion_cd = ""
