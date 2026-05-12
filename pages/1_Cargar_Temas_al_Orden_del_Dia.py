@@ -4,6 +4,7 @@ import re
 import unicodedata
 
 import streamlit as st
+import streamlit.components.v1 as components
 import gspread
 from pathlib import Path
 from google.oauth2.service_account import Credentials
@@ -40,6 +41,11 @@ TIPOS_CON_PUNTAJE = [
     "Informe Final",
     "Informe de Avance",
 ]
+
+
+def _ayuda_en_iframe(html: str, alto: int) -> None:
+    """HTML en iframe: el CSS del tema de Streamlit no vuelve blanco el texto de ayuda."""
+    components.html(html, height=alto, scrolling=False)
 
 
 def _normalizar_puntaje_desde_hoja(x: float) -> float:
@@ -322,15 +328,11 @@ section.main [data-testid="stCaptionContainer"],
 section.main [data-testid="stCaptionContainer"] p,
 section.main [data-testid="stCaptionContainer"] small,
 section.main [data-testid="stCaptionContainer"] span,
-section.main [data-testid="stCaption"] {
+section.main [data-testid="stCaption"],
+[data-testid="stMain"] [data-testid="stCaptionContainer"],
+[data-testid="stMain"] [data-testid="stCaptionContainer"] p,
+[data-testid="stMain"] [data-testid="stCaptionContainer"] span {
     color: #1a1a1a !important;
-}
-
-/* Ayuda puntaje: gris neutro, sin fondo celeste de st.info */
-[data-testid="stForm"] .puntaje-ayuda-inline {
-    background-color: #e4e4e4 !important;
-    color: #111111 !important;
-    border: 1px solid #c8c8c8 !important;
 }
 
 </style>
@@ -495,31 +497,37 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="margin-top:5px; margin-bottom:-15px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
-    <span style="font-weight:700;">Indicaciones:</span>
-    <ul style="margin-top:5px; margin-bottom:0;">
-    <li>Título del proyecto</li>
-    <li>Título del Informe Final o de Avance</li>
-    <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
+    col_den_head_1, col_den_head_2 = st.columns([1.05, 1.35])
+    with col_den_head_1:
+        st.markdown(
+            "<div style='margin:0 0 4px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
+            unsafe_allow_html=True,
+        )
+    with col_den_head_2:
+        _ayuda_en_iframe(
+            "<div style=\"box-sizing:border-box;margin:0;padding:6px 10px;font:12px/1.35 system-ui,sans-serif;"
+            "color:#111;background:#dedede;border-radius:6px;border-left:4px solid #0b6b5d;\">"
+            "<strong>Indicaciones:</strong> "
+            "Título del proyecto; Título del Informe Final o de Avance; "
+            "Título de Jornada / Semillero / Instituto u otra actividad</div>",
+            alto=88,
+        )
+
+    col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="top")
     with col_tema_1:
         titulo = st.text_input("", key="titulo_actividad_consejo")
     with col_tema_2:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Puntaje</div>", unsafe_allow_html=True)
             st.markdown(
-                "<div style='color:#111111 !important;font-size:0.88rem;line-height:1.35;margin:2px 0 6px 0;'>"
-                "Decimales con coma o punto (ej: 87,9 o 87.9)."
-                "</div>",
+                "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Puntaje</div>",
                 unsafe_allow_html=True,
+            )
+            _ayuda_en_iframe(
+                "<div style=\"box-sizing:border-box;margin:0;padding:6px 8px;font:13px/1.35 system-ui,sans-serif;"
+                "color:#111;background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
+                "Decimales con coma o punto (ej: 87,9 o 87.9).</div>",
+                alto=48,
             )
             puntaje_raw = st.text_input(
                 "",
