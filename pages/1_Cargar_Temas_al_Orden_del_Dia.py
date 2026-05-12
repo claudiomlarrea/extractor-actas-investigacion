@@ -495,19 +495,27 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="margin-top:5px; margin-bottom:-15px; background-color:#E6E6E6; padding:10px; border-radius:5px; font-size:13px; color:#000000;">
-    <span style="font-weight:700;">Indicaciones:</span>
-    <ul style="margin-top:5px; margin-bottom:0;">
-    <li>Título del proyecto</li>
-    <li>Título del Informe Final o de Avance</li>
-    <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    col_den_head_1, col_den_head_2 = st.columns([1.05, 1.35])
+    with col_den_head_1:
+        st.markdown(
+            "<div style='margin-bottom:4px; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
+            unsafe_allow_html=True,
+        )
+    with col_den_head_2:
+        st.markdown(
+            """
+            <div style="margin:0 0 6px 0; background-color:#E6E6E6; padding:8px 10px; border-radius:6px; font-size:12px; color:#000000; line-height:1.35;">
+            <span style="font-weight:700;">Indicaciones:</span>
+            <ul style="margin:4px 0 0 0; padding-left:18px;">
+            <li>Título del proyecto</li>
+            <li>Título del Informe Final o de Avance</li>
+            <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
+            </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     col_tema_1, col_tema_2 = st.columns([2, 1], vertical_alignment="bottom")
     with col_tema_1:
         titulo = st.text_input("", key="titulo_actividad_consejo")
