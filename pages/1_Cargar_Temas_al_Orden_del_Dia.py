@@ -508,13 +508,9 @@ with st.form("form_acta", clear_on_submit=False):
     with col_den_head_2:
         st.markdown(
             """
-            <div style="margin:0 0 6px 0; background-color:#E6E6E6; padding:8px 10px; border-radius:6px; font-size:12px; color:#000000; line-height:1.35;">
+            <div style="margin:0 0 6px 0; background-color:#E6E6E6; padding:6px 10px; border-radius:6px; font-size:12px; color:#000000; line-height:1.35;">
             <span style="font-weight:700;">Indicaciones:</span>
-            <ul style="margin:4px 0 0 0; padding-left:18px;">
-            <li>Título del proyecto</li>
-            <li>Título del Informe Final o de Avance</li>
-            <li>Título de Jornada / Semillero / Instituto u otra actividad</li>
-            </ul>
+            Título del proyecto; Título del Informe Final o de Avance; Título de Jornada / Semillero / Instituto u otra actividad
             </div>
             """,
             unsafe_allow_html=True,
