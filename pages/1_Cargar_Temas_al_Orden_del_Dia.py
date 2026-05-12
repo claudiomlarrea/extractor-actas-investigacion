@@ -497,27 +497,37 @@ with st.form("form_acta", clear_on_submit=False):
     # 📌 IDENTIFICACIÓN
     # =========================
 
-    # Denominación + Indicaciones a la derecha; debajo los inputs alineados (una sola fila de columnas).
-    col_den_l, col_den_r = st.columns([2, 1], vertical_alignment="bottom")
-    with col_den_l:
+    # Fila 1: título Denominación alineado arriba con Indicaciones (misma línea).
+    # Fila 2: inputs. Todo con vertical_alignment=top para no “colgar” indicaciones solas arriba.
+    hdr_l, hdr_r = st.columns([2, 1], vertical_alignment="top")
+    with hdr_l:
         st.markdown(
             "<div style='margin:0 0 2px 0; color:black; font-weight:700;'>🟢 Denominación de la actividad o Tema</div>",
             unsafe_allow_html=True,
         )
-        titulo = st.text_input("", key="titulo_actividad_consejo")
-    with col_den_r:
+    with hdr_r:
         _ayuda_en_iframe(
-            "<div style=\"box-sizing:border-box;margin:0 0 8px 0;padding:6px 10px 8px;font:12px/1.35 system-ui,sans-serif;"
+            "<div style=\"box-sizing:border-box;margin:0;padding:6px 10px 8px;font:12px/1.35 system-ui,sans-serif;"
             "color:#111;background:#dedede;border-radius:6px;border-left:4px solid #0b6b5d;\">"
             "<strong>Indicaciones:</strong> "
             "Título del proyecto; Título del Informe Final o de Avance; "
             "Título de Jornada / Semillero / Instituto u otra actividad</div>",
-            alto=92,
+            alto=86,
         )
+
+    st.markdown(
+        "<div style='margin-top:-8px;margin-bottom:-4px;' aria-hidden='true'></div>",
+        unsafe_allow_html=True,
+    )
+
+    inp_l, inp_r = st.columns([2, 1], vertical_alignment="top")
+    with inp_l:
+        titulo = st.text_input("", key="titulo_actividad_consejo")
+    with inp_r:
         puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
             _ayuda_en_iframe(
-                "<div style=\"box-sizing:border-box;margin:0 0 10px 0;padding:8px 10px 10px;font-family:system-ui,sans-serif;"
+                "<div style=\"box-sizing:border-box;margin:0 0 8px 0;padding:8px 10px 10px;font-family:system-ui,sans-serif;"
                 "background:#e4e4e4;border:1px solid #c8c8c8;border-radius:6px;\">"
                 "<div style=\"font-weight:700;color:#111;font-size:14px;line-height:1.25;margin:0 0 6px 0;\">🟢 Puntaje</div>"
                 "<div style=\"font-size:12px;line-height:1.4;color:#111;\">"
