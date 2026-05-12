@@ -126,6 +126,10 @@ def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
     return n, None
 
 
+def contar_palabras(texto: str) -> int:
+    return len(re.findall(r"\S+", str(texto or "").strip()))
+
+
 def format_puntaje_doc_es(x: float) -> str:
     """Texto para Word/correo: siempre 2 decimales y coma (ej. 86,00 como en la hoja)."""
     x = _normalizar_puntaje_desde_hoja(float(x))
@@ -571,7 +575,7 @@ with st.form("form_acta", clear_on_submit=False):
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
             categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación (no más de 30 palabras)</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo")
 
         col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
@@ -796,6 +800,12 @@ if submit and not st.session_state.enviado:
 
     elif not unidad.strip():
         st.error("Debe seleccionar la Unidad Académica")
+
+    elif contar_palabras(descripcion) > 30:
+        st.error("La descripción no debe superar 30 palabras")
+
+    elif contar_palabras(equipo) > 30:
+        st.error("El equipo de investigación no debe superar 30 palabras")
 
     elif not responsable_de_carga.strip():
         st.error("Debe completar el Responsable de carga")
