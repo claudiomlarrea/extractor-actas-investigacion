@@ -589,8 +589,8 @@ with st.form("form_acta", clear_on_submit=False):
             st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
             categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación (no más de 30 palabras)</div>", unsafe_allow_html=True)
-        equipo = st.text_area("", key="equipo")
+        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
+        equipo = st.text_area("", key="equipo", height=160)
 
         col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
         with col_eq_1:
@@ -818,8 +818,8 @@ if submit and not st.session_state.enviado:
     elif contar_palabras(descripcion) > 30:
         st.error("La descripción no debe superar 30 palabras")
 
-    elif contar_palabras(equipo) > 30:
-        st.error("El equipo de investigación no debe superar 30 palabras")
+    elif contar_palabras(equipo) > 50:
+        st.error("El equipo de investigación no debe superar 50 palabras")
 
     elif not responsable_de_carga.strip():
         st.error("Debe completar el Responsable de carga")
