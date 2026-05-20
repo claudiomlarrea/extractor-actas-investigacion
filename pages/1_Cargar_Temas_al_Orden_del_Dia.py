@@ -970,9 +970,15 @@ if _ir_a_descargar_od:
 
 st.markdown("## 📄 Generar y descargar Orden del Día")
 
+OPCION_OD_SIN_SELECCION = "Seleccione el orden del día"
+opciones_od_word = [OPCION_OD_SIN_SELECCION] + [
+    f"{n} - {actas_dict[n]['mes']}" for n in actas_dict
+]
+
 acta_word = st.selectbox(
     "Seleccionar Orden del Día para generar y descargar",
-    options=[f"{n} - {actas_dict[n]['mes']}" for n in actas_dict]
+    options=opciones_od_word,
+    index=0,
 )
 
 generar = st.button("Generar Orden del Día")
@@ -980,157 +986,160 @@ generar = st.button("Generar Orden del Día")
 if generar:
     st.session_state["_estuvo_en_seccion_od"] = True
 
-    datos = sheet.get_all_records()
-
-    acta_num = int(acta_word.split(" - ")[0])
-
-    registros = [
-        r for r in datos
-        if str(r.get("numero_acta", "")).strip() == str(acta_num)
-    ]
-    registros = ordenar_registros_por_unidad_academica(registros)
-
-    if not registros:
-        st.warning("No hay registros para esta acta")
-
+    if acta_word == OPCION_OD_SIN_SELECCION:
+        st.warning("Seleccione un orden del día antes de generar.")
     else:
-        doc = Document()
+        datos = sheet.get_all_records()
 
-        doc.add_heading('Consejo de Investigación', 0)
+        acta_num = int(acta_word.split(" - ")[0])
 
-        p_acta = doc.add_paragraph(f'Acta N° {acta_num}')
-        p_acta.paragraph_format.space_after = Pt(0)
+        registros = [
+            r for r in datos
+            if str(r.get("numero_acta", "")).strip() == str(acta_num)
+        ]
+        registros = ordenar_registros_por_unidad_academica(registros)
 
-        fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
-        p_fecha = doc.add_paragraph(f'Fecha: {fecha_real}')
-        p_fecha.paragraph_format.space_after = Pt(0)
+        if not registros:
+            st.warning("No hay registros para esta acta")
 
-        doc.add_heading('Orden del Día', level=1)
+        else:
+            doc = Document()
 
-        contador = 1
-        unidad_actual = None
+            doc.add_heading('Consejo de Investigación', 0)
 
-        for r in registros:
+            p_acta = doc.add_paragraph(f'Acta N° {acta_num}')
+            p_acta.paragraph_format.space_after = Pt(0)
 
-            r = {k.lower().strip(): v for k, v in r.items()}
+            fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
+            p_fecha = doc.add_paragraph(f'Fecha: {fecha_real}')
+            p_fecha.paragraph_format.space_after = Pt(0)
 
-            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+            doc.add_heading('Orden del Día', level=1)
 
-            if unidad != unidad_actual:
-                h = doc.add_paragraph()
-                h.paragraph_format.space_before = Pt(6)
-                h.paragraph_format.space_after = Pt(2)
-                h.paragraph_format.line_spacing = 1
+            contador = 1
+            unidad_actual = None
 
-                run_h = h.add_run(unidad)
-                run_h.bold = True
-                run_h.font.color.rgb = RGBColor(0, 102, 204)
+            for r in registros:
 
-                unidad_actual = unidad
+                r = {k.lower().strip(): v for k, v in r.items()}
 
-            p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(4)
-            p.paragraph_format.line_spacing = 1
+                unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
-            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+                if unidad != unidad_actual:
+                    h = doc.add_paragraph()
+                    h.paragraph_format.space_before = Pt(6)
+                    h.paragraph_format.space_after = Pt(2)
+                    h.paragraph_format.line_spacing = 1
 
-            descripcion = r.get("descripcion") or r.get("descripción") or ""
+                    run_h = h.add_run(unidad)
+                    run_h.bold = True
+                    run_h.font.color.rgb = RGBColor(0, 102, 204)
 
-            if descripcion:
-                p.add_run(f"   Descripción: {descripcion}\n")
-                
-            tipo_actividad = r.get("tipo", "")
+                    unidad_actual = unidad
 
-            if tipo_actividad == "Categorización Docente":
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(4)
+                p.paragraph_format.line_spacing = 1
 
-                nombre_doc = r.get("apellido_nombre_docente", "")
-                dni_doc = r.get("dni_docente", "")
+                p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-                if nombre_doc:
-                    p.add_run(f"   Docente: {nombre_doc}\n")
+                descripcion = r.get("descripcion") or r.get("descripción") or ""
 
-                if dni_doc:
-                    p.add_run(f"   DNI: {dni_doc}\n")
+                if descripcion:
+                    p.add_run(f"   Descripción: {descripcion}\n")
+                    
+                tipo_actividad = r.get("tipo", "")
 
-            tipos_con_director = [
-                "Proyecto de Investigación",
-                "Proyecto de Cátedra",
-                "Informe Final",
-                "Informe de Avance"
-            ]
+                if tipo_actividad == "Categorización Docente":
 
-            if tipo_actividad in tipos_con_director:
+                    nombre_doc = r.get("apellido_nombre_docente", "")
+                    dni_doc = r.get("dni_docente", "")
 
-                cat = r.get('cat_director', '')
-                if cat == "Seleccionar" or cat == "":
-                    p.add_run(f"   Director: {r.get('director', '')}\n")
-                else:
-                    p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
+                    if nombre_doc:
+                        p.add_run(f"   Docente: {nombre_doc}\n")
 
-                cat_codir = r.get('cat_codirector', '')
-                if cat_codir == "Seleccionar" or cat_codir == "":
-                    p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
-                else:
-                    p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
+                    if dni_doc:
+                        p.add_run(f"   DNI: {dni_doc}\n")
 
-            equipo_txt = r.get("equipo", "")
+                tipos_con_director = [
+                    "Proyecto de Investigación",
+                    "Proyecto de Cátedra",
+                    "Informe Final",
+                    "Informe de Avance"
+                ]
 
-            if equipo_txt:
-                equipo_txt = equipo_txt.replace("\n", "; ")
-                p.add_run(f"   Equipo: {equipo_txt}\n")
+                if tipo_actividad in tipos_con_director:
 
-            p.add_run(f"   Unidad Académica: {unidad}\n")
+                    cat = r.get('cat_director', '')
+                    if cat == "Seleccionar" or cat == "":
+                        p.add_run(f"   Director: {r.get('director', '')}\n")
+                    else:
+                        p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
 
-            raw_punt = r.get("puntaje")
-            txt_puntaje = puntaje_texto_para_word(raw_punt)
-            if txt_puntaje:
-                p.add_run(f"   Puntaje: {txt_puntaje}\n")
+                    cat_codir = r.get('cat_codirector', '')
+                    if cat_codir == "Seleccionar" or cat_codir == "":
+                        p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
+                    else:
+                        p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
 
-            if r.get("resolucion_cd"):
-                p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
+                equipo_txt = r.get("equipo", "")
 
-            if r.get("resolucion_cs"):
-                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion_cs')}\n")
+                if equipo_txt:
+                    equipo_txt = equipo_txt.replace("\n", "; ")
+                    p.add_run(f"   Equipo: {equipo_txt}\n")
 
-            if r.get("instituto"):
-                p.add_run(f"   Instituto: {r.get('instituto')}\n")
+                p.add_run(f"   Unidad Académica: {unidad}\n")
 
-            if r.get("catedra"):
-                p.add_run(f"   Cátedra: {r.get('catedra')}\n")
+                raw_punt = r.get("puntaje")
+                txt_puntaje = puntaje_texto_para_word(raw_punt)
+                if txt_puntaje:
+                    p.add_run(f"   Puntaje: {txt_puntaje}\n")
 
-            if r.get("tipo de financiamiento"):
-                p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
+                if r.get("resolucion_cd"):
+                    p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
 
-            if r.get("fuente de financiamiento"):
-                p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
+                if r.get("resolucion_cs"):
+                    p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion_cs')}\n")
 
-            if r.get("responsable_de_carga"):
-                p.add_run(f"   Responsable de carga: {r.get('responsable_de_carga')}\n")
+                if r.get("instituto"):
+                    p.add_run(f"   Instituto: {r.get('instituto')}\n")
 
-            if r.get("monto del financiamiento"):
-                try:
-                    monto = int(float(r.get("monto del financiamiento")))
-                    monto = f"${monto:,}".replace(",", ".")
-                except:
-                    monto = r.get("monto del financiamiento")
+                if r.get("catedra"):
+                    p.add_run(f"   Cátedra: {r.get('catedra')}\n")
 
-                p.add_run(f"   Monto: {monto}\n")
+                if r.get("tipo de financiamiento"):
+                    p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
 
-            if r.get("alumnos"):
-                p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
+                if r.get("fuente de financiamiento"):
+                    p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
 
-            contador += 1
+                if r.get("responsable_de_carga"):
+                    p.add_run(f"   Responsable de carga: {r.get('responsable_de_carga')}\n")
 
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+                if r.get("monto del financiamiento"):
+                    try:
+                        monto = int(float(r.get("monto del financiamiento")))
+                        monto = f"${monto:,}".replace(",", ".")
+                    except:
+                        monto = r.get("monto del financiamiento")
 
-        st.download_button(
-            "Descargar Orden del Día",
-            data=buffer,
-            file_name=f"Acta_{acta_num}.docx"
-        )
+                    p.add_run(f"   Monto: {monto}\n")
+
+                if r.get("alumnos"):
+                    p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
+
+                contador += 1
+
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+
+            st.download_button(
+                "Descargar Orden del Día",
+                data=buffer,
+                file_name=f"Acta_{acta_num}.docx"
+            )
         
 st.markdown("### 🧾 Generar informe por responsable")
 
@@ -1140,75 +1149,78 @@ generar_responsables = st.button("Generar informe del responsable de carga")
 
 if generar_responsables:
 
-    datos = sheet.get_all_records()
-
-    acta_num = int(acta_word.split(" - ")[0])
-
-    registros = [
-        r for r in datos
-        if str(r.get("numero_acta", "")).strip() == str(acta_num)
-        and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
-    ]
-    registros = ordenar_registros_por_unidad_academica(registros)
-
-    if not responsable_reporte.strip():
-        st.warning("Debe ingresar el responsable de carga")
-
-    elif not registros:
-        st.warning("No hay registros cargados por ese responsable para esta acta")
-
+    if acta_word == OPCION_OD_SIN_SELECCION:
+        st.warning("Seleccione un orden del día antes de generar el informe.")
     else:
-        doc = Document()
+        datos = sheet.get_all_records()
 
-        doc.add_heading("Informe de temas cargados", 0)
-        doc.add_paragraph(f"Acta N° {acta_num}")
-        doc.add_paragraph(f"Responsable de carga: {responsable_reporte}")
+        acta_num = int(acta_word.split(" - ")[0])
 
-        contador = 1
-        unidad_actual = None
+        registros = [
+            r for r in datos
+            if str(r.get("numero_acta", "")).strip() == str(acta_num)
+            and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
+        ]
+        registros = ordenar_registros_por_unidad_academica(registros)
 
-        for r in registros:
+        if not responsable_reporte.strip():
+            st.warning("Debe ingresar el responsable de carga")
 
-            r = {k.lower().strip(): v for k, v in r.items()}
+        elif not registros:
+            st.warning("No hay registros cargados por ese responsable para esta acta")
 
-            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+        else:
+            doc = Document()
 
-            if unidad != unidad_actual:
-                h = doc.add_paragraph()
-                h.paragraph_format.space_before = Pt(6)
-                h.paragraph_format.space_after = Pt(2)
+            doc.add_heading("Informe de temas cargados", 0)
+            doc.add_paragraph(f"Acta N° {acta_num}")
+            doc.add_paragraph(f"Responsable de carga: {responsable_reporte}")
 
-                run_h = h.add_run(unidad)
-                run_h.bold = True
-                run_h.font.color.rgb = RGBColor(0, 102, 204)
+            contador = 1
+            unidad_actual = None
 
-                unidad_actual = unidad
+            for r in registros:
 
-            p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(4)
-            p.paragraph_format.line_spacing = 1
+                r = {k.lower().strip(): v for k, v in r.items()}
 
-            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+                unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
-            descripcion = r.get("descripcion") or r.get("descripción") or ""
+                if unidad != unidad_actual:
+                    h = doc.add_paragraph()
+                    h.paragraph_format.space_before = Pt(6)
+                    h.paragraph_format.space_after = Pt(2)
 
-            if descripcion:
-                p.add_run(f"   Descripción: {descripcion}\n")
+                    run_h = h.add_run(unidad)
+                    run_h.bold = True
+                    run_h.font.color.rgb = RGBColor(0, 102, 204)
 
-            p.add_run(f"   Unidad Académica: {unidad}\n")
+                    unidad_actual = unidad
 
-            contador += 1
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(4)
+                p.paragraph_format.line_spacing = 1
 
-        buffer = BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+                p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-        st.download_button(
-            "Descargar informe del responsable de carga",
-            data=buffer,
-            file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
-        )
+                descripcion = r.get("descripcion") or r.get("descripción") or ""
+
+                if descripcion:
+                    p.add_run(f"   Descripción: {descripcion}\n")
+
+                p.add_run(f"   Unidad Académica: {unidad}\n")
+
+                contador += 1
+
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+
+            st.download_button(
+                "Descargar informe del responsable de carga",
+                data=buffer,
+                file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
+            )
 
 if _ir_a_descargar_od or st.session_state.pop("_estuvo_en_seccion_od", False):
     st.session_state["volver_arriba_cargar_temas"] = True
