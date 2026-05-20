@@ -877,6 +877,20 @@ if submit and not st.session_state.enviado:
 # 📄 GENERAR WORD
 # =========================
 
+if st.session_state.pop("ir_a_descargar_orden_dia", False):
+    components.html(
+        """
+        <script>
+        (function () {
+            const el = window.parent.document.getElementById("descargar-orden-del-dia");
+            if (el) el.scrollIntoView({behavior: "smooth", block: "start"});
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
+st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
 st.markdown("## 📄 Generar y descargar Orden del Día")
 
 acta_word = st.selectbox(

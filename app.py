@@ -83,6 +83,7 @@ st.markdown("""
 Usá el menú de la izquierda para:
 
 • Cargar los temas que van a Consejo de Investigación  
+• **Descargar orden del día** (generar Word al final de Cargar Temas)  
 • Cargar archivos de los temas  
 • Cargar Publicaciones
 """)
