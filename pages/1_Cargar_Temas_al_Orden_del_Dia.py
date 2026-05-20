@@ -544,8 +544,14 @@ with st.form("form_acta", clear_on_submit=False):
             _pv = parse_puntaje_valor(puntaje_raw)
             puntaje = _pv if _pv is not None else 0.0
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 50 palabras)</div>", unsafe_allow_html=True)
-    descripcion = st.text_area("")
+    # Descripción solo bajo Denominación + Indicaciones (misma proporción que arriba: 2.5+2.5 vs 1.05)
+    col_desc_w, _col_desc_pad = st.columns([5.0, 1.05])
+    with col_desc_w:
+        st.markdown(
+            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 50 palabras)</div>",
+            unsafe_allow_html=True,
+        )
+        descripcion = st.text_area("")
 
     # =========================
     # 👥 EQUIPO (CONDICIONAL)
