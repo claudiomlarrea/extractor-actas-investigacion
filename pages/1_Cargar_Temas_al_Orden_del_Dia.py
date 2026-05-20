@@ -482,7 +482,7 @@ categoria_opciones = [
     "Sin categorización / Externo"
 ]
 
-MAX_UNIDADES_ACADEMICAS = 3
+MAX_UNIDADES_ACADEMICAS = 5
 opciones_unidades_select = [
     "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
     "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
@@ -700,7 +700,10 @@ with st.form("form_acta", clear_on_submit=False):
     col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
     with col_uni_res_1:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
-        st.caption(f"Puede elegir hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas.")
+        st.caption(
+            f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. "
+            f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quite una con la × para cambiar."
+        )
         unidades_sel = st.multiselect(
             "",
             opciones_unidades_select,
@@ -912,7 +915,10 @@ if submit and not st.session_state.enviado:
         st.error("Debe seleccionar al menos una Unidad Académica")
 
     elif len(unidades_sel) > MAX_UNIDADES_ACADEMICAS:
-        st.error(f"Puede seleccionar hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas")
+        st.error(
+            f"Solo puede seleccionar hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas. "
+            "Quite una con la × e intente de nuevo."
+        )
 
     elif contar_palabras(descripcion) > 50:
         st.error("La descripción no debe superar 50 palabras")
