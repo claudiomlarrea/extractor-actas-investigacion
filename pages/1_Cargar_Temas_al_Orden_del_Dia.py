@@ -544,7 +544,7 @@ with st.form("form_acta", clear_on_submit=False):
             _pv = parse_puntaje_valor(puntaje_raw)
             puntaje = _pv if _pv is not None else 0.0
 
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 30 palabras)</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 50 palabras)</div>", unsafe_allow_html=True)
     descripcion = st.text_area("")
 
     # =========================
@@ -815,8 +815,8 @@ if submit and not st.session_state.enviado:
     elif not unidad.strip():
         st.error("Debe seleccionar la Unidad Académica")
 
-    elif contar_palabras(descripcion) > 30:
-        st.error("La descripción no debe superar 30 palabras")
+    elif contar_palabras(descripcion) > 50:
+        st.error("La descripción no debe superar 50 palabras")
 
     elif contar_palabras(equipo) > 50:
         st.error("El equipo de investigación no debe superar 50 palabras")
