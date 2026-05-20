@@ -177,21 +177,74 @@ def puntaje_texto_para_word(raw) -> str | None:
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 hide_streamlit_cloud_toolbar()
 
-if not st.session_state.get("ir_a_descargar_orden_dia"):
-    components.html(
-        """
-        <script>
-        (function () {
-            const doc = window.parent.document;
-            const main = doc.querySelector("section.main");
-            if (main) main.scrollTo({top: 0, behavior: "smooth"});
-            doc.querySelector('[data-testid="stAppViewContainer"]')
-                ?.scrollTo({top: 0, behavior: "smooth"});
-        })();
-        </script>
-        """,
-        height=0,
-    )
+_ir_a_descargar_od = st.session_state.pop("ir_a_descargar_orden_dia", False)
+_viene_de_otra_pagina = st.session_state.get("_pagina_streamlit_prev") != "cargar_temas"
+st.session_state["_pagina_streamlit_prev"] = "cargar_temas"
+
+_scroll_arriba = (not _ir_a_descargar_od) and (
+    st.session_state.pop("volver_arriba_cargar_temas", False) or _viene_de_otra_pagina
+)
+
+components.html(
+    f"""
+    <script>
+    (function () {{
+        const win = window.parent;
+        const doc = win.document;
+        const storage = win.sessionStorage;
+        const irOd = {"true" if _ir_a_descargar_od else "false"};
+        const irArriba = {"true" if _scroll_arriba else "false"};
+
+        function subir() {{
+            [doc.querySelector("section.main"),
+             doc.querySelector('[data-testid="stAppViewContainer"]'),
+             doc.querySelector('[data-testid="stMainBlockContainer"]'),
+             doc.querySelector('[data-testid="stMain"]')].forEach(function (el) {{
+                if (el) el.scrollTop = 0;
+            }});
+        }}
+        function programarSubir() {{
+            subir();
+            [0, 120, 350, 700, 1200, 2000].forEach(function (ms) {{
+                setTimeout(subir, ms);
+            }});
+        }}
+
+        if (!win._uccNavScrollInit) {{
+            win._uccNavScrollInit = true;
+            setInterval(function () {{
+                if (storage.getItem("ucc_scroll_top") === "1") {{
+                    storage.removeItem("ucc_scroll_top");
+                    programarSubir();
+                }}
+            }}, 200);
+            function enlazarMenu() {{
+                doc.querySelectorAll(
+                    '[data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"]'
+                ).forEach(function (a) {{
+                    if (a._uccBound) return;
+                    const t = (a.textContent || "").toLowerCase();
+                    if (t.includes("cargar") && t.includes("temas")) {{
+                        a._uccBound = true;
+                        a.addEventListener("pointerdown", function () {{
+                            storage.setItem("ucc_scroll_top", "1");
+                        }}, true);
+                    }}
+                }});
+            }}
+            enlazarMenu();
+            new MutationObserver(enlazarMenu).observe(doc.body, {{
+                childList: true,
+                subtree: true,
+            }});
+        }}
+
+        if (irArriba) storage.setItem("ucc_scroll_top", "1");
+    }})();
+    </script>
+    """,
+    height=0,
+)
 
 _APP_ROOT = Path(__file__).resolve().parent.parent
 _LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
@@ -893,20 +946,28 @@ if submit and not st.session_state.enviado:
 # 📄 GENERAR WORD
 # =========================
 
-if st.session_state.pop("ir_a_descargar_orden_dia", False):
+st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
+
+if _ir_a_descargar_od:
     components.html(
         """
         <script>
         (function () {
-            const el = window.parent.document.getElementById("descargar-orden-del-dia");
-            if (el) el.scrollIntoView({behavior: "smooth", block: "start"});
+            function bajar() {
+                const el = window.parent.document.getElementById("descargar-orden-del-dia");
+                if (!el) return false;
+                el.scrollIntoView({behavior: "smooth", block: "start"});
+                return true;
+            }
+            [0, 300, 700, 1200, 2000, 3500].forEach(function (ms) {
+                setTimeout(bajar, ms);
+            });
         })();
         </script>
         """,
         height=0,
     )
 
-st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
 st.markdown("## 📄 Generar y descargar Orden del Día")
 
 acta_word = st.selectbox(
@@ -917,6 +978,7 @@ acta_word = st.selectbox(
 generar = st.button("Generar Orden del Día")
 
 if generar:
+    st.session_state["_estuvo_en_seccion_od"] = True
 
     datos = sheet.get_all_records()
 
@@ -1147,3 +1209,6 @@ if generar_responsables:
             data=buffer,
             file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
         )
+
+if _ir_a_descargar_od or st.session_state.pop("_estuvo_en_seccion_od", False):
+    st.session_state["volver_arriba_cargar_temas"] = True
