@@ -521,14 +521,23 @@ with col_bas_1:
 
 with col_bas_2:
     st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Seleccione el Orden del Día</div>", unsafe_allow_html=True)
+    OPCION_ACTA_SIN_SELECCION = "Seleccionar el Orden del día"
+    opciones_acta_carga = [OPCION_ACTA_SIN_SELECCION] + [
+        f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict
+    ]
     acta_label = st.selectbox(
         "",
-        [f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict],
+        opciones_acta_carga,
+        index=0,
         key="acta",
     )
 
-numero_acta = int(acta_label.split("Acta ")[1])
-fecha = fechas_actas.get(numero_acta, "")
+if acta_label == OPCION_ACTA_SIN_SELECCION:
+    numero_acta = None
+    fecha = ""
+else:
+    numero_acta = int(acta_label.split("Acta ")[1])
+    fecha = fechas_actas.get(numero_acta, "")
 
 with col_bas_3:
     st.markdown("<div style='margin-bottom:6px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
@@ -882,7 +891,7 @@ if submit and not st.session_state.enviado:
         st.error("Debe completar el año")
 
     elif not numero_acta:
-        st.error("Debe seleccionar el número de acta")
+        st.error("Debe seleccionar el Orden del día")
 
     elif not fecha:
         st.error("Debe seleccionar la fecha")
