@@ -177,6 +177,22 @@ def puntaje_texto_para_word(raw) -> str | None:
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 hide_streamlit_cloud_toolbar()
 
+if not st.session_state.get("ir_a_descargar_orden_dia"):
+    components.html(
+        """
+        <script>
+        (function () {
+            const doc = window.parent.document;
+            const main = doc.querySelector("section.main");
+            if (main) main.scrollTo({top: 0, behavior: "smooth"});
+            doc.querySelector('[data-testid="stAppViewContainer"]')
+                ?.scrollTo({top: 0, behavior: "smooth"});
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
 _APP_ROOT = Path(__file__).resolve().parent.parent
 _LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
 
