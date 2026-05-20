@@ -510,7 +510,6 @@ with st.form("form_acta", clear_on_submit=False):
             'border-radius:6px;border:1px solid #c8c8c8;">🟢 Denominación de la actividad o Tema</div>',
             alto=_hdr_iframe_h,
         )
-        titulo = st.text_input("", key="titulo_actividad_consejo")
 
     with col_ind:
         _ayuda_en_iframe(
@@ -524,7 +523,6 @@ with st.form("form_acta", clear_on_submit=False):
         )
 
     with col_pun:
-        puntaje = 0.0
         if tipo in TIPOS_CON_PUNTAJE:
             _ayuda_en_iframe(
                 f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;flex-direction:column;"
@@ -535,6 +533,14 @@ with st.form("form_acta", clear_on_submit=False):
                 "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
                 alto=_hdr_iframe_h,
             )
+
+    # Inputs: denominación ancha (hasta borde de Indicaciones) | puntaje a la derecha
+    col_tit_w, col_pun_inp = st.columns([5.0, 1.05], vertical_alignment="top")
+    with col_tit_w:
+        titulo = st.text_input("", key="titulo_actividad_consejo")
+    with col_pun_inp:
+        puntaje = 0.0
+        if tipo in TIPOS_CON_PUNTAJE:
             puntaje_raw = st.text_input(
                 "",
                 placeholder="Ej: 87,9",
