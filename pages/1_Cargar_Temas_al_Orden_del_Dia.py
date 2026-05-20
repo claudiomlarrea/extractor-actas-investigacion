@@ -482,8 +482,8 @@ categoria_opciones = [
     "Sin categorización / Externo"
 ]
 
-opciones_unidades = [
-    "Seleccionar unidad académica",
+MAX_UNIDADES_ACADEMICAS = 3
+opciones_unidades_select = [
     "FDCSSL- Facultad de Derecho y Ciencias Sociales Sede San Luis",
     "FCMSL- Facultad de Ciencias Médicas Sede San Luis",
     "FCVSL- Facultad de Ciencias Veterinarias Sede San Luis",
@@ -700,7 +700,14 @@ with st.form("form_acta", clear_on_submit=False):
     col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
     with col_uni_res_1:
         st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
-        unidad = st.selectbox("", opciones_unidades, key="unidad")
+        st.caption(f"Puede elegir hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas.")
+        unidades_sel = st.multiselect(
+            "",
+            opciones_unidades_select,
+            key="unidades_academicas",
+            max_selections=MAX_UNIDADES_ACADEMICAS,
+            label_visibility="collapsed",
+        )
 
     # =========================
     # 📄 RESOLUCIONES
@@ -837,10 +844,9 @@ if submit and not st.session_state.enviado:
     if tipo_financiamiento == "Seleccionar...":
         tipo_financiamiento = ""
 
-    # 🔹 LIMPIAR "Seleccionar" (versión robusta)
-    if unidad.strip().startswith("Seleccionar"):
-        unidad = ""
+    unidad = "; ".join(unidades_sel)
 
+    # 🔹 LIMPIAR "Seleccionar" (versión robusta)
     if instituto.strip().startswith("Seleccionar"):
         instituto = ""
 
@@ -902,8 +908,11 @@ if submit and not st.session_state.enviado:
     elif not titulo.strip():
         st.error("Debe completar la Denominación de la actividad")
 
-    elif not unidad.strip():
-        st.error("Debe seleccionar la Unidad Académica")
+    elif not unidades_sel:
+        st.error("Debe seleccionar al menos una Unidad Académica")
+
+    elif len(unidades_sel) > MAX_UNIDADES_ACADEMICAS:
+        st.error(f"Puede seleccionar hasta {MAX_UNIDADES_ACADEMICAS} unidades académicas")
 
     elif contar_palabras(descripcion) > 50:
         st.error("La descripción no debe superar 50 palabras")
