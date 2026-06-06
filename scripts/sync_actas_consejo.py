@@ -42,6 +42,7 @@ YEARS_FILTER = {
     if y.strip()
 }
 IMPORT_TAG = "Importación automática acta PDF"
+REPLACE_IMPORT = os.environ.get("ACTAS_REPLACE_IMPORT", "").lower() in ("1", "true", "yes")
 
 HEADERS = [
     "numero_acta",
@@ -137,7 +138,7 @@ def existing_keys_from_sheet(ws) -> Set[str]:
     return keys
 
 
-def list_pdfs_from_drive(creds, folder_id: str) -> List[Tuple[str, bytes]]:
+def list_pdfs_from_drive(creds, folder_id: str) -> List[Tuple[str, bytes, str]]:
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaIoBaseDownload
     from googleapiclient.errors import HttpError
@@ -159,7 +160,7 @@ def list_pdfs_from_drive(creds, folder_id: str) -> List[Tuple[str, bytes]]:
             ) from exc
         raise
 
-    out: List[Tuple[str, bytes]] = []
+    out: List[Tuple[str, bytes, str]] = []
     download_count = 0
 
     def walk(fid: str, path_prefix: str = "") -> None:
@@ -211,7 +212,7 @@ def list_pdfs_from_drive(creds, folder_id: str) -> List[Tuple[str, bytes]]:
                     done = False
                     while not done:
                         _, done = downloader.next_chunk()
-                    out.append((name, buf.getvalue()))
+                    out.append((f"{path_prefix}{name}" if path_prefix else name, buf.getvalue()))
             page_token = resp.get("nextPageToken")
             if not page_token:
                 break
@@ -230,34 +231,62 @@ def _path_matches_year_filter(rel: str) -> bool:
     return any(y in rel for y in YEARS_FILTER)
 
 
-def list_pdfs_local(root: Path) -> List[Tuple[str, bytes]]:
-    out: List[Tuple[str, bytes]] = []
+def list_pdfs_local(root: Path) -> List[Tuple[str, bytes, str]]:
+    out: List[Tuple[str, bytes, str]] = []
     for path in sorted(root.rglob("*.pdf")):
         if "acta" not in path.name.lower():
             continue
         rel = str(path.relative_to(root))
         if not _path_matches_year_filter(rel):
             continue
-        out.append((path.name, path.read_bytes()))
+        out.append((path.name, path.read_bytes(), rel))
     return out
 
 
-def parse_all_pdfs(pdf_list: Iterable[Tuple[str, bytes]]) -> List[ActaItem]:
+def _year_hint_from_rel(rel: str) -> str:
+    for part in rel.replace("\\", "/").split("/"):
+        if re.fullmatch(r"20\d{2}", part):
+            return part
+    return ""
+
+
+def parse_all_pdfs(pdf_list: Iterable[Tuple[str, bytes, str]]) -> List[ActaItem]:
     items: List[ActaItem] = []
     pdf_list = list(pdf_list)
     total = len(pdf_list)
-    for i, (name, data) in enumerate(pdf_list, start=1):
-        print(f"  Parseando ({i}/{total}): {name}", file=sys.stderr, flush=True)
+    for i, (name, data, rel) in enumerate(pdf_list, start=1):
+        print(f"  Parseando ({i}/{total}): {rel or name}", file=sys.stderr, flush=True)
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
             tmp.write(data)
             tmp_path = Path(tmp.name)
         try:
-            items.extend(parse_acta_pdf(tmp_path))
+            items.extend(parse_acta_pdf(tmp_path, year_hint=_year_hint_from_rel(rel)))
         except Exception as exc:
             print(f"⚠ Error parseando {name}: {exc}", file=sys.stderr)
         finally:
             tmp_path.unlink(missing_ok=True)
     return items
+
+
+def remove_import_rows(ws) -> int:
+    rows = ws.get_all_values()
+    if len(rows) < 2:
+        return 0
+    resp_idx = HEADERS.index("responsable_de_carga")
+    header = rows[0]
+    kept = [header]
+    removed = 0
+    for row in rows[1:]:
+        padded = row + [""] * max(0, len(HEADERS) - len(row))
+        if padded[resp_idx].strip() == IMPORT_TAG:
+            removed += 1
+            continue
+        kept.append(padded[: max(len(header), len(HEADERS))])
+    if removed:
+        print(f"  Eliminando {removed} filas de importación previa...", file=sys.stderr, flush=True)
+        ws.clear()
+        ws.update(values=kept, range_name="A1")
+    return removed
 
 
 def push_items(items: List[ActaItem]) -> int:
@@ -266,6 +295,9 @@ def push_items(items: List[ActaItem]) -> int:
     creds = get_credentials()
     gc = gspread.authorize(creds)
     ws = gc.open_by_key(SHEET_ID).worksheet(SHEET_TAB)
+
+    if REPLACE_IMPORT:
+        remove_import_rows(ws)
 
     existing = existing_keys_from_sheet(ws)
     to_add: List[List[str]] = []
@@ -284,7 +316,7 @@ def push_items(items: List[ActaItem]) -> int:
 
 def main() -> int:
     creds = get_credentials()
-    pdf_list: List[Tuple[str, bytes]] = []
+    pdf_list: List[Tuple[str, bytes, str]] = []
 
     if LOCAL_DIR:
         root = Path(LOCAL_DIR)
@@ -297,10 +329,10 @@ def main() -> int:
         seen_names = set()
         for fid in folder_ids:
             try:
-                for name, data in list_pdfs_from_drive(creds, fid):
+                for name, data, rel in list_pdfs_from_drive(creds, fid):
                     if name not in seen_names:
                         seen_names.add(name)
-                        pdf_list.append((name, data))
+                        pdf_list.append((name, data, rel))
             except Exception as exc:
                 print(f"⚠ Carpeta {fid}: {exc}", file=sys.stderr)
         print(f"PDFs en Drive: {len(pdf_list)}", file=sys.stderr)
