@@ -212,7 +212,8 @@ def list_pdfs_from_drive(creds, folder_id: str) -> List[Tuple[str, bytes, str]]:
                     done = False
                     while not done:
                         _, done = downloader.next_chunk()
-                    out.append((f"{path_prefix}{name}" if path_prefix else name, buf.getvalue()))
+                    rel = f"{path_prefix}{name}" if path_prefix else name
+                    out.append((name, buf.getvalue(), rel))
             page_token = resp.get("nextPageToken")
             if not page_token:
                 break
