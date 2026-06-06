@@ -1,0 +1,86 @@
+ACTAS PDF → LOOKER (DATOS CONSEJO II)
+=====================================
+
+Objetivo
+--------
+Completar automáticamente la planilla que alimenta Looker Studio (pestaña
+«Datos Consejo II») con proyectos, informes finales e informes de avance
+extraídos de las actas PDF 2023–2025, sin duplicar lo que ya carga el
+Sistema Consejo (Orden del Día / Streamlit).
+
+Flujo
+-----
+1) PDFs en Google Drive:
+   SECRETARIA DE INVESTIGACIÓN → ACTAS DE CONSEJO DE INVESTIGACIÓN → 2023/2024/2025
+
+2) Script `scripts/sync_actas_consejo.py`:
+   - Lee cada PDF
+   - Extrae: Proyecto de Investigación | Informe Final | Informe de Avance
+   - Agrega filas en «Datos Consejo Investigación» · «Hoja 2»
+   - Deduplica por acta + tipo + título
+
+3) Looker Studio relee la planilla (cada ~15 min).
+
+4) El Sistema Consejo sigue cargando lo nuevo (2026+); este job solo
+   completa el histórico y actas que no pasaron por el formulario.
+
+
+PASO A — Permisos Google (una vez)
+----------------------------------
+Compartir con looker-sync@uccuyo-looker-sync.iam.gserviceaccount.com como Editor:
+
+  a) Planilla Datos Consejo:
+     https://docs.google.com/spreadsheets/d/17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8/edit
+
+  b) Carpeta Drive ACTAS DE CONSEJO (o cada subcarpeta 2023/2024/2025):
+     Abrí la carpeta en Drive → copiá el ID de la URL:
+       https://drive.google.com/drive/folders/ESTE_ES_EL_ID
+     Compartí con la cuenta de servicio como Lector (o Editor).
+
+     Si la carpeta padre no tiene un enlace directo, compartí las tres
+     subcarpetas por año y usá ACTAS_DRIVE_FOLDER_IDS=id2023,id2024,id2025
+
+En Google Cloud (proyecto uccuyo-looker-sync) habilitar:
+  - Google Sheets API
+  - Google Drive API
+
+
+PASO B — GitHub (ya tenés GOOGLE_SA_JSON)
+-----------------------------------------
+Repo: claudiomlarrea/extractor-actas-investigacion
+
+Settings → Secrets → Actions → agregar:
+  ACTAS_DRIVE_FOLDER_ID = ID de la carpeta ACTAS (o ACTAS_DRIVE_FOLDER_IDS con varios)
+
+Actions → «Sync Actas Consejo → Looker» → Run workflow
+
+
+PASO C — Probar en tu Mac
+-------------------------
+export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/uccuyo-looker-sync-f1730fe5029f.json
+cd ~/Documents/extractor-actas-investigacion
+pip install -r scripts/requirements-actas-sync.txt
+
+# Solo 3 actas de prueba (Downloads):
+ACTAS_LOCAL_DIR=~/Downloads python3 scripts/sync_actas_consejo.py
+
+# Desde Drive (automático) — reemplazá ID por el de tu carpeta:
+ACTAS_DRIVE_FOLDER_ID=PEGA_AQUI_EL_ID python3 scripts/sync_actas_consejo.py
+
+# Varias carpetas (ej. 2023, 2024, 2025 por separado):
+ACTAS_DRIVE_FOLDER_IDS=id2023,id2024,id2025 python3 scripts/sync_actas_consejo.py
+
+
+Qué campos se completan
+-----------------------
+  numero_acta, FECHA, AŃO, TIPO, TITULO, DIRECTOR, UNIDAD ACADÉMICA, EQUIPO
+  responsable_de_carga = «Importación automática acta PDF»
+
+Vacíos (no están en el PDF): puntaje, alumnos, financiamiento.
+
+
+Looker
+------
+Fuente: Datos Consejo Investigación → Hoja 2
+Gráficos «Cantidad de actividades por año» se alimentan solos.
+Financiamiento / puntaje / alumnos: solo completos para cargas del Sistema Consejo.
