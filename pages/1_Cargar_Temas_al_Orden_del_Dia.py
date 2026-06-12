@@ -6,6 +6,7 @@ import unicodedata
 import streamlit as st
 import streamlit.components.v1 as components
 import gspread
+from gspread.utils import ValueInputOption
 from pathlib import Path
 from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
 from google.oauth2.service_account import Credentials
@@ -119,6 +120,19 @@ def puntaje_a_texto_celda_sheet(x: float) -> str:
     if abs(x - round(x)) < 1e-9:
         return str(int(round(x)))
     return f"{x:.4f}".rstrip("0").rstrip(".")
+
+
+def parse_anio_hoja(s: str) -> int | None:
+    """Año como entero para la planilla (Looker Studio agrupa por número, no por texto)."""
+    if s is None or not str(s).strip():
+        return None
+    s = str(s).strip()
+    if not re.fullmatch(r"\d{4}", s):
+        return None
+    n = int(s)
+    if n < 1990 or n > 2100:
+        return None
+    return n
 
 
 def parse_puntaje_campo_formulario(s: str) -> tuple[float, str | None]:
@@ -870,10 +884,12 @@ if submit and not st.session_state.enviado:
     if monto_financiamiento is None:
         monto_financiamiento = ""
 
+    anio_hoja = parse_anio_hoja(anio)
+
     fila = [
-        numero_acta,
+        int(numero_acta) if numero_acta is not None else numero_acta,
         fecha,
-        anio,
+        anio_hoja,
         tipo,
         titulo,
         descripcion,
@@ -898,8 +914,8 @@ if submit and not st.session_state.enviado:
         ]
 
     # VALIDACIONES
-    if not anio.strip():
-        st.error("Debe completar el año")
+    if anio_hoja is None:
+        st.error("Debe ingresar un año válido de cuatro dígitos (ej: 2026)")
 
     elif not numero_acta:
         st.error("Debe seleccionar el Orden del día")
@@ -935,7 +951,7 @@ if submit and not st.session_state.enviado:
         st.error(err_puntaje)
 
     else:
-        sheet.append_row(fila)
+        sheet.append_row(fila, value_input_option=ValueInputOption.user_entered)
 
         try:
             enviar_correo_tema(fila)
