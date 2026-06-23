@@ -116,7 +116,7 @@ st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo direc
 actas = {
     "Orden del Día Mayo - Acta 190": "https://drive.google.com/drive/folders/1i6amwbRjPYBqCK0gZ2k5sbcBV6mVM0ki",
     "Orden del Día Junio - Acta 191": "https://drive.google.com/drive/folders/118VKqYfacn5eBH0dYXRvM5uAXv2M4flI",
-    "Orden del Día Julio - Acta 192": "https://drive.google.com/drive/folders/1LdSq7ZcQXItGTKoHoHeFJ7xLVO4lXmRc",
+    "Orden del Día Julio - Acta 192": "https://drive.google.com/drive/folders/1T1GID13Wa5TXmTfibQ0HAMBtNmOvC-DH",
     "Orden del Día Agosto - Acta 193": "https://drive.google.com/drive/folders/1VVdUSebRgH2FdivZ6ZceoK30mmqtPYVs",
     "Orden del Día Septiembre - Acta 194": "https://drive.google.com/drive/folders/1XkVQdpn4zNQhy2pLx0SbfTxfDQQw0eoY",
     "Orden del Día Octubre - Acta 195": "https://drive.google.com/drive/folders/1UhA4EHVhHFlfB75bkbsLGYDm4YzmVZI0",
