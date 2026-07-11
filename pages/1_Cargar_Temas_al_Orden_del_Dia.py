@@ -294,16 +294,16 @@ st.markdown("""
 /* Fondo principal (mint claro, estilo EvaluAR) */
 .stApp,
 [data-testid="stAppViewContainer"] {
-    background-color: #EEF6F2 !important;
+    background-color: #D8EBE2 !important;
 }
 
 /* Sidebar (mint más marcado) */
 [data-testid="stSidebar"] {
-    background-color: #CFE4DA !important;
+    background-color: #B5D5C6 !important;
 }
 
 [data-testid="stSidebar"] > div:first-child {
-    background-color: #CFE4DA !important;
+    background-color: #B5D5C6 !important;
 }
 
 section[data-testid="stSidebar"] * {
@@ -431,12 +431,12 @@ div[data-baseweb="select"] [contenteditable="true"] {
     padding: 9px 12px;
     border-radius: 8px;
     font-weight: 500 !important;
-    border: 1px solid #b7d2c6 !important;
+    border: 1px solid #9bbbac !important;
     box-shadow: 0 1px 2px rgba(6, 74, 63, 0.06);
 }
 
 [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background-color: #b8d9cb !important;
+    background-color: #9fc9b6 !important;
     color: #064a3f !important;
     font-weight: 600 !important;
     border-color: #9fc9b6 !important;

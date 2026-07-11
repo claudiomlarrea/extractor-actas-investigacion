@@ -7,7 +7,7 @@ toolbarMode = "viewer"
 # El botón de envío del formulario Consejo sigue en rojo por CSS de la página.
 [theme]
 primaryColor = "#0B6B5D"
-backgroundColor = "#EEF6F2"
-secondaryBackgroundColor = "#CFE4DA"
+backgroundColor = "#D8EBE2"
+secondaryBackgroundColor = "#B5D5C6"
 textColor = "#1e293b"
 font = "sans serif"

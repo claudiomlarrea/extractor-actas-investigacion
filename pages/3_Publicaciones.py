@@ -26,7 +26,7 @@ st.markdown("""
 
 
 [data-testid="stAppViewContainer"] {
-    background-color: #EEF6F2 !important;
+    background-color: #D8EBE2 !important;
 }
 
 h1, h2, h3, p, label {
@@ -34,11 +34,11 @@ h1, h2, h3, p, label {
 }
 
 [data-testid="stSidebar"] {
-    background-color: #CFE4DA !important;
+    background-color: #B5D5C6 !important;
 }
 
 [data-testid="stSidebar"] > div:first-child {
-    background-color: #CFE4DA !important;
+    background-color: #B5D5C6 !important;
 }
 
 [data-testid="stSidebar"] * {
@@ -79,11 +79,11 @@ input, textarea, select {
     margin-bottom: 8px;
     padding: 10px 12px;
     border-radius: 8px;
-    border: 1px solid #b7d2c6 !important;
+    border: 1px solid #9bbbac !important;
 }
 
 [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background-color: #b8d9cb !important;
+    background-color: #9fc9b6 !important;
     color: #064a3f !important;
     font-weight: 600 !important;
 }
