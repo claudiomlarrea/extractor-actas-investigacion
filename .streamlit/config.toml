@@ -3,11 +3,11 @@
 [client]
 toolbarMode = "viewer"
 
-# Tema institucional UCCuyo (chips, foco, widgets). El botón de envío del formulario
-# sigue en rojo por CSS propio de la página.
+# Fondos tipo EvaluAR: principal más claro, sidebar mint más marcado.
+# El botón de envío del formulario Consejo sigue en rojo por CSS de la página.
 [theme]
 primaryColor = "#0B6B5D"
-backgroundColor = "#F4F6F8"
-secondaryBackgroundColor = "#FFFFFF"
+backgroundColor = "#EEF6F2"
+secondaryBackgroundColor = "#CFE4DA"
 textColor = "#1e293b"
 font = "sans serif"

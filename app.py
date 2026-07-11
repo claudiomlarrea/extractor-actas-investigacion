@@ -14,21 +14,25 @@ st.markdown("""
 <style>
 
 [data-testid="stAppViewContainer"] {
-    background-color: #F4F6F8 !important;
+    background-color: #EEF6F2 !important;
 }
 
 /* TEXTO GENERAL */
 h1, h2, h3, p {
-    color: #1A1A1A !important;
+    color: #1e293b !important;
 }
 
-/* SIDEBAR (ARREGLADO) */
+/* SIDEBAR mint (estilo EvaluAR) */
 [data-testid="stSidebar"] {
-    background-color: #1C1F26 !important;
+    background-color: #CFE4DA !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #CFE4DA !important;
 }
 
 [data-testid="stSidebar"] * {
-    color: #EAEAEA !important;
+    color: #1e293b !important;
 }
 
 /* HEADER */
@@ -43,14 +47,22 @@ h1, h2, h3, p {
     color: white !important;
     margin: 0;
 }
-/* TODAS LAS OPCIONES EN VERDE */
+
+/* Navegación: botones claros sobre mint */
 [data-testid="stSidebarNav"] a {
-    background-color: #064a3f !important;
-    color: white !important;
-    font-size: 16px !important;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 10px;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 15px !important;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #b7d2c6 !important;
+}
+
+[data-testid="stSidebarNav"] a[aria-current="page"] {
+    background-color: #b8d9cb !important;
+    color: #064a3f !important;
+    font-weight: 600 !important;
 }
 
 </style>

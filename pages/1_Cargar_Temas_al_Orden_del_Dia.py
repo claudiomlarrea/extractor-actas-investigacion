@@ -291,9 +291,23 @@ with col2:
 st.markdown("""
 <style>
 
-/* Fondo general más claro */
-.stApp {
-    background-color: #F4F6F8;
+/* Fondo principal (mint claro, estilo EvaluAR) */
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background-color: #EEF6F2 !important;
+}
+
+/* Sidebar (mint más marcado) */
+[data-testid="stSidebar"] {
+    background-color: #CFE4DA !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #CFE4DA !important;
+}
+
+section[data-testid="stSidebar"] * {
+    color: #1e293b !important;
 }
 
 /* HEADER INSTITUCIONAL */
@@ -408,24 +422,31 @@ div[data-baseweb="select"] [contenteditable="true"] {
     caret-color: #0B6B5D !important;
 }
 
-/* Sidebar: menos “bloque tosco”, más plano */
+/* Sidebar: botones claros sobre mint (estilo EvaluAR) */
 [data-testid="stSidebarNav"] a {
-    background-color: #064a3f !important;
-    color: white !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
     font-size: 15px !important;
     margin-bottom: 6px;
     padding: 9px 12px;
     border-radius: 8px;
     font-weight: 500 !important;
+    border: 1px solid #b7d2c6 !important;
+    box-shadow: 0 1px 2px rgba(6, 74, 63, 0.06);
 }
 
 [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background-color: #0B6B5D !important;
-    color: white !important;
+    background-color: #b8d9cb !important;
+    color: #064a3f !important;
     font-weight: 600 !important;
+    border-color: #9fc9b6 !important;
 }
 
-[data-testid="stSidebarNav"] * { color: white !important; }
+[data-testid="stSidebarNav"] a,
+[data-testid="stSidebarNav"] a span,
+[data-testid="stSidebarNav"] a p {
+    color: inherit !important;
+}
 
 /* Alertas: menos énfasis */
 [data-testid="stAlert"] * {

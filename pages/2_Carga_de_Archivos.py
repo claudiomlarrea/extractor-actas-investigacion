@@ -20,63 +20,61 @@ hide_streamlit_cloud_toolbar()
 st.markdown("""
 <style>
 
-/* 🔥 RESTAURAR CONTRASTE REAL */
 [data-testid="stAppViewContainer"] {
-    background-color: #F4F6F8 !important;
+    background-color: #EEF6F2 !important;
 }
 
-/* 🔥 CONTENIDO PRINCIPAL */
 .block-container {
     background-color: transparent !important;
     opacity: 1 !important;
 }
 
-/* 🔥 ELIMINA EFECTO "VELO BLANCO" */
 section.main > div {
     opacity: 1 !important;
 }
 
-/* 🔥 TEXTO PRINCIPAL BIEN OSCURO */
 h1, h2, h3, p, li {
-    color: #1A1A1A !important;
+    color: #1e293b !important;
 }
 
-/* 🔥 SIDEBAR MÁS VISIBLE */
 [data-testid="stSidebar"] {
-    background-color: #1C1F26;
+    background-color: #CFE4DA !important;
 }
 
-/* 🔥 ITEMS DEL SIDEBAR */
-[data-testid="stSidebar"] * {
-    color: #EAEAEA !important;
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #CFE4DA !important;
 }
+
+[data-testid="stSidebar"] * {
+    color: #1e293b !important;
+}
+
 .header-uccuyo {
     background-color: #064a3f;
     padding: 20px;
     border-radius: 10px;
 }
 
-/* 🔥 FORZAR BLANCO SOLO EN HEADER */
 .header-uccuyo h2,
 .header-uccuyo p {
     color: white !important;
     margin: 0;
 }
-/* SIDEBAR EN VERDE */
+
 [data-testid="stSidebarNav"] a {
-    background-color: #064a3f !important;
-    color: white !important;
-    font-size: 16px !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 15px !important;
     margin-bottom: 8px;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
+    border: 1px solid #b7d2c6 !important;
 }
 
-/* OPCIÓN ACTIVA */
 [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background-color: #0B6B5D !important;
-    color: white !important;
-    font-weight: bold;
+    background-color: #b8d9cb !important;
+    color: #064a3f !important;
+    font-weight: 600 !important;
 }
 </style>
 """, unsafe_allow_html=True)

@@ -26,18 +26,23 @@ st.markdown("""
 
 
 [data-testid="stAppViewContainer"] {
-    background-color: #F4F6F8 !important;
+    background-color: #EEF6F2 !important;
 }
 
 h1, h2, h3, p, label {
-    color: #1A1A1A !important;
+    color: #1e293b !important;
 }
 
 [data-testid="stSidebar"] {
-    background-color: #1C1F26;
+    background-color: #CFE4DA !important;
 }
+
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #CFE4DA !important;
+}
+
 [data-testid="stSidebar"] * {
-    color: #EAEAEA !important;
+    color: #1e293b !important;
 }
 
 .header-uccuyo {
@@ -54,7 +59,7 @@ h1, h2, h3, p, label {
 
 input, textarea, select {
     background-color: white !important;
-    color: black !important;
+    color: #1e293b !important;
 }
 
 .stButton > button {
@@ -66,21 +71,21 @@ input, textarea, select {
 .stButton > button p {
     color: white !important;
 }
-/* SIDEBAR EN VERDE */
+
 [data-testid="stSidebarNav"] a {
-    background-color: #064a3f !important;
-    color: white !important;
-    font-size: 16px !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    font-size: 15px !important;
     margin-bottom: 8px;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 8px;
+    border: 1px solid #b7d2c6 !important;
 }
 
-/* OPCIÓN ACTIVA */
 [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background-color: #0B6B5D !important;
-    color: white !important;
-    font-weight: bold;
+    background-color: #b8d9cb !important;
+    color: #064a3f !important;
+    font-weight: 600 !important;
 }
 
 </style>
