@@ -291,20 +291,20 @@ with col2:
 st.markdown("""
 <style>
 
-/* Fondo general */
+/* Fondo general más claro */
 .stApp {
-    background-color: #E6E6E6;
+    background-color: #F4F6F8;
 }
 
 /* HEADER INSTITUCIONAL */
 .header-uccuyo {
     background: linear-gradient(90deg, #064a3f, #0B6B5D);
-    padding: 20px;
+    padding: 18px 20px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(6, 74, 63, 0.18);
 }
 
 .header-uccuyo h2,
@@ -312,23 +312,30 @@ st.markdown("""
 .header-uccuyo h5 {
     color: white !important;
     margin: 0;
+    font-weight: 600 !important;
 }
 
-/* Títulos GENERALES (NO TOCA HEADER) */
-h1, h2, h3, h4, h5, h6 {
-    color: black !important;
+/* Títulos generales: gris pizarra, no negro puro */
+section.main h1,
+section.main h2,
+section.main h3,
+section.main h4,
+section.main h5,
+section.main h6 {
+    color: #1e293b !important;
+    font-weight: 600 !important;
 }
 
-/* Labels */
+/* Labels Streamlit nativos */
 label {
-    color: black !important;
-    font-weight: 700 !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
 }
 
 /* INPUTS */
 input, textarea {
     background-color: white !important;
-    color: black !important;
+    color: #1e293b !important;
 }
 
 /* Selectbox */
@@ -336,8 +343,8 @@ div[data-baseweb="select"] {
     background-color: white !important;
 }
 
-div[data-baseweb="select"] span {
-    color: black !important;
+div[data-baseweb="select"] > div {
+    border-color: #cbd5e1 !important;
 }
 
 div[role="listbox"] {
@@ -346,11 +353,30 @@ div[role="listbox"] {
 
 div[role="option"] {
     background-color: white !important;
-    color: black !important;
+    color: #1e293b !important;
 }
 
 div[role="option"]:hover {
-    background-color: #e6e6e6 !important;
+    background-color: #ecf5f2 !important;
+}
+
+/* Chips del multiselect (unidades académicas): verde UCCuyo, no rojo */
+span[data-baseweb="tag"],
+[data-baseweb="tag"] {
+    background-color: #0B6B5D !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    border: none !important;
+}
+
+span[data-baseweb="tag"] span,
+[data-baseweb="tag"] span {
+    color: #ffffff !important;
+}
+
+span[data-baseweb="tag"] svg,
+[data-baseweb="tag"] svg {
+    fill: #ffffff !important;
 }
 
 /* Barra vertical al final del texto en selects = caret del combobox Base Web */
@@ -361,54 +387,53 @@ div[data-baseweb="select"] [contenteditable="true"] {
     caret-color: transparent !important;
 }
 
-/* Placeholder */
 ::placeholder {
-    color: #777 !important;
+    color: #94a3b8 !important;
 }
 
 .stTextInput > div > div > input {
     background-color: white !important;
-    color: black !important;
-    caret-color: #111111 !important;
+    color: #1e293b !important;
+    caret-color: #0B6B5D !important;
 }
 
 .stTextArea textarea {
     background-color: white !important;
-    color: black !important;
-    caret-color: #111111 !important;
+    color: #1e293b !important;
+    caret-color: #0B6B5D !important;
 }
 
-/* Números: mismo cursor oscuro sobre fondo blanco */
 .stNumberInput input,
 [data-testid="stNumberInputField"] {
-    caret-color: #111111 !important;
+    caret-color: #0B6B5D !important;
 }
-/* SIDEBAR OPCIONES EN VERDE */
+
+/* Sidebar: menos “bloque tosco”, más plano */
 [data-testid="stSidebarNav"] a {
     background-color: #064a3f !important;
     color: white !important;
-    font-size: 16px !important;
-    margin-bottom: 8px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    font-size: 15px !important;
+    margin-bottom: 6px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-weight: 500 !important;
 }
 
-/* OPCIÓN ACTIVA */
 [data-testid="stSidebarNav"] a[aria-current="page"] {
     background-color: #0B6B5D !important;
     color: white !important;
-    font-weight: bold;
+    font-weight: 600 !important;
 }
-/* 🔥 SOLUCIÓN DEFINITIVA */
+
 [data-testid="stSidebarNav"] * { color: white !important; }
 
-/* MENSAJE VERDE */
+/* Alertas: menos énfasis */
 [data-testid="stAlert"] * {
-    color: black !important;
-    font-weight: 700 !important;
+    color: #1e293b !important;
+    font-weight: 500 !important;
 }
 
-/* Leyendas (caption): evitar texto blanco heredado sobre fondo claro */
+/* Captions */
 section.main [data-testid="stCaptionContainer"],
 section.main [data-testid="stCaptionContainer"] p,
 section.main [data-testid="stCaptionContainer"] small,
@@ -417,7 +442,8 @@ section.main [data-testid="stCaption"],
 [data-testid="stMain"] [data-testid="stCaptionContainer"],
 [data-testid="stMain"] [data-testid="stCaptionContainer"] p,
 [data-testid="stMain"] [data-testid="stCaptionContainer"] span {
-    color: #1a1a1a !important;
+    color: #64748b !important;
+    font-weight: 400 !important;
 }
 
 </style>
@@ -444,9 +470,9 @@ sheet = client.open_by_key(SHEET_ID).worksheet("Hoja 2")
 
 st.markdown(
     """
-    <div style='background-color:#d4edda; padding:15px; border-radius:10px'>
-        <a href='https://docs.google.com/spreadsheets/d/17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8' target='_blank' style='text-decoration:none; color:#155724; font-weight:bold; font-size:18px;'>
-            ✔ Base de datos de Órdenes del Día del Consejo de Investigación (abrir)
+    <div style='background-color:#ecf5f2; padding:12px 14px; border-radius:8px; border:1px solid #c5ddd6; margin-bottom:0.5rem;'>
+        <a href='https://docs.google.com/spreadsheets/d/17MiyW17W7oLIwSCKjDXCoA85CwBkYqHYhDKblVN37c8' target='_blank' style='text-decoration:none; color:#0b6b5d; font-weight:600; font-size:15px;'>
+            Base de datos de Órdenes del Día del Consejo de Investigación (abrir)
         </a>
     </div>
     """,
@@ -525,18 +551,18 @@ opciones_unidades_select = [
 # =========================
 
 st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
-st.markdown("<span style='color:black; font-weight:700;'>🔷 Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
+st.markdown("<span style='color:#64748b; font-weight:500; font-size:0.95rem;'>Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
 
 # Fuera del form: cada cambio dispara rerun. Dentro de st.form, los widgets no
 # actualizan el script hasta enviar, y la fecha quedaba desfasada del desplegable de acta.
 col_bas_1, col_bas_2, col_bas_3 = st.columns([1, 2, 2])
 
 with col_bas_1:
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Año</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Año</div>", unsafe_allow_html=True)
     anio = st.text_input("", "2026", key="anio")
 
 with col_bas_2:
-    st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Seleccione el Orden del Día</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Seleccione el Orden del Día</div>", unsafe_allow_html=True)
     OPCION_ACTA_SIN_SELECCION = "Seleccionar el Orden del día"
     opciones_acta_carga = [OPCION_ACTA_SIN_SELECCION] + [
         f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict
@@ -556,14 +582,14 @@ else:
     fecha = fechas_actas.get(numero_acta, "")
 
 with col_bas_3:
-    st.markdown("<div style='margin-bottom:6px; color:black; font-weight:700;'>🟢 Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:6px; color:#334155; font-weight:600; font-size:0.95rem;'>Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
     st.markdown(
-        f"<p style='color:black; margin:0 0 20px 0; padding-bottom:4px;'><strong>{fecha}</strong></p>",
+        f"<p style='color:#475569; margin:0 0 20px 0; padding-bottom:4px; font-weight:500;'>{fecha}</p>",
         unsafe_allow_html=True,
     )
 
 st.markdown(
-    "<div style='margin-bottom:8px; color:black; font-weight:700;'>🟢 Elija la Actividad o Tema para enviar al Orden del día</div>",
+    "<div style='margin-bottom:8px; color:#334155; font-weight:600; font-size:0.95rem;'>Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True,
 )
 col_tipo_1, col_tipo_2 = st.columns([2, 3])
@@ -600,16 +626,16 @@ with st.form("form_acta", clear_on_submit=False):
     with col_den:
         _ayuda_en_iframe(
             f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;align-items:center;"
-            "padding:8px 12px;font:bold 15px/1.2 system-ui,sans-serif;color:#111;background:#dedede;"
-            'border-radius:6px;border:1px solid #c8c8c8;">🟢 Denominación de la actividad o Tema</div>',
+            "padding:8px 12px;font:600 14px/1.25 system-ui,sans-serif;color:#334155;background:#f1f5f9;"
+            'border-radius:6px;border:1px solid #e2e8f0;">Denominación de la actividad o Tema</div>',
             alto=_hdr_iframe_h,
         )
 
     with col_ind:
         _ayuda_en_iframe(
-            f"<div style=\"box-sizing:border-box;min-height:{_hdr_iframe_h - 2}px;padding:8px 10px;font:11.5px/1.3 system-ui,sans-serif;"
-            "color:#111;background:#dedede;border-radius:6px;border-left:5px solid #0b6b5d;"
-            'border-top:1px solid #c8c8c8;border-right:1px solid #c8c8c8;border-bottom:1px solid #c8c8c8;">'
+            f"<div style=\"box-sizing:border-box;min-height:{_hdr_iframe_h - 2}px;padding:8px 10px;font:11.5px/1.35 system-ui,sans-serif;"
+            "color:#475569;background:#f1f5f9;border-radius:6px;border-left:4px solid #0b6b5d;"
+            'border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">'
             "<strong>Indicaciones:</strong> "
             "Título del proyecto; Título del Informe Final o de Avance; "
             "Título de Jornada / Semillero / Instituto u otra actividad</div>",
@@ -621,9 +647,9 @@ with st.form("form_acta", clear_on_submit=False):
             _ayuda_en_iframe(
                 f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;flex-direction:column;"
                 "justify-content:center;gap:6px;padding:8px 10px;font-family:system-ui,sans-serif;"
-                "background:#dedede;border-radius:6px;border:1px solid #c8c8c8;\">"
-                "<div style=\"font-weight:700;color:#111;font-size:15px;line-height:1.15;\">🟢 Puntaje</div>"
-                "<div style=\"font-size:11.5px;line-height:1.3;color:#111;\">"
+                "background:#f1f5f9;border-radius:6px;border:1px solid #e2e8f0;\">"
+                "<div style=\"font-weight:600;color:#334155;font-size:14px;line-height:1.15;\">Puntaje</div>"
+                "<div style=\"font-size:11.5px;line-height:1.35;color:#64748b;\">"
                 "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
                 alto=_hdr_iframe_h,
             )
@@ -648,7 +674,7 @@ with st.form("form_acta", clear_on_submit=False):
     col_desc_w, _col_desc_pad = st.columns([5.0, 1.05])
     with col_desc_w:
         st.markdown(
-            "<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Descripción (no más de 50 palabras)</div>",
+            "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Descripción (no más de 50 palabras)</div>",
             unsafe_allow_html=True,
         )
         descripcion = st.text_area("")
@@ -671,42 +697,42 @@ with st.form("form_acta", clear_on_submit=False):
     if tipo == "Categorización Docente":
         col_doc_1, col_doc_2 = st.columns(2)
         with col_doc_1:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Apellido y nombre del docente</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Apellido y nombre del docente</div>", unsafe_allow_html=True)
             apellido_nombre_docente = st.text_input("", key="apellido_nombre_docente")
         with col_doc_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 DNI</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>DNI</div>", unsafe_allow_html=True)
             dni_docente = st.text_input("", key="dni_docente")
 
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
         col_dir_1, col_dir_2 = st.columns(2)
         with col_dir_1:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Director</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Director</div>", unsafe_allow_html=True)
             director = st.text_input("", key="director")
         with col_dir_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Director</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Director</div>", unsafe_allow_html=True)
             cat_director = st.selectbox("", categoria_opciones, key="cat_director")
 
         col_codir_1, col_codir_2 = st.columns(2)
         with col_codir_1:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Codirector</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Codirector</div>", unsafe_allow_html=True)
             codirector = st.text_input("", key="codirector")
         with col_codir_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Categoría del Codirector</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Codirector</div>", unsafe_allow_html=True)
             categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo", height=160)
 
         col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
         with col_eq_1:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Instituto de Investigación</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
             instituto = st.text_input("", key="instituto")
         with col_eq_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
             catedra = st.text_input("", key="catedra")
         with col_eq_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700; font-size:0.92rem; line-height:1.2;'>🟢 Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem; font-size:0.92rem; line-height:1.2;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
             alumnos = st.text_input("", key="alumnos")
 
     # =========================
@@ -715,7 +741,7 @@ with st.form("form_acta", clear_on_submit=False):
 
     col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
     with col_uni_res_1:
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Unidad Académica</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Unidad Académica</div>", unsafe_allow_html=True)
         st.caption(
             f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. "
             f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quite una con la × para cambiar."
@@ -735,10 +761,10 @@ with st.form("form_acta", clear_on_submit=False):
     if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
         with col_uni_res_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CD</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CD</div>", unsafe_allow_html=True)
             resolucion_cd = st.text_input("", key="resolucion_cd", max_chars=10, placeholder="Ej: 665")
         with col_uni_res_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Resolución CS</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CS</div>", unsafe_allow_html=True)
             resolucion_cs = st.text_input("", key="resolucion_cs", max_chars=10, placeholder="Ej: 657")
 
     else:
@@ -751,7 +777,7 @@ with st.form("form_acta", clear_on_submit=False):
 
     col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
     with col_fin_1:
-        st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🔴 Responsable de carga</div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Responsable de carga <span style='color:#94a3b8;font-weight:500;'>(requerido)</span></div>", unsafe_allow_html=True)
         responsable_de_carga = st.text_input("", key="responsable")
 
     # =========================
@@ -761,13 +787,13 @@ with st.form("form_acta", clear_on_submit=False):
     if tipo != "Categorización Docente":
 
         with col_fin_2:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Tipo de financiamiento</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Tipo de financiamiento</div>", unsafe_allow_html=True)
             tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
         with col_fin_3:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Fuente de Financiamiento</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Fuente de Financiamiento</div>", unsafe_allow_html=True)
             fuente_financiamiento = st.text_input("", key="fuente")
         with col_fin_4:
-            st.markdown("<div style='margin-bottom:-10px; color:black; font-weight:700;'>🟢 Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
             monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
 
     else:

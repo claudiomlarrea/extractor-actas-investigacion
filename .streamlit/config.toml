@@ -2,3 +2,12 @@
 # https://docs.streamlit.io/develop/api-reference/configuration/config.toml
 [client]
 toolbarMode = "viewer"
+
+# Tema institucional UCCuyo (chips, foco, widgets). El botón de envío del formulario
+# sigue en rojo por CSS propio de la página.
+[theme]
+primaryColor = "#0B6B5D"
+backgroundColor = "#F4F6F8"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1e293b"
+font = "sans serif"
