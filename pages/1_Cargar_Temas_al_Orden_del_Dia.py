@@ -199,6 +199,9 @@ _scroll_arriba = (not _ir_a_descargar_od) and (
     st.session_state.pop("volver_arriba_cargar_temas", False) or _viene_de_otra_pagina
 )
 
+# Ancla superior: el menú «Cargar Temas» vuelve acá aunque ya estés en esta página.
+st.markdown('<div id="inicio-cargar-temas"></div>', unsafe_allow_html=True)
+
 components.html(
     f"""
     <script>
@@ -209,17 +212,39 @@ components.html(
         const irOd = {"true" if _ir_a_descargar_od else "false"};
         const irArriba = {"true" if _scroll_arriba else "false"};
 
-        function subir() {{
-            [doc.querySelector("section.main"),
-             doc.querySelector('[data-testid="stAppViewContainer"]'),
-             doc.querySelector('[data-testid="stMainBlockContainer"]'),
-             doc.querySelector('[data-testid="stMain"]')].forEach(function (el) {{
-                if (el) el.scrollTop = 0;
-            }});
+        function contenedoresScroll() {{
+            return [
+                win,
+                doc.scrollingElement,
+                doc.documentElement,
+                doc.body,
+                doc.querySelector("section.main"),
+                doc.querySelector('[data-testid="stAppViewContainer"]'),
+                doc.querySelector('[data-testid="stMainBlockContainer"]'),
+                doc.querySelector('[data-testid="stMain"]'),
+            ];
         }}
+
+        function subir() {{
+            storage.setItem("ucc_scroll_mode", "top");
+            storage.removeItem("ucc_scroll_od");
+            try {{ win.scrollTo(0, 0); }} catch (e) {{}}
+            contenedoresScroll().forEach(function (el) {{
+                if (!el) return;
+                try {{
+                    if (typeof el.scrollTo === "function") el.scrollTo(0, 0);
+                    if ("scrollTop" in el) el.scrollTop = 0;
+                }} catch (e) {{}}
+            }});
+            const ancla = doc.getElementById("inicio-cargar-temas");
+            if (ancla) {{
+                try {{ ancla.scrollIntoView({{ behavior: "auto", block: "start" }}); }} catch (e) {{}}
+            }}
+        }}
+
         function programarSubir() {{
             subir();
-            [0, 120, 350, 700, 1200, 2000].forEach(function (ms) {{
+            [0, 50, 150, 350, 700, 1200, 2000].forEach(function (ms) {{
                 setTimeout(subir, ms);
             }});
         }}
@@ -231,19 +256,36 @@ components.html(
                     storage.removeItem("ucc_scroll_top");
                     programarSubir();
                 }}
-            }}, 200);
+            }}, 150);
             function enlazarMenu() {{
                 doc.querySelectorAll(
-                    '[data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"]'
+                    '[data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"], [data-testid="stSidebarNav"] li'
                 ).forEach(function (a) {{
                     if (a._uccBound) return;
                     const t = (a.textContent || "").toLowerCase();
-                    if (t.includes("cargar") && t.includes("temas")) {{
-                        a._uccBound = true;
-                        a.addEventListener("pointerdown", function () {{
+                    const esCargar = t.includes("cargar") && t.includes("temas");
+                    const esDescargar = t.includes("descargar") && t.includes("orden");
+                    if (!esCargar && !esDescargar) return;
+                    a._uccBound = true;
+                    a.addEventListener("pointerdown", function () {{
+                        if (esCargar) {{
+                            storage.setItem("ucc_scroll_mode", "top");
                             storage.setItem("ucc_scroll_top", "1");
-                        }}, true);
-                    }}
+                            storage.removeItem("ucc_scroll_od");
+                            programarSubir();
+                        }} else if (esDescargar) {{
+                            storage.setItem("ucc_scroll_mode", "od");
+                            storage.setItem("ucc_scroll_od", "1");
+                            storage.removeItem("ucc_scroll_top");
+                        }}
+                    }}, true);
+                    a.addEventListener("click", function () {{
+                        if (esCargar) {{
+                            storage.setItem("ucc_scroll_mode", "top");
+                            storage.setItem("ucc_scroll_top", "1");
+                            programarSubir();
+                        }}
+                    }}, true);
                 }});
             }}
             enlazarMenu();
@@ -253,7 +295,14 @@ components.html(
             }});
         }}
 
-        if (irArriba) storage.setItem("ucc_scroll_top", "1");
+        if (irOd) {{
+            storage.setItem("ucc_scroll_mode", "od");
+            storage.setItem("ucc_scroll_od", "1");
+            storage.removeItem("ucc_scroll_top");
+        }} else if (irArriba) {{
+            storage.setItem("ucc_scroll_top", "1");
+            programarSubir();
+        }}
     }})();
     </script>
     """,
@@ -1042,8 +1091,17 @@ if _ir_a_descargar_od:
         """
         <script>
         (function () {
+            const win = window.parent;
+            const doc = win.document;
+            const storage = win.sessionStorage;
+            storage.setItem("ucc_scroll_mode", "od");
+            storage.setItem("ucc_scroll_od", "1");
+
             function bajar() {
-                const el = window.parent.document.getElementById("descargar-orden-del-dia");
+                // Si el usuario pidió volver arriba, no seguir bajando.
+                if (storage.getItem("ucc_scroll_mode") === "top") return true;
+                if (storage.getItem("ucc_scroll_top") === "1") return true;
+                const el = doc.getElementById("descargar-orden-del-dia");
                 if (!el) return false;
                 el.scrollIntoView({behavior: "smooth", block: "start"});
                 return true;
