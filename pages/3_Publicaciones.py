@@ -4,9 +4,11 @@ from google.oauth2.service_account import Credentials
 from pathlib import Path
 
 from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
+from ucc_navegacion import render_menu_navegacion
 
 st.set_page_config(page_title="Publicaciones - Consejo de Investigación", layout="wide")
 hide_streamlit_cloud_toolbar()
+render_menu_navegacion()
 
 scope = [
     "https://spreadsheets.google.com/feeds",

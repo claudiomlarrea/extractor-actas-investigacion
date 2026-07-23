@@ -2,6 +2,7 @@ import streamlit as st
 from pathlib import Path
 
 from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
+from ucc_navegacion import render_menu_navegacion
 
 st.set_page_config(page_title="Sistema de Actas", layout="wide")
 hide_streamlit_cloud_toolbar()
@@ -91,8 +92,11 @@ with col2:
 
 st.title("📊 Sistema de Actas - Consejo de Investigación")
 
+render_menu_navegacion()
+
 st.markdown("""
-Usá el menú de la izquierda para:
+**En el celular:** usá los botones verdes de arriba para ir a cada sección.  
+En la computadora también podés usar el menú de la izquierda.
 
 • Cargar los temas que van a Consejo de Investigación  
 • **Descargar orden del día** (generar Word al final de Cargar Temas)  
