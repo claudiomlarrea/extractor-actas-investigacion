@@ -199,6 +199,13 @@ _scroll_arriba = (not _ir_a_descargar_od) and (
     st.session_state.pop("volver_arriba_cargar_temas", False) or _viene_de_otra_pagina
 )
 
+# Al elegir acta / generar, Streamlit re-ejecuta y vuelve arriba: mantener ancla en OD.
+if _ir_a_descargar_od:
+    st.session_state["_mantener_scroll_descargar_od"] = True
+if _scroll_arriba:
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
+_mantener_en_od = bool(st.session_state.get("_mantener_scroll_descargar_od"))
+
 # Ancla superior: el menú «Cargar Temas» vuelve acá aunque ya estés en esta página.
 st.markdown('<div id="inicio-cargar-temas"></div>', unsafe_allow_html=True)
 
@@ -1086,30 +1093,39 @@ if submit and not st.session_state.enviado:
 
 st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
 
-if _ir_a_descargar_od:
+if _mantener_en_od:
+    _scroll_od_suave = "true" if _ir_a_descargar_od else "false"
     components.html(
-        """
+        f"""
         <script>
-        (function () {
+        (function () {{
             const win = window.parent;
             const doc = win.document;
             const storage = win.sessionStorage;
+            const suave = {_scroll_od_suave};
             storage.setItem("ucc_scroll_mode", "od");
             storage.setItem("ucc_scroll_od", "1");
 
-            function bajar() {
+            function bajar() {{
                 // Si el usuario pidió volver arriba, no seguir bajando.
                 if (storage.getItem("ucc_scroll_mode") === "top") return true;
                 if (storage.getItem("ucc_scroll_top") === "1") return true;
                 const el = doc.getElementById("descargar-orden-del-dia");
                 if (!el) return false;
-                el.scrollIntoView({behavior: "smooth", block: "start"});
+                el.scrollIntoView({{
+                    behavior: suave ? "smooth" : "auto",
+                    block: "start"
+                }});
                 return true;
-            }
-            [0, 300, 700, 1200, 2000, 3500].forEach(function (ms) {
+            }}
+            // Primera visita (menú): reintentos largos. Re-runs (selectbox): inmediato.
+            const delays = suave
+                ? [0, 300, 700, 1200, 2000, 3500]
+                : [0, 50, 150, 400, 800];
+            delays.forEach(function (ms) {{
                 setTimeout(bajar, ms);
-            });
-        })();
+            }});
+        }})();
         </script>
         """,
         height=0,
@@ -1126,12 +1142,12 @@ acta_word = st.selectbox(
     "Seleccionar Orden del Día para generar y descargar",
     options=opciones_od_word,
     index=0,
+    key="acta_word_descargar",
 )
 
 generar = st.button("Generar Orden del Día")
 
 if generar:
-    st.session_state["_estuvo_en_seccion_od"] = True
 
     if acta_word == OPCION_OD_SIN_SELECCION:
         st.warning("Seleccione un orden del día antes de generar.")
@@ -1368,6 +1384,3 @@ if generar_responsables:
                 data=buffer,
                 file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
             )
-
-if _ir_a_descargar_od or st.session_state.pop("_estuvo_en_seccion_od", False):
-    st.session_state["volver_arriba_cargar_temas"] = True
