@@ -801,16 +801,38 @@ with st.form("form_acta", clear_on_submit=False):
         st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
         equipo = st.text_area("", key="equipo", height=160)
 
-        col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
-        with col_eq_1:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
-            instituto = st.text_input("", key="instituto")
-        with col_eq_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
-            catedra = st.text_input("", key="catedra")
-        with col_eq_3:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem; font-size:0.92rem; line-height:1.2;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
-            alumnos = st.text_input("", key="alumnos")
+        if tipo == "Proyecto de Cátedra":
+            st.markdown(
+                "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>"
+                "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            st.caption("Indique una o varias cátedras, separadas por punto y coma o por coma.")
+            catedra = st.text_area(
+                "",
+                key="catedra_proyecto_catedra",
+                height=90,
+                placeholder="Ej: Anatomía I; Fisiología; Clínica Médica",
+            )
+            col_eq_1, col_eq_2 = st.columns(2)
+            with col_eq_1:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
+                instituto = st.text_input("", key="instituto")
+            with col_eq_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+                alumnos = st.text_input("", key="alumnos")
+        else:
+            col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
+            with col_eq_1:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
+                instituto = st.text_input("", key="instituto")
+            with col_eq_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
+                catedra = st.text_input("", key="catedra")
+            with col_eq_3:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem; font-size:0.92rem; line-height:1.2;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+                alumnos = st.text_input("", key="alumnos")
 
     # =========================
     # 🏫 UNIDAD
@@ -972,8 +994,16 @@ if submit and not st.session_state.enviado:
     if instituto.strip().startswith("Seleccionar"):
         instituto = ""
 
-    if catedra.strip().startswith("Seleccionar"):
+    catedra = str(catedra or "").strip()
+    if catedra.startswith("Seleccionar"):
         catedra = ""
+    else:
+        # Una o varias cátedras en una sola celda / línea del Word
+        catedra = "; ".join(
+            parte.strip()
+            for parte in catedra.replace("\n", ";").split(";")
+            if parte.strip()
+        )
 
     if tipo_financiamiento.strip().startswith("Seleccionar"):
         tipo_financiamiento = ""
@@ -1049,6 +1079,9 @@ if submit and not st.session_state.enviado:
 
     elif not responsable_de_carga.strip():
         st.error("Debe completar el Responsable de carga")
+
+    elif tipo == "Proyecto de Cátedra" and not str(catedra).strip():
+        st.error("Debe indicar la cátedra o las cátedras del proyecto")
 
     elif err_puntaje:
         st.error(err_puntaje)
@@ -1268,8 +1301,20 @@ if generar:
                 if r.get("instituto"):
                     p.add_run(f"   Instituto: {r.get('instituto')}\n")
 
-                if r.get("catedra"):
-                    p.add_run(f"   Cátedra: {r.get('catedra')}\n")
+                catedra_od = (
+                    r.get("catedra")
+                    or r.get("cátedra")
+                    or r.get("catedras")
+                    or r.get("cátedras")
+                    or ""
+                )
+                if str(catedra_od).strip():
+                    etiqueta = (
+                        "Cátedras"
+                        if (";" in str(catedra_od) or "," in str(catedra_od))
+                        else "Cátedra"
+                    )
+                    p.add_run(f"   {etiqueta}: {catedra_od}\n")
 
                 if r.get("tipo de financiamiento"):
                     p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
