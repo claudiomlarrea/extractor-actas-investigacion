@@ -672,7 +672,7 @@ st.markdown(
 col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="top")
 with col_tipo_1:
     st.markdown(
-        "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Actividad o Tema</div>",
+        "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>Actividad o Tema</div>",
         unsafe_allow_html=True,
     )
     tipo = st.selectbox(
@@ -699,7 +699,7 @@ catedra_lateral = ""
 with col_tipo_2:
     if tipo == "Proyecto de Cátedra":
         st.markdown(
-            "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>"
+            "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>"
             "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
             "</div>",
             unsafe_allow_html=True,
