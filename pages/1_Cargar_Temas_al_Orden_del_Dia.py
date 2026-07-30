@@ -669,8 +669,12 @@ st.markdown(
     "<div style='margin-bottom:8px; color:#334155; font-weight:600; font-size:0.95rem;'>Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True,
 )
-col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="bottom")
+col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="top")
 with col_tipo_1:
+    st.markdown(
+        "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Actividad o Tema</div>",
+        unsafe_allow_html=True,
+    )
     tipo = st.selectbox(
         "Tipo de actividad",
         [
