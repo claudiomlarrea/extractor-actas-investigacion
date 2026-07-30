@@ -669,7 +669,7 @@ st.markdown(
     "<div style='margin-bottom:8px; color:#334155; font-weight:600; font-size:0.95rem;'>Elija la Actividad o Tema para enviar al Orden del día</div>",
     unsafe_allow_html=True,
 )
-col_tipo_1, col_tipo_2 = st.columns([2, 3])
+col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="bottom")
 with col_tipo_1:
     tipo = st.selectbox(
         "Tipo de actividad",
@@ -689,6 +689,23 @@ with col_tipo_1:
         key="tipo_actividad",
         label_visibility="collapsed",
     )
+
+# Al lado del tipo: solo cuando es Proyecto de Cátedra (fuera del form para que se vea al instante).
+catedra_lateral = ""
+with col_tipo_2:
+    if tipo == "Proyecto de Cátedra":
+        st.markdown(
+            "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>"
+            "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        catedra_lateral = st.text_input(
+            "",
+            key="catedra_proyecto_catedra",
+            placeholder="Ej: Anatomía I; Fisiología; Clínica Médica",
+            label_visibility="collapsed",
+        )
 
 with st.form("form_acta", clear_on_submit=False):
 
@@ -802,19 +819,8 @@ with st.form("form_acta", clear_on_submit=False):
         equipo = st.text_area("", key="equipo", height=160)
 
         if tipo == "Proyecto de Cátedra":
-            st.markdown(
-                "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>"
-                "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
-                "</div>",
-                unsafe_allow_html=True,
-            )
-            st.caption("Indique una o varias cátedras, separadas por punto y coma o por coma.")
-            catedra = st.text_area(
-                "",
-                key="catedra_proyecto_catedra",
-                height=90,
-                placeholder="Ej: Anatomía I; Fisiología; Clínica Médica",
-            )
+            # La cátedra se carga al lado del tipo (arriba); acá solo instituto / alumnos.
+            catedra = catedra_lateral
             col_eq_1, col_eq_2 = st.columns(2)
             with col_eq_1:
                 st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
@@ -976,6 +982,9 @@ if "enviado" not in st.session_state:
     st.session_state.enviado = False
 
 if submit and not st.session_state.enviado:
+
+    if tipo == "Proyecto de Cátedra":
+        catedra = st.session_state.get("catedra_proyecto_catedra", catedra)
 
     if tipo in TIPOS_CON_PUNTAJE:
         puntaje_fila, err_puntaje = parse_puntaje_campo_formulario(
