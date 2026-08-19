@@ -989,10 +989,10 @@ Responsable de carga: {fila[23]}
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls(context=context)
 
-        server.login(
-            st.secrets["email"]["EMAIL_USER"],
-            st.secrets["email"]["EMAIL_PASS"]
-        )
+        user = str(st.secrets["email"]["EMAIL_USER"]).strip()
+        # Gmail muestra la contraseña de aplicación con espacios; SMTP no los admite.
+        password = str(st.secrets["email"]["EMAIL_PASS"]).replace(" ", "").strip()
+        server.login(user, password)
 
         server.send_message(msg)
 
@@ -1124,7 +1124,16 @@ if submit:
         try:
             enviar_correo_tema(fila)
         except Exception as e:
-            st.warning(f"No se pudo enviar el correo automático: {e}")
+            err = str(e)
+            if "535" in err or "BadCredentials" in err or "Username and Password" in err:
+                st.warning(
+                    "El tema quedó guardado en la planilla. El aviso por correo no salió: "
+                    "Gmail rechazó la contraseña de aplicación. Hay que generar una nueva "
+                    "en Google (cuenta investigacion@uccuyo.edu.ar) y actualizarla en "
+                    "los secretos de Streamlit Cloud (email.EMAIL_PASS)."
+                )
+            else:
+                st.warning("El tema quedó guardado. No se pudo enviar el correo automático.")
 
         n_acta = _contar_temas_acta(sheet, numero_acta)
         st.success(
