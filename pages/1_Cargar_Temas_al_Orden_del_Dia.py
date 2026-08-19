@@ -6,7 +6,7 @@ import unicodedata
 import streamlit as st
 import streamlit.components.v1 as components
 import gspread
-from gspread.utils import ValueInputOption
+from gspread.utils import ValueInputOption, InsertDataOption
 from pathlib import Path
 from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
 from google.oauth2.service_account import Credentials
@@ -1115,7 +1115,11 @@ if submit:
         st.error(err_puntaje)
 
     else:
-        sheet.append_row(fila, value_input_option=ValueInputOption.user_entered)
+        sheet.append_row(
+            fila,
+            value_input_option=ValueInputOption.user_entered,
+            insert_data_option=InsertDataOption.insert_rows,
+        )
 
         try:
             enviar_correo_tema(fila)
