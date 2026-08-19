@@ -4,9 +4,8 @@
 name: Sync Actas Consejo → Looker
 
 on:
-  schedule:
-    # Lunes 11:00 UTC (~08:00 Argentina) — complementa el sistema Consejo
-    - cron: "0 11 * * 1"
+  # Cron desactivado: cada lunes anexaba actas históricas a la misma Hoja 2
+  # que usa la carga en vivo del Consejo (miles de duplicados).
   workflow_dispatch:
 
 jobs:

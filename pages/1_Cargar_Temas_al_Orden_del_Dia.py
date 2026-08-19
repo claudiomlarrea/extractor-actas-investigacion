@@ -28,6 +28,24 @@ def _unidad_academica_clave(r):
     return str(row.get("unidad académica") or row.get("unidad") or "").strip()
 
 
+def _numero_acta_igual(valor, acta_num) -> bool:
+    """Compara número de acta aunque Sheets lo devuelva como 193, '193' o 193.0."""
+    if valor is None or valor == "":
+        return False
+    try:
+        return int(float(str(valor).strip().replace(",", "."))) == int(acta_num)
+    except (TypeError, ValueError):
+        return str(valor).strip() == str(acta_num).strip()
+
+
+def _contar_temas_acta(worksheet, acta_num) -> int:
+    try:
+        datos = worksheet.get_all_records()
+    except Exception:
+        return 0
+    return sum(1 for r in datos if _numero_acta_igual(r.get("numero_acta"), acta_num))
+
+
 def ordenar_registros_por_unidad_academica(registros):
     """Orden estable por unidad; dentro de cada unidad conserva el orden del sheet."""
     if not registros:
@@ -982,10 +1000,7 @@ Responsable de carga: {fila[23]}
 # 💾 GUARDAR
 # =========================
 
-if "enviado" not in st.session_state:
-    st.session_state.enviado = False
-
-if submit and not st.session_state.enviado:
+if submit:
 
     if tipo == "Proyecto de Cátedra":
         catedra = st.session_state.get("catedra_proyecto_catedra", catedra)
@@ -1107,8 +1122,13 @@ if submit and not st.session_state.enviado:
         except Exception as e:
             st.warning(f"No se pudo enviar el correo automático: {e}")
 
-        st.session_state.enviado = True
-        st.success("✅ Registro guardado correctamente.\n\n📂 Ahora cargue el archivo correspondiente.\n\n🔄 Finalmente, vuelva a la página principal del sistema y recárgela para enviar otro tema.")
+        n_acta = _contar_temas_acta(sheet, numero_acta)
+        st.success(
+            "✅ Registro guardado correctamente (se agregó al Orden del Día; no reemplaza temas anteriores).\n\n"
+            f"El Acta {numero_acta} tiene ahora **{n_acta}** tema(s) cargado(s).\n\n"
+            "Puede enviar otro tema ahora mismo (cambie los campos y vuelva a enviar) "
+            "o cargar el archivo correspondiente."
+        )
         st.markdown("""
         <a href="/Carga_de_Archivos" target="_self">
             <button style="
@@ -1204,12 +1224,14 @@ if generar:
 
         registros = [
             r for r in datos
-            if str(r.get("numero_acta", "")).strip() == str(acta_num)
+            if _numero_acta_igual(r.get("numero_acta"), acta_num)
         ]
         registros = ordenar_registros_por_unidad_academica(registros)
 
         if not registros:
             st.warning("No hay registros para esta acta")
+        else:
+            st.info(f"Se encontraron **{len(registros)}** tema(s) para el Acta {acta_num}.")
 
         else:
             doc = Document()
@@ -1379,7 +1401,7 @@ if generar_responsables:
 
         registros = [
             r for r in datos
-            if str(r.get("numero_acta", "")).strip() == str(acta_num)
+            if _numero_acta_igual(r.get("numero_acta"), acta_num)
             and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
         ]
         registros = ordenar_registros_por_unidad_academica(registros)
