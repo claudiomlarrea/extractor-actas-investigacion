@@ -1123,17 +1123,10 @@ if submit:
 
         try:
             enviar_correo_tema(fila)
-        except Exception as e:
-            err = str(e)
-            if "535" in err or "BadCredentials" in err or "Username and Password" in err:
-                st.warning(
-                    "El tema quedó guardado en la planilla. El aviso por correo no salió: "
-                    "Gmail rechazó la contraseña de aplicación. Hay que generar una nueva "
-                    "en Google (cuenta investigacion@uccuyo.edu.ar) y actualizarla en "
-                    "los secretos de Streamlit Cloud (email.EMAIL_PASS)."
-                )
-            else:
-                st.warning("El tema quedó guardado. No se pudo enviar el correo automático.")
+        except Exception:
+            # El guardado en Sheets ya se hizo. No mostrar aviso a quien carga:
+            # Gmail (EMAIL_PASS) hay que renovarlo en secretos de Streamlit Cloud.
+            pass
 
         n_acta = _contar_temas_acta(sheet, numero_acta)
         st.success(
