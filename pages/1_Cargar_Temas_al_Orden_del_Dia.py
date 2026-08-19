@@ -1233,7 +1233,6 @@ if generar:
         else:
             st.info(f"Se encontraron **{len(registros)}** tema(s) para el Acta {acta_num}.")
 
-        else:
             doc = Document()
 
             doc.add_heading('Consejo de Investigación', 0)
