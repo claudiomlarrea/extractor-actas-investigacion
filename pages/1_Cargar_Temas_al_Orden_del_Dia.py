@@ -55,6 +55,133 @@ def ordenar_registros_por_unidad_academica(registros):
     return [r for _, r in indexed]
 
 
+def _fingerprint_tema(r) -> str:
+    """Identifica un tema de forma estable para reordenar el Word (no es ID de Sheets)."""
+    row = _fila_sheet_normalizada(r)
+    return "|".join(
+        [
+            str(row.get("tipo", "")).strip(),
+            str(row.get("titulo", "") or row.get("título", "")).strip(),
+            str(row.get("responsable_de_carga", "")).strip(),
+            str(row.get("unidad académica") or row.get("unidad") or "").strip(),
+            str(row.get("director", "")).strip(),
+            str(row.get("descripcion") or row.get("descripción") or "").strip()[:120],
+        ]
+    )
+
+
+def _clave_orden_manual_od(acta_num) -> str:
+    return f"od_orden_manual_{acta_num}"
+
+
+def _aplicar_orden_manual_od(acta_num, registros):
+    """Aplica el orden elegido por la asistente; temas nuevos van al final de su unidad."""
+    if not registros:
+        return registros
+    key = _clave_orden_manual_od(acta_num)
+    by_fp: dict[str, list] = {}
+    fps_sheet = []
+    for r in registros:
+        fp = _fingerprint_tema(r)
+        fps_sheet.append(fp)
+        by_fp.setdefault(fp, []).append(r)
+
+    prev = st.session_state.get(key)
+    if not isinstance(prev, list) or not prev:
+        base = ordenar_registros_por_unidad_academica(registros)
+        st.session_state[key] = [_fingerprint_tema(r) for r in base]
+        return base
+
+    usados: dict[str, int] = {}
+    ordenados = []
+    for fp in prev:
+        cola = by_fp.get(fp) or []
+        idx = usados.get(fp, 0)
+        if idx < len(cola):
+            ordenados.append(cola[idx])
+            usados[fp] = idx + 1
+
+    for fp in fps_sheet:
+        cola = by_fp.get(fp) or []
+        idx = usados.get(fp, 0)
+        if idx < len(cola):
+            ordenados.append(cola[idx])
+            usados[fp] = idx + 1
+
+    st.session_state[key] = [_fingerprint_tema(r) for r in ordenados]
+    return ordenados
+
+
+def _mover_tema_od(acta_num, fingerprint: str, delta: int, registros) -> bool:
+    """Mueve un tema ↑/↓ solo dentro de la misma unidad académica."""
+    key = _clave_orden_manual_od(acta_num)
+    orden = list(st.session_state.get(key) or [])
+    if fingerprint not in orden:
+        return False
+    i = orden.index(fingerprint)
+    j = i + delta
+    if j < 0 or j >= len(orden):
+        return False
+    by_fp = {_fingerprint_tema(r): r for r in registros}
+    ri = by_fp.get(orden[i])
+    rj = by_fp.get(orden[j])
+    if ri is None or rj is None:
+        return False
+    if _unidad_academica_clave(ri).casefold() != _unidad_academica_clave(rj).casefold():
+        return False
+    orden[i], orden[j] = orden[j], orden[i]
+    st.session_state[key] = orden
+    return True
+
+
+def _ui_reordenar_temas_od(acta_num, registros) -> None:
+    """↑/↓ por unidad. No escribe en Google Sheets."""
+    if not registros:
+        return
+    st.markdown("### Reordenar temas del Orden del Día")
+    st.caption(
+        "Dentro de cada unidad académica, use ↑ o ↓ para definir cómo salen en el Word. "
+        "No modifica la planilla de Google Sheets."
+    )
+    col_reset, _ = st.columns([1, 3])
+    with col_reset:
+        if st.button(
+            "Restaurar orden de carga",
+            key=f"od_reset_orden_{acta_num}",
+            use_container_width=True,
+        ):
+            st.session_state.pop(_clave_orden_manual_od(acta_num), None)
+            st.rerun()
+
+    unidad_actual = None
+    for idx, r in enumerate(registros):
+        row = _fila_sheet_normalizada(r)
+        unidad = _unidad_academica_clave(r)
+        if unidad != unidad_actual:
+            st.markdown(f"**{unidad or 'Sin unidad académica'}**")
+            unidad_actual = unidad
+
+        fp = _fingerprint_tema(r)
+        tipo = str(row.get("tipo", "")).strip()
+        titulo = str(row.get("titulo", "") or row.get("título", "")).strip()
+        resp = str(row.get("responsable_de_carga", "")).strip()
+        etiqueta = f"{tipo} — {titulo}" if titulo else tipo
+        if resp:
+            etiqueta = f"{etiqueta} ({resp})"
+
+        c_up, c_dn, c_txt = st.columns([0.08, 0.08, 0.84])
+        with c_up:
+            if st.button("↑", key=f"od_up_{acta_num}_{idx}", help="Subir dentro de la unidad"):
+                if _mover_tema_od(acta_num, fp, -1, registros):
+                    st.rerun()
+        with c_dn:
+            if st.button("↓", key=f"od_dn_{acta_num}_{idx}", help="Bajar dentro de la unidad"):
+                if _mover_tema_od(acta_num, fp, 1, registros):
+                    st.rerun()
+        with c_txt:
+            st.markdown(f"{idx + 1}. {etiqueta}")
+
+
 TIPOS_CON_PUNTAJE = [
     "Proyecto de Investigación",
     "Proyecto de Cátedra",
@@ -1217,177 +1344,188 @@ acta_word = st.selectbox(
     key="acta_word_descargar",
 )
 
+registros_od = []
+acta_num_od = None
+if acta_word != OPCION_OD_SIN_SELECCION:
+    acta_num_od = int(acta_word.split(" - ")[0])
+    try:
+        _datos_od = sheet.get_all_records()
+    except Exception as exc:
+        st.error(f"No se pudo leer la planilla: {exc}")
+        _datos_od = []
+    _base_od = [
+        r for r in _datos_od
+        if _numero_acta_igual(r.get("numero_acta"), acta_num_od)
+    ]
+    registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
+    if registros_od:
+        st.info(f"Se encontraron **{len(registros_od)}** tema(s) para el Acta {acta_num_od}.")
+        _ui_reordenar_temas_od(acta_num_od, registros_od)
+        registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
+    else:
+        st.caption("No hay temas cargados para esta acta todavía.")
+
 generar = st.button("Generar Orden del Día")
 
 if generar:
 
     if acta_word == OPCION_OD_SIN_SELECCION:
         st.warning("Seleccione un orden del día antes de generar.")
+    elif not registros_od or acta_num_od is None:
+        st.warning("No hay registros para esta acta")
     else:
-        datos = sheet.get_all_records()
+        acta_num = acta_num_od
+        registros = registros_od
 
-        acta_num = int(acta_word.split(" - ")[0])
+        doc = Document()
 
-        registros = [
-            r for r in datos
-            if _numero_acta_igual(r.get("numero_acta"), acta_num)
-        ]
-        registros = ordenar_registros_por_unidad_academica(registros)
+        doc.add_heading('Consejo de Investigación', 0)
 
-        if not registros:
-            st.warning("No hay registros para esta acta")
-        else:
-            st.info(f"Se encontraron **{len(registros)}** tema(s) para el Acta {acta_num}.")
+        p_acta = doc.add_paragraph(f'Acta N° {acta_num}')
+        p_acta.paragraph_format.space_after = Pt(0)
 
-            doc = Document()
+        fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
+        p_fecha = doc.add_paragraph(f'Fecha: {fecha_real}')
+        p_fecha.paragraph_format.space_after = Pt(0)
 
-            doc.add_heading('Consejo de Investigación', 0)
+        doc.add_heading('Orden del Día', level=1)
 
-            p_acta = doc.add_paragraph(f'Acta N° {acta_num}')
-            p_acta.paragraph_format.space_after = Pt(0)
+        contador = 1
+        unidad_actual = None
 
-            fecha_real = registros[0].get("FECHA", registros[0].get("fecha", ""))
-            p_fecha = doc.add_paragraph(f'Fecha: {fecha_real}')
-            p_fecha.paragraph_format.space_after = Pt(0)
+        for r in registros:
 
-            doc.add_heading('Orden del Día', level=1)
+            r = {k.lower().strip(): v for k, v in r.items()}
 
-            contador = 1
-            unidad_actual = None
+            unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
-            for r in registros:
+            if unidad != unidad_actual:
+                h = doc.add_paragraph()
+                h.paragraph_format.space_before = Pt(6)
+                h.paragraph_format.space_after = Pt(2)
+                h.paragraph_format.line_spacing = 1
 
-                r = {k.lower().strip(): v for k, v in r.items()}
+                run_h = h.add_run(unidad)
+                run_h.bold = True
+                run_h.font.color.rgb = RGBColor(0, 102, 204)
 
-                unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+                unidad_actual = unidad
 
-                if unidad != unidad_actual:
-                    h = doc.add_paragraph()
-                    h.paragraph_format.space_before = Pt(6)
-                    h.paragraph_format.space_after = Pt(2)
-                    h.paragraph_format.line_spacing = 1
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.line_spacing = 1
 
-                    run_h = h.add_run(unidad)
-                    run_h.bold = True
-                    run_h.font.color.rgb = RGBColor(0, 102, 204)
+            p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
 
-                    unidad_actual = unidad
+            descripcion = r.get("descripcion") or r.get("descripción") or ""
 
-                p = doc.add_paragraph()
-                p.paragraph_format.space_before = Pt(0)
-                p.paragraph_format.space_after = Pt(4)
-                p.paragraph_format.line_spacing = 1
+            if descripcion:
+                p.add_run(f"   Descripción: {descripcion}\n")
+                
+            tipo_actividad = r.get("tipo", "")
 
-                p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+            if tipo_actividad == "Categorización Docente":
 
-                descripcion = r.get("descripcion") or r.get("descripción") or ""
+                nombre_doc = r.get("apellido_nombre_docente", "")
+                dni_doc = r.get("dni_docente", "")
 
-                if descripcion:
-                    p.add_run(f"   Descripción: {descripcion}\n")
-                    
-                tipo_actividad = r.get("tipo", "")
+                if nombre_doc:
+                    p.add_run(f"   Docente: {nombre_doc}\n")
 
-                if tipo_actividad == "Categorización Docente":
+                if dni_doc:
+                    p.add_run(f"   DNI: {dni_doc}\n")
 
-                    nombre_doc = r.get("apellido_nombre_docente", "")
-                    dni_doc = r.get("dni_docente", "")
+            tipos_con_director = [
+                "Proyecto de Investigación",
+                "Proyecto de Cátedra",
+                "Informe Final",
+                "Informe de Avance"
+            ]
 
-                    if nombre_doc:
-                        p.add_run(f"   Docente: {nombre_doc}\n")
+            if tipo_actividad in tipos_con_director:
 
-                    if dni_doc:
-                        p.add_run(f"   DNI: {dni_doc}\n")
+                cat = r.get('cat_director', '')
+                if cat == "Seleccionar" or cat == "":
+                    p.add_run(f"   Director: {r.get('director', '')}\n")
+                else:
+                    p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
 
-                tipos_con_director = [
-                    "Proyecto de Investigación",
-                    "Proyecto de Cátedra",
-                    "Informe Final",
-                    "Informe de Avance"
-                ]
+                cat_codir = r.get('cat_codirector', '')
+                if cat_codir == "Seleccionar" or cat_codir == "":
+                    p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
+                else:
+                    p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
 
-                if tipo_actividad in tipos_con_director:
+            equipo_txt = r.get("equipo", "")
 
-                    cat = r.get('cat_director', '')
-                    if cat == "Seleccionar" or cat == "":
-                        p.add_run(f"   Director: {r.get('director', '')}\n")
-                    else:
-                        p.add_run(f"   Director: {r.get('director', '')} ({cat})\n")
+            if equipo_txt:
+                equipo_txt = equipo_txt.replace("\n", "; ")
+                p.add_run(f"   Equipo: {equipo_txt}\n")
 
-                    cat_codir = r.get('cat_codirector', '')
-                    if cat_codir == "Seleccionar" or cat_codir == "":
-                        p.add_run(f"   Codirector: {r.get('codirector', '')}\n")
-                    else:
-                        p.add_run(f"   Codirector: {r.get('codirector', '')} ({cat_codir})\n")
+            p.add_run(f"   Unidad Académica: {unidad}\n")
 
-                equipo_txt = r.get("equipo", "")
+            raw_punt = r.get("puntaje")
+            txt_puntaje = puntaje_texto_para_word(raw_punt)
+            if txt_puntaje:
+                p.add_run(f"   Puntaje: {txt_puntaje}\n")
 
-                if equipo_txt:
-                    equipo_txt = equipo_txt.replace("\n", "; ")
-                    p.add_run(f"   Equipo: {equipo_txt}\n")
+            if r.get("resolucion_cd"):
+                p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
 
-                p.add_run(f"   Unidad Académica: {unidad}\n")
+            if r.get("resolucion_cs"):
+                p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion_cs')}\n")
 
-                raw_punt = r.get("puntaje")
-                txt_puntaje = puntaje_texto_para_word(raw_punt)
-                if txt_puntaje:
-                    p.add_run(f"   Puntaje: {txt_puntaje}\n")
+            if r.get("instituto"):
+                p.add_run(f"   Instituto: {r.get('instituto')}\n")
 
-                if r.get("resolucion_cd"):
-                    p.add_run(f"   Resolución CD: {r.get('resolucion_cd')}\n")
-
-                if r.get("resolucion_cs"):
-                    p.add_run(f"   Resolución CS del Proyecto: {r.get('resolucion_cs')}\n")
-
-                if r.get("instituto"):
-                    p.add_run(f"   Instituto: {r.get('instituto')}\n")
-
-                catedra_od = (
-                    r.get("catedra")
-                    or r.get("cátedra")
-                    or r.get("catedras")
-                    or r.get("cátedras")
-                    or ""
-                )
-                if str(catedra_od).strip():
-                    etiqueta = (
-                        "Cátedras"
-                        if (";" in str(catedra_od) or "," in str(catedra_od))
-                        else "Cátedra"
-                    )
-                    p.add_run(f"   {etiqueta}: {catedra_od}\n")
-
-                if r.get("tipo de financiamiento"):
-                    p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
-
-                if r.get("fuente de financiamiento"):
-                    p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
-
-                if r.get("responsable_de_carga"):
-                    p.add_run(f"   Responsable de carga: {r.get('responsable_de_carga')}\n")
-
-                if r.get("monto del financiamiento"):
-                    try:
-                        monto = int(float(r.get("monto del financiamiento")))
-                        monto = f"${monto:,}".replace(",", ".")
-                    except:
-                        monto = r.get("monto del financiamiento")
-
-                    p.add_run(f"   Monto: {monto}\n")
-
-                if r.get("alumnos"):
-                    p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
-
-                contador += 1
-
-            buffer = BytesIO()
-            doc.save(buffer)
-            buffer.seek(0)
-
-            st.download_button(
-                "Descargar Orden del Día",
-                data=buffer,
-                file_name=f"Acta_{acta_num}.docx"
+            catedra_od = (
+                r.get("catedra")
+                or r.get("cátedra")
+                or r.get("catedras")
+                or r.get("cátedras")
+                or ""
             )
+            if str(catedra_od).strip():
+                etiqueta = (
+                    "Cátedras"
+                    if (";" in str(catedra_od) or "," in str(catedra_od))
+                    else "Cátedra"
+                )
+                p.add_run(f"   {etiqueta}: {catedra_od}\n")
+
+            if r.get("tipo de financiamiento"):
+                p.add_run(f"   Financiamiento: {r.get('tipo de financiamiento')}\n")
+
+            if r.get("fuente de financiamiento"):
+                p.add_run(f"   Fuente: {r.get('fuente de financiamiento')}\n")
+
+            if r.get("responsable_de_carga"):
+                p.add_run(f"   Responsable de carga: {r.get('responsable_de_carga')}\n")
+
+            if r.get("monto del financiamiento"):
+                try:
+                    monto = int(float(r.get("monto del financiamiento")))
+                    monto = f"${monto:,}".replace(",", ".")
+                except:
+                    monto = r.get("monto del financiamiento")
+
+                p.add_run(f"   Monto: {monto}\n")
+
+            if r.get("alumnos"):
+                p.add_run(f"   Alumnos: {r.get('alumnos')}\n")
+
+            contador += 1
+
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+
+        st.download_button(
+            "Descargar Orden del Día",
+            data=buffer,
+            file_name=f"Acta_{acta_num}.docx"
+        )
         
 st.markdown("### 🧾 Generar informe por responsable")
 
