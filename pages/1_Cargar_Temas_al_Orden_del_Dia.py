@@ -791,6 +791,37 @@ section.main [data-testid="stCaption"],
     font-weight: 400 !important;
 }
 
+/* Orden del Día: Restaurar / Generar / Descargar en bordó */
+.st-key-od_acciones_bordo button,
+.st-key-od_acciones_bordo [data-testid="stBaseButton-secondary"],
+.st-key-od_acciones_bordo [data-testid="stBaseButton-primary"],
+.st-key-od_acciones_bordo [data-testid="stDownloadButton"] button,
+div[data-testid="stVerticalBlockBorderWrapper"] button {
+    background-color: #7D1C1C !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border: 1px solid #5c1515 !important;
+    font-weight: 600 !important;
+}
+.st-key-od_acciones_bordo button p,
+.st-key-od_acciones_bordo button span,
+.st-key-od_acciones_bordo [data-testid="stMarkdownContainer"] p,
+div[data-testid="stVerticalBlockBorderWrapper"] button p,
+div[data-testid="stVerticalBlockBorderWrapper"] button span {
+    color: #ffffff !important;
+}
+.st-key-od_acciones_bordo button:hover,
+div[data-testid="stVerticalBlockBorderWrapper"] button:hover {
+    background-color: #5c1515 !important;
+    color: #ffffff !important;
+}
+.st-key-od_acciones_bordo button:disabled,
+div[data-testid="stVerticalBlockBorderWrapper"] button:disabled {
+    background-color: #7D1C1C !important;
+    color: #ffffff !important;
+    opacity: 0.55 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1484,39 +1515,18 @@ if acta_word != OPCION_OD_SIN_SELECCION:
     if registros_od:
         st.info(f"Se encontraron **{len(registros_od)}** tema(s) para el Acta {acta_num_od}.")
 
-        st.markdown(
-            """
-            <style>
-            /* Contenedor con borde: solo Restaurar / Generar / Descargar */
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) button {
-                background-color: #7D1C1C !important;
-                color: #ffffff !important;
-                border: 1px solid #5c1515 !important;
-                font-weight: 600 !important;
-            }
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) button p,
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) button span,
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) a,
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) a p,
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) a span {
-                color: #ffffff !important;
-            }
-            div[data-testid="stVerticalBlockBorderWrapper"]:has(#od-acciones-bordo) button:disabled {
-                opacity: 0.55 !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        with st.container(border=True):
-            st.markdown('<div id="od-acciones-bordo"></div>', unsafe_allow_html=True)
+        try:
+            _caja_od = st.container(border=True, key="od_acciones_bordo")
+        except TypeError:
+            _caja_od = st.container(border=True)
+        with _caja_od:
             col_rest, col_gen, col_dl = st.columns(3)
             with col_rest:
                 if st.button(
                     "Restaurar orden de carga",
                     key=f"od_reset_orden_{acta_num_od}",
                     use_container_width=True,
+                    type="primary",
                 ):
                     st.session_state.pop(_clave_orden_manual_od(acta_num_od), None)
                     st.session_state.pop(f"od_docx_bytes_{acta_num_od}", None)
@@ -1526,6 +1536,7 @@ if acta_word != OPCION_OD_SIN_SELECCION:
                     "Generar Orden del Día",
                     key=f"od_generar_{acta_num_od}",
                     use_container_width=True,
+                    type="primary",
                 )
             with col_dl:
                 _docx = st.session_state.get(f"od_docx_bytes_{acta_num_od}")
@@ -1543,8 +1554,32 @@ if acta_word != OPCION_OD_SIN_SELECCION:
                         key=f"od_descargar_disabled_{acta_num_od}",
                         use_container_width=True,
                         disabled=True,
+                        type="primary",
                         help="Primero genere el Orden del Día",
                     )
+
+        # Refuerzo de color (mismo patrón que el submit del formulario)
+        st.markdown(
+            """
+            <style>
+            .st-key-od_acciones_bordo button,
+            .st-key-od_acciones_bordo [data-testid="stDownloadButton"] button,
+            div[data-testid="stVerticalBlockBorderWrapper"] button {
+                background-color: #7D1C1C !important;
+                background-image: none !important;
+                color: #ffffff !important;
+                border: 1px solid #5c1515 !important;
+            }
+            .st-key-od_acciones_bordo button p,
+            .st-key-od_acciones_bordo button span,
+            div[data-testid="stVerticalBlockBorderWrapper"] button p,
+            div[data-testid="stVerticalBlockBorderWrapper"] button span {
+                color: #ffffff !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
         if generar:
             st.session_state[f"od_docx_bytes_{acta_num_od}"] = _construir_bytes_orden_del_dia(
