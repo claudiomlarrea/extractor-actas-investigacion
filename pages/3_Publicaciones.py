@@ -64,15 +64,7 @@ input, textarea, select {
     color: #1e293b !important;
 }
 
-.stButton > button {
-    background-color: #111111 !important;
-    color: white !important;
-    border-radius: 8px;
-}
-
-.stButton > button p {
-    color: white !important;
-}
+/* Botones 3D bordó: ucc_streamlit_chrome.inject_botones_3d_consejo() */
 
 [data-testid="stSidebarNav"] a {
     background-color: #ffffff !important;

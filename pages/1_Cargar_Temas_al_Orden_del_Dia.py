@@ -791,36 +791,7 @@ section.main [data-testid="stCaption"],
     font-weight: 400 !important;
 }
 
-/* Orden del Día: Restaurar / Generar / Descargar en bordó */
-.st-key-od_acciones_bordo button,
-.st-key-od_acciones_bordo [data-testid="stBaseButton-secondary"],
-.st-key-od_acciones_bordo [data-testid="stBaseButton-primary"],
-.st-key-od_acciones_bordo [data-testid="stDownloadButton"] button,
-div[data-testid="stVerticalBlockBorderWrapper"] button {
-    background-color: #7D1C1C !important;
-    background-image: none !important;
-    color: #ffffff !important;
-    border: 1px solid #5c1515 !important;
-    font-weight: 600 !important;
-}
-.st-key-od_acciones_bordo button p,
-.st-key-od_acciones_bordo button span,
-.st-key-od_acciones_bordo [data-testid="stMarkdownContainer"] p,
-div[data-testid="stVerticalBlockBorderWrapper"] button p,
-div[data-testid="stVerticalBlockBorderWrapper"] button span {
-    color: #ffffff !important;
-}
-.st-key-od_acciones_bordo button:hover,
-div[data-testid="stVerticalBlockBorderWrapper"] button:hover {
-    background-color: #5c1515 !important;
-    color: #ffffff !important;
-}
-.st-key-od_acciones_bordo button:disabled,
-div[data-testid="stVerticalBlockBorderWrapper"] button:disabled {
-    background-color: #7D1C1C !important;
-    color: #ffffff !important;
-    opacity: 0.55 !important;
-}
+/* Estilo 3D bordó de botones: ucc_streamlit_chrome.inject_botones_3d_consejo() */
 
 </style>
 """, unsafe_allow_html=True)
@@ -1214,17 +1185,18 @@ with st.form("form_acta", clear_on_submit=False):
     # =========================
 
     submit = st.form_submit_button("Clic para enviar al Consejo de Investigación (Google Sheets)")
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         div[data-testid="stFormSubmitButton"] button {
-            background-color: #7D1C1C !important;
-            color: white !important;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
         }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 def enviar_correo_tema(fila):
 
@@ -1418,19 +1390,13 @@ if submit:
         )
         st.markdown("""
         <a href="/Carga_de_Archivos" target="_self">
-            <button style="
-                background-color:#7D1C1C;
-                color:white;
+            <button class="ucc-btn-3d" style="
                 width:auto;
                 display:inline-block;
                 text-align:left;
                 padding:12px 20px;
-                border:none;
-                border-radius:10px;
                 font-size:17px;
-                font-weight:700;
-                margin-top:10px;
-                cursor:pointer;">
+                margin-top:10px;">
                 📂 Ahora cargue el archivo correspondiente
             </button>
         </a>
@@ -1557,29 +1523,6 @@ if acta_word != OPCION_OD_SIN_SELECCION:
                         type="primary",
                         help="Primero genere el Orden del Día",
                     )
-
-        # Refuerzo de color (mismo patrón que el submit del formulario)
-        st.markdown(
-            """
-            <style>
-            .st-key-od_acciones_bordo button,
-            .st-key-od_acciones_bordo [data-testid="stDownloadButton"] button,
-            div[data-testid="stVerticalBlockBorderWrapper"] button {
-                background-color: #7D1C1C !important;
-                background-image: none !important;
-                color: #ffffff !important;
-                border: 1px solid #5c1515 !important;
-            }
-            .st-key-od_acciones_bordo button p,
-            .st-key-od_acciones_bordo button span,
-            div[data-testid="stVerticalBlockBorderWrapper"] button p,
-            div[data-testid="stVerticalBlockBorderWrapper"] button span {
-                color: #ffffff !important;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
 
         if generar:
             st.session_state[f"od_docx_bytes_{acta_num_od}"] = _construir_bytes_orden_del_dia(
