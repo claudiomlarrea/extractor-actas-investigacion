@@ -811,16 +811,15 @@ col1, col2 = st.columns([1, 8], vertical_alignment="center")
 
 with col1:
     if _LOGO_PATH.is_file():
-        st.image(str(_LOGO_PATH), width=120)
+        st.image(str(_LOGO_PATH), width=72)
     else:
         st.caption("Logo no encontrado (assets/logo_uccuyo.png)")
 
 with col2:
     st.markdown("""
-    <div class='header-uccuyo'>
-        <h2 style="font-weight:600;">Universidad Católica de Cuyo</h2>
-        <h4 style="opacity:0.9;">Secretaría de Investigación</h4>
-        <h5 style="opacity:0.8;">Consejo de Investigación</h5>
+    <div class='header-uccuyo' style="padding:12px 16px;">
+        <h2 style="font-weight:600; font-size:1.15rem; margin:0;">Universidad Católica de Cuyo</h2>
+        <h4 style="opacity:0.9; font-size:0.95rem; margin:2px 0 0 0;">Secretaría de Investigación · Consejo de Investigación</h4>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1174,7 +1173,7 @@ def _estado_acta(numero_acta: int) -> tuple[str, str]:
 
 st.markdown('<div id="dashboard-actas"></div>', unsafe_allow_html=True)
 st.markdown("## 📊 Dashboard de estado")
-st.caption("Cada acta es un acceso directo: ver lo cargado, cargar un tema, descargar el Orden del Día o subir archivos.")
+st.caption("Seleccione un acta y use las acciones. La tabla muestra el estado de todas.")
 
 st.markdown(
     """
@@ -1183,43 +1182,33 @@ st.markdown(
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding: 1px 7px;
+      padding: 3px 10px;
       border-radius: 999px;
       color: #fff;
       font-weight: 800;
-      font-size: 0.68rem;
+      font-size: 0.78rem;
       line-height: 1.2;
     }
-    .ucc-dash-acta{
-      padding: 8px 10px !important;
-      margin-bottom: 0 !important;
-    }
-    .ucc-dash-acta strong{
-      font-size: 0.92rem !important;
-    }
-    div[class*="st-key-dash_"] button,
+    div[class*="st-key-dash_accion_"] button,
     div[class*="st-key-volver_actas"] button{
-      min-height: 1.55rem !important;
-      height: 1.55rem !important;
-      padding: 0 4px !important;
-      font-size: 0.68rem !important;
-      margin-bottom: 0.1rem !important;
-      line-height: 1.1 !important;
-    }
-    div[class*="st-key-dash_"] {
-      margin-bottom: -0.35rem !important;
+      min-height: 2.6rem !important;
+      padding: 10px 14px !important;
+      font-size: 0.95rem !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
 def _dash_ver_temas(numero: int) -> None:
+    st.session_state["dashboard_acta_seleccion"] = numero
     st.session_state["dashboard_acta_detalle"] = numero
     st.session_state.pop("_mantener_scroll_descargar_od", None)
 
 
 def _dash_cargar_tema(numero: int) -> None:
+    st.session_state["dashboard_acta_seleccion"] = numero
     st.session_state["acta"] = f"Orden del Día {actas_dict[numero]['mes']} - Acta {numero}"
     st.session_state.pop("_mantener_scroll_descargar_od", None)
     st.session_state["volver_arriba_cargar_temas"] = True
@@ -1228,6 +1217,7 @@ def _dash_cargar_tema(numero: int) -> None:
 
 
 def _dash_descargar_od(numero: int) -> None:
+    st.session_state["dashboard_acta_seleccion"] = numero
     st.session_state["acta_word_descargar"] = f"{numero} - {actas_dict[numero]['mes']}"
     st.session_state["ir_a_descargar_orden_dia"] = True
     st.session_state.pop("dashboard_acta_detalle", None)
@@ -1236,71 +1226,111 @@ def _dash_descargar_od(numero: int) -> None:
 
 
 def _dash_cargar_archivos(numero: int) -> None:
+    st.session_state["dashboard_acta_seleccion"] = numero
     st.session_state["acta_archivos"] = numero
 
 
 _actas_ordenadas = sorted(actas_dict.keys())
-cols_actas = st.columns(4)
-for idx, n in enumerate(_actas_ordenadas):
-    c = cols_actas[idx % 4]
+_opciones_dash = []
+_mapa_label_acta: dict[str, int] = {}
+for n in _actas_ordenadas:
+    estado_txt, _ = _estado_acta(n)
     temas = _por_acta_temas.get(n, 0)
-    unidades_presentes = len(_por_acta_unidades[n] & _EXPECTED_UNIDADES)
-    estado_txt, estado_bg = _estado_acta(n)
+    label = f"Acta {n} · {actas_dict[n]['mes']} · {estado_txt} · {temas} tema(s)"
+    _opciones_dash.append(label)
+    _mapa_label_acta[label] = n
 
-    mes = actas_dict[n]["mes"]
-    with c:
-        st.markdown(
-            f"""
-            <div class="ucc-summary-item ucc-dash-acta">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:4px;">
-                <strong style="color:#334155; margin:0;">Acta {n}</strong>
-                <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
-              </div>
-              <div style="margin-top:2px; color:#064a3f; font-weight:600; font-size:0.75rem;">
-                {mes} · {temas} tema(s) · {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES}
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        b1, b2, b3, b4 = st.columns(4)
-        with b1:
-            st.button(
-                "Ver",
-                key=f"dash_ver_{n}",
-                use_container_width=True,
-                on_click=_dash_ver_temas,
-                args=(n,),
-                help="Ver temas cargados",
-            )
-        with b2:
-            st.button(
-                "Cargar",
-                key=f"dash_cargar_{n}",
-                use_container_width=True,
-                on_click=_dash_cargar_tema,
-                args=(n,),
-                help="Cargar tema",
-            )
-        with b3:
-            st.button(
-                "OD",
-                key=f"dash_od_{n}",
-                use_container_width=True,
-                on_click=_dash_descargar_od,
-                args=(n,),
-                help="Descargar Orden del Día",
-            )
-        with b4:
-            if st.button(
-                "Archivo",
-                key=f"dash_arch_{n}",
-                use_container_width=True,
-                on_click=_dash_cargar_archivos,
-                args=(n,),
-                help="Cargar archivo",
-            ):
-                st.switch_page("pages/2_Carga_de_Archivos.py")
+if "dashboard_acta_seleccion" not in st.session_state:
+    _pref = next(
+        (n for n in _actas_ordenadas if _MES_A_NUMERO.get(actas_dict[n]["mes"], 0) == _MES_ACTUAL),
+        _actas_ordenadas[0],
+    )
+    st.session_state["dashboard_acta_seleccion"] = _pref
+
+_idx_sel = 0
+for i, lab in enumerate(_opciones_dash):
+    if _mapa_label_acta[lab] == st.session_state.get("dashboard_acta_seleccion"):
+        _idx_sel = i
+        break
+
+_label_sel = st.selectbox(
+    "Acta en trabajo",
+    options=_opciones_dash,
+    index=_idx_sel,
+    key="dashboard_acta_selectbox",
+)
+_acta_sel = _mapa_label_acta[_label_sel]
+st.session_state["dashboard_acta_seleccion"] = _acta_sel
+
+_estado_sel, _bg_sel = _estado_acta(_acta_sel)
+_temas_sel = _por_acta_temas.get(_acta_sel, 0)
+_unidades_sel_n = len(_por_acta_unidades[_acta_sel] & _EXPECTED_UNIDADES)
+st.markdown(
+    f"""
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:6px 0 12px 0;">
+      <span class="ucc-badge-pill" style="{_bg_sel}">{_estado_sel}</span>
+      <span style="color:#334155; font-weight:600;">{_temas_sel} tema(s)</span>
+      <span style="color:#64748b;">{_unidades_sel_n}/{_TOTAL_EXPECTED_UNIDADES} unidades con carga</span>
+      <span style="color:#64748b;">{fechas_actas.get(_acta_sel, "")}</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+a1, a2, a3, a4 = st.columns(4)
+with a1:
+    st.button(
+        "Ver temas",
+        key="dash_accion_ver",
+        use_container_width=True,
+        on_click=_dash_ver_temas,
+        args=(_acta_sel,),
+    )
+with a2:
+    st.button(
+        "Cargar tema",
+        key="dash_accion_cargar",
+        use_container_width=True,
+        on_click=_dash_cargar_tema,
+        args=(_acta_sel,),
+    )
+with a3:
+    st.button(
+        "Descargar OD",
+        key="dash_accion_od",
+        use_container_width=True,
+        on_click=_dash_descargar_od,
+        args=(_acta_sel,),
+    )
+with a4:
+    if st.button(
+        "Cargar archivo",
+        key="dash_accion_archivo",
+        use_container_width=True,
+        on_click=_dash_cargar_archivos,
+        args=(_acta_sel,),
+    ):
+        st.switch_page("pages/2_Carga_de_Archivos.py")
+
+# Resumen de todas las actas (compacto, legible al 100%)
+_resumen_filas = []
+for n in _actas_ordenadas:
+    est, _ = _estado_acta(n)
+    _resumen_filas.append(
+        {
+            "Acta": n,
+            "Mes": actas_dict[n]["mes"],
+            "Estado": est,
+            "Temas": _por_acta_temas.get(n, 0),
+            "Unidades": f"{len(_por_acta_unidades[n] & _EXPECTED_UNIDADES)}/{_TOTAL_EXPECTED_UNIDADES}",
+        }
+    )
+st.dataframe(
+    pd.DataFrame(_resumen_filas),
+    use_container_width=True,
+    hide_index=True,
+    height=280,
+)
 
 _acta_detalle = st.session_state.get("dashboard_acta_detalle")
 if _acta_detalle in actas_dict:
