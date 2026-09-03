@@ -523,7 +523,7 @@ def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: i
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             st.markdown(
-                '<a class="ucc-nav-btn-3d" href="#" onclick="var m=window.parent.document.querySelector(\'section.main\');if(m)m.scrollTo({top:0,behavior:\'smooth\'});else window.scrollTo({top:0,behavior:\'smooth\'});return false;">📝 Cargar tema</a>',
+                '<a class="ucc-nav-btn-3d" href="#" onclick="var el=document.getElementById(\'paso-1-ancla\')||window.parent.document.getElementById(\'paso-1-ancla\');if(el){el.scrollIntoView({behavior:\'smooth\',block:\'start\'});}return false;">📝 Cargar tema</a>',
                 unsafe_allow_html=True,
             )
         try:
@@ -1257,6 +1257,7 @@ if numero_acta:
                     unsafe_allow_html=False,
                 )
 
+st.markdown('<div id="paso-1-ancla"></div>', unsafe_allow_html=True)
 with _container_con_estilo("ucc_card_paso_1"):
     _render_encabezado_bloque(
         "Paso 1",
