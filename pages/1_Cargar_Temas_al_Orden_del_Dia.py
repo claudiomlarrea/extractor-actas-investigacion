@@ -500,6 +500,9 @@ def _marcar_volver_actas() -> None:
 
 def _marcar_ir_od() -> None:
     st.session_state["ir_a_descargar_orden_dia"] = True
+    st.session_state.pop("volver_arriba_cargar_temas", None)
+    st.session_state.pop("volver_dashboard_actas", None)
+    st.session_state.pop("dashboard_acta_detalle", None)
 
 
 def _render_boton_volver_actas(clave: str) -> None:
@@ -678,133 +681,120 @@ if _scroll_arriba or _scroll_dashboard:
     st.session_state.pop("_mantener_scroll_descargar_od", None)
 _mantener_en_od = bool(st.session_state.get("_mantener_scroll_descargar_od"))
 
-# Ancla superior: el menú «Cargar Temas» vuelve acá aunque ya estés en esta página.
+# Anclas tipo IDS (#inicio): navegación por secciones en la misma página.
 st.markdown('<div id="inicio-cargar-temas"></div>', unsafe_allow_html=True)
 
-components.html(
-    f"""
-    <script>
-    (function () {{
-        const win = window.parent;
-        const doc = win.document;
-        const storage = win.sessionStorage;
-        const irOd = {"true" if _ir_a_descargar_od else "false"};
-        const irArriba = {"true" if _scroll_arriba else "false"};
-        const irDashboard = {"true" if _scroll_dashboard else "false"};
+# Destino del scroll de este rerun (estilo PETAS/IDS).
+_ancla_destino = None
+if _ir_a_descargar_od or _mantener_en_od:
+    _ancla_destino = "descargar-orden-del-dia"
+elif _scroll_dashboard:
+    _ancla_destino = "dashboard-actas"
+elif _scroll_arriba:
+    _ancla_destino = "paso-1-ancla"
+elif st.session_state.get("dashboard_acta_detalle"):
+    _ancla_destino = "detalle-acta-ancla"
 
-        function contenedoresScroll() {{
-            return [
-                win,
-                doc.scrollingElement,
-                doc.documentElement,
-                doc.body,
-                doc.querySelector("section.main"),
-                doc.querySelector('[data-testid="stAppViewContainer"]'),
-                doc.querySelector('[data-testid="stMainBlockContainer"]'),
-                doc.querySelector('[data-testid="stMain"]'),
-            ];
-        }}
 
-        function subir() {{
-            storage.setItem("ucc_scroll_mode", "top");
-            storage.removeItem("ucc_scroll_od");
-            const ancla = doc.getElementById("paso-1-ancla") || doc.getElementById("inicio-cargar-temas");
-            if (ancla) {{
-                try {{ ancla.scrollIntoView({{ behavior: "auto", block: "start" }}); }} catch (e) {{}}
+def _inject_scroll_a_ancla(ancla_id: str, suave: bool = True) -> None:
+    """Scroll fiable al ancla, compensando el contenedor de Streamlit."""
+    if not ancla_id:
+        return
+    components.html(
+        f"""
+        <script>
+        (function () {{
+            const win = window.parent;
+            const doc = win.document;
+            const storage = win.sessionStorage;
+            const targetId = {ancla_id!r};
+            const suave = {"true" if suave else "false"};
+            const margen = 90;
+
+            storage.setItem("ucc_scroll_target", targetId);
+            if (targetId === "descargar-orden-del-dia") {{
+                storage.setItem("ucc_scroll_mode", "od");
+                storage.removeItem("ucc_scroll_top");
+            }} else {{
+                storage.setItem("ucc_scroll_mode", "top");
+                storage.removeItem("ucc_scroll_od");
             }}
-            // Compensa la barra superior de Streamlit para no tapar "Paso 1".
-            const margen = 130;
-            contenedoresScroll().forEach(function (el) {{
-                if (!el || !("scrollTop" in el)) return;
-                try {{ el.scrollTop = Math.max(0, el.scrollTop - margen); }} catch (e) {{}}
-            }});
-        }}
 
-        function irTablero() {{
-            storage.setItem("ucc_scroll_mode", "top");
-            storage.removeItem("ucc_scroll_od");
-            const ancla = doc.getElementById("dashboard-actas") || doc.getElementById("inicio-cargar-temas");
-            if (ancla) {{
-                try {{ ancla.scrollIntoView({{ behavior: "auto", block: "start" }}); }} catch (e) {{}}
+            function contenedores() {{
+                return [
+                    doc.scrollingElement,
+                    doc.documentElement,
+                    doc.body,
+                    doc.querySelector("section.main"),
+                    doc.querySelector('[data-testid="stAppViewContainer"]'),
+                    doc.querySelector('[data-testid="stMain"]'),
+                    doc.querySelector('[data-testid="stMainBlockContainer"]'),
+                ].filter(Boolean);
             }}
-        }}
 
-        function programarTablero() {{
-            irTablero();
-            [0, 50, 150, 350, 700, 1200].forEach(function (ms) {{
-                setTimeout(irTablero, ms);
-            }});
-        }}
+            function ir() {{
+                const pedido = storage.getItem("ucc_scroll_target");
+                if (pedido && pedido !== targetId) return false;
+                const el = doc.getElementById(targetId);
+                if (!el) return false;
 
-        function programarSubir() {{
-            subir();
-            [0, 50, 150, 350, 700, 1200, 2000].forEach(function (ms) {{
-                setTimeout(subir, ms);
-            }});
-        }}
+                // 1) scrollIntoView (como #inicio en IDS)
+                try {{
+                    el.scrollIntoView({{
+                        behavior: suave ? "smooth" : "auto",
+                        block: "start"
+                    }});
+                }} catch (e) {{}}
 
-        if (!win._uccNavScrollInit) {{
-            win._uccNavScrollInit = true;
-            setInterval(function () {{
-                if (storage.getItem("ucc_scroll_top") === "1") {{
-                    storage.removeItem("ucc_scroll_top");
-                    programarSubir();
-                }}
-            }}, 150);
-            function enlazarMenu() {{
-                doc.querySelectorAll(
-                    '[data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"], [data-testid="stSidebarNav"] li'
-                ).forEach(function (a) {{
-                    if (a._uccBound) return;
-                    const t = (a.textContent || "").toLowerCase();
-                    const esCargar = t.includes("cargar") && t.includes("temas");
-                    const esDescargar = t.includes("descargar") && t.includes("orden");
-                    if (!esCargar && !esDescargar) return;
-                    a._uccBound = true;
-                    a.addEventListener("pointerdown", function () {{
-                        if (esCargar) {{
-                            storage.setItem("ucc_scroll_mode", "top");
-                            storage.setItem("ucc_scroll_top", "1");
-                            storage.removeItem("ucc_scroll_od");
-                            programarSubir();
-                        }} else if (esDescargar) {{
-                            storage.setItem("ucc_scroll_mode", "od");
-                            storage.setItem("ucc_scroll_od", "1");
-                            storage.removeItem("ucc_scroll_top");
+                // 2) ajuste manual en contenedores scrollables de Streamlit
+                const rect = el.getBoundingClientRect();
+                contenedores().forEach(function (sc) {{
+                    try {{
+                        const top = (sc.scrollTop || 0) + rect.top - margen;
+                        if (typeof sc.scrollTo === "function") {{
+                            sc.scrollTo({{ top: Math.max(0, top), behavior: suave ? "smooth" : "auto" }});
+                        }} else if ("scrollTop" in sc) {{
+                            sc.scrollTop = Math.max(0, top);
                         }}
-                    }}, true);
-                    a.addEventListener("click", function () {{
-                        if (esCargar) {{
-                            storage.setItem("ucc_scroll_mode", "top");
-                            storage.setItem("ucc_scroll_top", "1");
-                            programarSubir();
-                        }}
-                    }}, true);
+                    }} catch (e) {{}}
+                }});
+                try {{ win.scrollBy(0, rect.top - margen); }} catch (e) {{}}
+                return true;
+            }}
+
+            function programar() {{
+                [0, 50, 150, 300, 600, 1000, 1600, 2500, 4000].forEach(function (ms) {{
+                    setTimeout(ir, ms);
                 }});
             }}
-            enlazarMenu();
-            new MutationObserver(enlazarMenu).observe(doc.body, {{
-                childList: true,
-                subtree: true,
-            }});
-        }}
 
-        if (irOd) {{
-            storage.setItem("ucc_scroll_mode", "od");
-            storage.setItem("ucc_scroll_od", "1");
-            storage.removeItem("ucc_scroll_top");
-        }} else if (irDashboard) {{
-            storage.setItem("ucc_scroll_mode", "top");
-            programarTablero();
-        }} else if (irArriba) {{
-            storage.setItem("ucc_scroll_top", "1");
-            programarSubir();
-        }}
-    }})();
-    </script>
-    """,
-    height=0,
-)
+            programar();
+
+            if (!win._uccAnclaScrollInit) {{
+                win._uccAnclaScrollInit = true;
+                setInterval(function () {{
+                    const t = storage.getItem("ucc_scroll_target");
+                    if (!t) return;
+                    const el = doc.getElementById(t);
+                    if (!el) return;
+                    const r = el.getBoundingClientRect();
+                    // Si quedó lejos del tope visible, reintentar.
+                    if (r.top < 40 || r.top > 220) {{
+                        try {{
+                            el.scrollIntoView({{ behavior: "auto", block: "start" }});
+                        }} catch (e) {{}}
+                    }}
+                }}, 400);
+            }}
+        }})();
+        </script>
+        """,
+        height=0,
+    )
+
+
+if _ancla_destino:
+    _inject_scroll_a_ancla(_ancla_destino, suave=bool(_ir_a_descargar_od or _scroll_arriba or _scroll_dashboard))
 
 _APP_ROOT = Path(__file__).resolve().parent.parent
 _LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
@@ -1216,6 +1206,7 @@ st.markdown(
 
 def _dash_ver_temas(numero: int) -> None:
     st.session_state["dashboard_acta_detalle"] = numero
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
 
 
 def _dash_cargar_tema(numero: int) -> None:
@@ -1223,12 +1214,15 @@ def _dash_cargar_tema(numero: int) -> None:
     st.session_state.pop("_mantener_scroll_descargar_od", None)
     st.session_state["volver_arriba_cargar_temas"] = True
     st.session_state.pop("dashboard_acta_detalle", None)
+    st.session_state.pop("ucc_scroll_target", None)
 
 
 def _dash_descargar_od(numero: int) -> None:
     st.session_state["acta_word_descargar"] = f"{numero} - {actas_dict[numero]['mes']}"
     st.session_state["ir_a_descargar_orden_dia"] = True
     st.session_state.pop("dashboard_acta_detalle", None)
+    st.session_state.pop("volver_arriba_cargar_temas", None)
+    st.session_state.pop("volver_dashboard_actas", None)
 
 
 def _dash_cargar_archivos(numero: int) -> None:
@@ -1294,6 +1288,8 @@ for idx, n in enumerate(_actas_ordenadas):
 
 _acta_detalle = st.session_state.get("dashboard_acta_detalle")
 if _acta_detalle in actas_dict:
+    st.markdown('<div id="detalle-acta-ancla"></div>', unsafe_allow_html=True)
+    _inject_scroll_a_ancla("detalle-acta-ancla", suave=True)
     _mes_detalle = actas_dict[_acta_detalle]["mes"]
     _fecha_detalle = fechas_actas.get(_acta_detalle, "")
     _filas_detalle = [
@@ -1431,37 +1427,8 @@ if numero_acta:
                 )
 
 st.markdown('<div id="paso-1-ancla"></div>', unsafe_allow_html=True)
-if _scroll_arriba:
-    components.html(
-        """
-        <script>
-        (function () {
-            const win = window.parent;
-            const doc = win.document;
-            function irPaso1() {
-                const el = doc.getElementById("paso-1-ancla");
-                if (!el) return;
-                try { el.scrollIntoView({ behavior: "auto", block: "start" }); } catch (e) {}
-                const margen = 130;
-                [
-                    doc.scrollingElement,
-                    doc.documentElement,
-                    doc.body,
-                    doc.querySelector("section.main"),
-                    doc.querySelector('[data-testid="stMain"]'),
-                    doc.querySelector('[data-testid="stAppViewContainer"]'),
-                    doc.querySelector('[data-testid="stMainBlockContainer"]'),
-                ].forEach(function (sc) {
-                    if (!sc || !("scrollTop" in sc)) return;
-                    try { sc.scrollTop = Math.max(0, sc.scrollTop - margen); } catch (e) {}
-                });
-            }
-            [0, 80, 250, 600, 1200].forEach(function (ms) { setTimeout(irPaso1, ms); });
-        })();
-        </script>
-        """,
-        height=0,
-    )
+if _scroll_arriba or _ancla_destino == "paso-1-ancla":
+    _inject_scroll_a_ancla("paso-1-ancla", suave=True)
 with _container_con_estilo("ucc_card_paso_1"):
     _render_encabezado_bloque(
         "Paso 1",
@@ -1996,44 +1963,8 @@ if submit:
 render_historial_acta(sheet, numero_acta)
 
 st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
-
-if _mantener_en_od:
-    _scroll_od_suave = "true" if _ir_a_descargar_od else "false"
-    components.html(
-        f"""
-        <script>
-        (function () {{
-            const win = window.parent;
-            const doc = win.document;
-            const storage = win.sessionStorage;
-            const suave = {_scroll_od_suave};
-            storage.setItem("ucc_scroll_mode", "od");
-            storage.setItem("ucc_scroll_od", "1");
-
-            function bajar() {{
-                // Si el usuario pidió volver arriba, no seguir bajando.
-                if (storage.getItem("ucc_scroll_mode") === "top") return true;
-                if (storage.getItem("ucc_scroll_top") === "1") return true;
-                const el = doc.getElementById("descargar-orden-del-dia");
-                if (!el) return false;
-                el.scrollIntoView({{
-                    behavior: suave ? "smooth" : "auto",
-                    block: "start"
-                }});
-                return true;
-            }}
-            // Primera visita (menú): reintentos largos. Re-runs (selectbox): inmediato.
-            const delays = suave
-                ? [0, 300, 700, 1200, 2000, 3500]
-                : [0, 50, 150, 400, 800];
-            delays.forEach(function (ms) {{
-                setTimeout(bajar, ms);
-            }});
-        }})();
-        </script>
-        """,
-        height=0,
-    )
+if _ir_a_descargar_od or _mantener_en_od or _ancla_destino == "descargar-orden-del-dia":
+    _inject_scroll_a_ancla("descargar-orden-del-dia", suave=bool(_ir_a_descargar_od))
 
 with _container_con_estilo("ucc_card_od_modulo"):
     _render_encabezado_bloque(
