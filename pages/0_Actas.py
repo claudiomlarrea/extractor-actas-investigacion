@@ -1151,29 +1151,18 @@ _MES_ACTUAL = _dt.date.today().month
 
 
 def _estado_acta(numero_acta: int) -> tuple[str, str]:
-    """Retorna (texto, background_css)."""
+    """Retorna (texto, background_css) para tarjetas: Cerrada / En curso / Próxima."""
     mes_acta = _MES_A_NUMERO.get(actas_dict[numero_acta]["mes"], 0)
-    acta_pasada = mes_acta < _MES_ACTUAL
-
-    temas = _por_acta_temas.get(numero_acta, 0)
-    if temas <= 0:
-        if acta_pasada:
-            return "Cerrada", "background:#6b7280"
-        return "Sin carga", "background:#b91c1c"
-
-    if acta_pasada:
+    if mes_acta < _MES_ACTUAL:
         return "Cerrada", "background:#6b7280"
-
-    unidades_presentes = len(_por_acta_unidades[numero_acta] & _EXPECTED_UNIDADES)
-    cobertura = unidades_presentes / _TOTAL_EXPECTED_UNIDADES
-    if cobertura >= _UMBRAL_COMPLETA:
-        return "Completa", "background:#0b6b5d"
+    if mes_acta > _MES_ACTUAL:
+        return "Próxima", "background:#1d4ed8"
     return "En curso", "background:#b45309"
 
 
 st.markdown('<div id="dashboard-actas"></div>', unsafe_allow_html=True)
 st.markdown("## 📊 Dashboard de estado")
-st.caption("Seleccione un acta y use las acciones. La tabla muestra el estado de todas.")
+st.caption("Haga clic en una tarjeta para elegir el acta. Luego use las acciones de abajo.")
 
 st.markdown(
     """
@@ -1182,12 +1171,42 @@ st.markdown(
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 999px;
       color: #fff;
-      font-weight: 800;
-      font-size: 0.78rem;
+      font-weight: 700;
+      font-size: 0.68rem;
       line-height: 1.2;
+    }
+    .ucc-pick-card{
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid #d8e7e0;
+      min-height: 58px;
+    }
+    .ucc-pick-card.is-active{
+      border-color: #0b6b5d;
+      box-shadow: 0 0 0 2px rgba(11,107,93,0.18);
+      background: #f3faf7;
+    }
+    .ucc-pick-title{
+      color: #334155;
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin: 0;
+    }
+    .ucc-pick-mes{
+      color: #064a3f;
+      font-weight: 600;
+      font-size: 0.74rem;
+      margin-top: 2px;
+    }
+    div[class*="st-key-dash_pick_"] button{
+      min-height: 1.7rem !important;
+      padding: 2px 8px !important;
+      font-size: 0.72rem !important;
+      margin-top: 4px !important;
     }
     div[class*="st-key-dash_accion_"] button,
     div[class*="st-key-volver_actas"] button{
@@ -1231,15 +1250,6 @@ def _dash_cargar_archivos(numero: int) -> None:
 
 
 _actas_ordenadas = sorted(actas_dict.keys())
-_opciones_dash = []
-_mapa_label_acta: dict[str, int] = {}
-for n in _actas_ordenadas:
-    estado_txt, _ = _estado_acta(n)
-    temas = _por_acta_temas.get(n, 0)
-    label = f"Acta {n} · {actas_dict[n]['mes']} · {estado_txt} · {temas} tema(s)"
-    _opciones_dash.append(label)
-    _mapa_label_acta[label] = n
-
 if "dashboard_acta_seleccion" not in st.session_state:
     _pref = next(
         (n for n in _actas_ordenadas if _MES_A_NUMERO.get(actas_dict[n]["mes"], 0) == _MES_ACTUAL),
@@ -1247,30 +1257,52 @@ if "dashboard_acta_seleccion" not in st.session_state:
     )
     st.session_state["dashboard_acta_seleccion"] = _pref
 
-_idx_sel = 0
-for i, lab in enumerate(_opciones_dash):
-    if _mapa_label_acta[lab] == st.session_state.get("dashboard_acta_seleccion"):
-        _idx_sel = i
-        break
+# Tarjetas compactas para elegir acta
+st.markdown("**Acta en trabajo**")
+cols_pick = st.columns(4)
+for idx, n in enumerate(_actas_ordenadas):
+    estado_txt, estado_bg = _estado_acta(n)
+    mes = actas_dict[n]["mes"]
+    activa = st.session_state.get("dashboard_acta_seleccion") == n
+    clase = "ucc-pick-card is-active" if activa else "ucc-pick-card"
+    with cols_pick[idx % 4]:
+        st.markdown(
+            f"""
+            <div class="{clase}">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                <p class="ucc-pick-title">Acta {n}</p>
+                <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
+              </div>
+              <div class="ucc-pick-mes">{mes}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button(
+            "Elegida" if activa else "Elegir",
+            key=f"dash_pick_{n}",
+            use_container_width=True,
+            disabled=activa,
+        ):
+            st.session_state["dashboard_acta_seleccion"] = n
+            st.session_state.pop("dashboard_acta_detalle", None)
+            st.rerun()
 
-_label_sel = st.selectbox(
-    "Acta en trabajo",
-    options=_opciones_dash,
-    index=_idx_sel,
-    key="dashboard_acta_selectbox",
-)
-_acta_sel = _mapa_label_acta[_label_sel]
-st.session_state["dashboard_acta_seleccion"] = _acta_sel
+_acta_sel = st.session_state.get("dashboard_acta_seleccion")
+if _acta_sel not in actas_dict:
+    _acta_sel = _actas_ordenadas[0]
+    st.session_state["dashboard_acta_seleccion"] = _acta_sel
 
 _estado_sel, _bg_sel = _estado_acta(_acta_sel)
 _temas_sel = _por_acta_temas.get(_acta_sel, 0)
 _unidades_sel_n = len(_por_acta_unidades[_acta_sel] & _EXPECTED_UNIDADES)
 st.markdown(
     f"""
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:6px 0 12px 0;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 12px 0;">
+      <span style="color:#334155; font-weight:700;">Seleccionada: Acta {_acta_sel} · {actas_dict[_acta_sel]['mes']}</span>
       <span class="ucc-badge-pill" style="{_bg_sel}">{_estado_sel}</span>
       <span style="color:#334155; font-weight:600;">{_temas_sel} tema(s)</span>
-      <span style="color:#64748b;">{_unidades_sel_n}/{_TOTAL_EXPECTED_UNIDADES} unidades con carga</span>
+      <span style="color:#64748b;">{_unidades_sel_n}/{_TOTAL_EXPECTED_UNIDADES} unidades</span>
       <span style="color:#64748b;">{fechas_actas.get(_acta_sel, "")}</span>
     </div>
     """,
