@@ -11,6 +11,7 @@ import streamlit as st
 # Rutas sin prefijo numérico (Streamlit: "1_Cargar_Foo.py" → "/Cargar_Foo").
 _MENU_ENLACES: list[tuple[str, str]] = [
     ("/", "Inicio"),
+    ("/Actas", "Actas"),
     ("/Cargar_Temas_al_Orden_del_Dia", "Cargar Temas"),
     ("/Descargar_Orden_del_Dia", "Descargar orden del día"),
     ("/Carga_de_Archivos", "Carga de Archivos"),

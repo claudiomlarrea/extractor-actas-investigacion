@@ -670,9 +670,13 @@ _viene_de_otra_pagina = st.session_state.get("_pagina_streamlit_prev") != "carga
 st.session_state["_pagina_streamlit_prev"] = "cargar_temas"
 
 _scroll_dashboard = st.session_state.pop("volver_dashboard_actas", False)
-_scroll_arriba = (not _ir_a_descargar_od) and (not _scroll_dashboard) and (
-    st.session_state.pop("volver_arriba_cargar_temas", False) or _viene_de_otra_pagina
+# Solo ir al Paso 1 si el usuario pidió "Cargar tema" (no al abrir la página).
+_scroll_arriba = (not _ir_a_descargar_od) and (not _scroll_dashboard) and bool(
+    st.session_state.pop("volver_arriba_cargar_temas", False)
 )
+# Al abrir la página o volver desde otra sección, mostrar el dashboard de actas.
+if (not _ir_a_descargar_od) and (not _scroll_arriba) and (_scroll_dashboard or _viene_de_otra_pagina):
+    _scroll_dashboard = True
 
 # Al elegir acta / generar, Streamlit re-ejecuta y vuelve arriba: mantener ancla en OD.
 if _ir_a_descargar_od:
