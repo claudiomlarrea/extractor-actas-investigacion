@@ -1147,6 +1147,7 @@ for idx, n in enumerate(_actas_ordenadas):
     unidades_presentes = len(_por_acta_unidades[n] & _EXPECTED_UNIDADES)
     estado_txt, estado_bg = _estado_acta(n)
 
+    mes = actas_dict[n]["mes"]
     with c:
         st.markdown(
             f"""
@@ -1155,10 +1156,13 @@ for idx, n in enumerate(_actas_ordenadas):
                 <strong style="color:#334155;">Acta {n}</strong>
                 <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
               </div>
-              <div style="margin-top:8px; color:#475569; font-weight:700;">
+              <div style="margin-top:4px; color:#064a3f; font-weight:600; font-size:0.92rem;">
+                {mes}
+              </div>
+              <div style="margin-top:6px; color:#475569; font-weight:700;">
                 {temas} tema(s)
               </div>
-              <div style="margin-top:6px; color:#64748b;">
+              <div style="margin-top:4px; color:#64748b;">
                 {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES} unidades con carga
               </div>
             </div>
