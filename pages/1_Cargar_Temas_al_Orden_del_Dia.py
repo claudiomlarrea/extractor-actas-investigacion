@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from html import escape
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -452,6 +453,174 @@ def puntaje_texto_para_word(raw) -> str | None:
     return f"{x:.2f}".replace(".", ",")
 
 
+def _container_con_estilo(key: str, border: bool = True):
+    try:
+        return st.container(border=border, key=key)
+    except TypeError:
+        return st.container(border=border)
+
+
+def _texto_resumen(valor, vacio: str = "Pendiente") -> str:
+    texto = str(valor or "").strip()
+    return texto if texto else vacio
+
+
+def _render_encabezado_bloque(paso: str, titulo: str, ayuda: str) -> None:
+    st.markdown(
+        f"""
+        <p class="ucc-section-label">{escape(paso)}</p>
+        <h3 class="ucc-section-title">{escape(titulo)}</h3>
+        <p class="ucc-section-help">{escape(ayuda)}</p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: int | None) -> None:
+    with _container_con_estilo("ucc_card_hero_carga_temas"):
+        st.markdown(
+            """
+            <p class="ucc-section-label">Consejo de Investigación</p>
+            <h1 class="ucc-section-title" style="font-size:2rem; margin-bottom:0.35rem;">
+                Carga de temas al Orden del Día
+            </h1>
+            <p class="ucc-page-intro">
+                Ingrese un tema, revise los datos clave y envíelo al acta correspondiente.
+                La carga mantiene el flujo actual a Google Sheets y luego permite generar el Word.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+        chips = [
+            f'<span class="ucc-chip"><strong>Acta</strong> {_texto_resumen(numero_acta)}</span>',
+            f'<span class="ucc-chip"><strong>Fecha</strong> {escape(_texto_resumen(fecha))}</span>',
+            f'<span class="ucc-chip"><strong>Tipo</strong> {escape(_texto_resumen(tipo, "Seleccione un tema"))}</span>',
+            f'<span class="ucc-chip"><strong>Temas cargados</strong> {_texto_resumen(cantidad_temas_acta, "Sin datos")}</span>',
+        ]
+        st.markdown(
+            f'<div class="ucc-chip-row">{"".join(chips)}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """
+            <div class="ucc-card-note">
+                Flujo sugerido: seleccione el acta, complete solo los campos que correspondan,
+                revise el resumen y luego envíe. Después puede pasar a Carga de Archivos o generar el Orden del Día.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        col_a, col_b, col_c = st.columns(3)
+        try:
+            with col_a:
+                st.page_link(
+                    "pages/1_Cargar_Temas_al_Orden_del_Dia.py",
+                    label="Cargar tema",
+                    icon="📝",
+                    use_container_width=True,
+                )
+            with col_b:
+                st.page_link(
+                    "pages/1_Descargar_Orden_del_Dia.py",
+                    label="Generar OD",
+                    icon="📄",
+                    use_container_width=True,
+                )
+            with col_c:
+                st.page_link(
+                    "pages/2_Carga_de_Archivos.py",
+                    label="Cargar archivo",
+                    icon="📂",
+                    use_container_width=True,
+                )
+        except AttributeError:
+            with col_a:
+                st.markdown('<a class="ucc-nav-btn-3d" href="/Cargar_Temas_al_Orden_del_Dia">Cargar tema</a>', unsafe_allow_html=True)
+            with col_b:
+                st.markdown('<a class="ucc-nav-btn-3d" href="/Descargar_Orden_del_Dia">Generar OD</a>', unsafe_allow_html=True)
+            with col_c:
+                st.markdown('<a class="ucc-nav-btn-3d" href="/Carga_de_Archivos">Cargar archivo</a>', unsafe_allow_html=True)
+
+
+def render_resumen_pre_envio(
+    numero_acta,
+    fecha,
+    anio,
+    tipo,
+    titulo,
+    unidades_sel,
+    responsable,
+    director,
+    descripcion,
+) -> None:
+    with _container_con_estilo("ucc_card_soft_resumen_envio"):
+        _render_encabezado_bloque(
+            "Revisión final",
+            "Revisión antes de enviar",
+            "Verifique los datos más importantes antes de confirmar la carga.",
+        )
+        resumen = [
+            ("Acta", _texto_resumen(numero_acta)),
+            ("Fecha", _texto_resumen(fecha)),
+            ("Año", _texto_resumen(anio)),
+            ("Tipo", _texto_resumen(tipo)),
+            ("Título", _texto_resumen(titulo)),
+            ("Unidad académica", _texto_resumen("; ".join(unidades_sel))),
+            ("Responsable", _texto_resumen(responsable)),
+            ("Director", _texto_resumen(director, "No corresponde")),
+            ("Descripción", _texto_resumen(descripcion, "Sin descripción")),
+        ]
+        html_items = "".join(
+            f'<div class="ucc-summary-item"><strong>{escape(label)}</strong><span>{escape(str(value))}</span></div>'
+            for label, value in resumen
+        )
+        st.markdown(
+            f'<div class="ucc-summary-grid">{html_items}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def render_historial_acta(sheet, numero_acta) -> None:
+    with _container_con_estilo("ucc_card_historial_acta"):
+        _render_encabezado_bloque(
+            "Control rápido",
+            "Temas ya cargados en esta acta",
+            "Vista de apoyo para evitar duplicados y revisar lo último ingresado.",
+        )
+        if not numero_acta:
+            st.caption("Seleccione un acta para ver el historial inmediato.")
+            return
+        try:
+            datos = sheet.get_all_records()
+        except Exception as exc:
+            st.caption(f"No se pudo leer el historial: {exc}")
+            return
+        registros = [
+            _fila_sheet_normalizada(r)
+            for r in datos
+            if _numero_acta_igual(r.get("numero_acta"), numero_acta)
+        ]
+        registros = registros[-8:]
+        if not registros:
+            st.caption("Todavía no hay temas cargados para esta acta.")
+            return
+        for idx, r in enumerate(reversed(registros), start=1):
+            titulo = str(r.get("titulo") or r.get("título") or "Sin título").strip()
+            tipo = str(r.get("tipo") or "").strip() or "Sin tipo"
+            unidad = str(r.get("unidad académica") or r.get("unidad") or "").strip() or "Sin unidad"
+            responsable = str(r.get("responsable_de_carga") or "").strip() or "Sin responsable"
+            st.markdown(
+                f"""
+                <div class="ucc-card-note" style="margin-top:{'0' if idx == 1 else '8px'};">
+                    <strong>{idx}. {escape(tipo)}</strong><br>
+                    <span>{escape(titulo)}</span><br>
+                    <span style="color:#64748b;">{escape(unidad)} · {escape(responsable)}</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+
 # =========================
 # ⚙ CONFIGURACIÓN
 # =========================
@@ -897,30 +1066,12 @@ opciones_unidades_select = [
 # 📝 FORMULARIO
 # =========================
 
-st.subheader("Sistema de gestión de temas para el Consejo de Investigación")
-st.markdown("<span style='color:#64748b; font-weight:500; font-size:0.95rem;'>Complete solo los campos que correspondan</span>", unsafe_allow_html=True)
+OPCION_ACTA_SIN_SELECCION = "Seleccionar el Orden del día"
+opciones_acta_carga = [OPCION_ACTA_SIN_SELECCION] + [
+    f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict
+]
 
-# Fuera del form: cada cambio dispara rerun. Dentro de st.form, los widgets no
-# actualizan el script hasta enviar, y la fecha quedaba desfasada del desplegable de acta.
-col_bas_1, col_bas_2, col_bas_3 = st.columns([1, 2, 2])
-
-with col_bas_1:
-    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Año</div>", unsafe_allow_html=True)
-    anio = st.text_input("", "2026", key="anio")
-
-with col_bas_2:
-    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Seleccione el Orden del Día</div>", unsafe_allow_html=True)
-    OPCION_ACTA_SIN_SELECCION = "Seleccionar el Orden del día"
-    opciones_acta_carga = [OPCION_ACTA_SIN_SELECCION] + [
-        f"Orden del Día {actas_dict[n]['mes']} - Acta {n}" for n in actas_dict
-    ]
-    acta_label = st.selectbox(
-        "",
-        opciones_acta_carga,
-        index=0,
-        key="acta",
-    )
-
+acta_label = st.session_state.get("acta", OPCION_ACTA_SIN_SELECCION)
 if acta_label == OPCION_ACTA_SIN_SELECCION:
     numero_acta = None
     fecha = ""
@@ -928,261 +1079,345 @@ else:
     numero_acta = int(acta_label.split("Acta ")[1])
     fecha = fechas_actas.get(numero_acta, "")
 
-with col_bas_3:
-    st.markdown("<div style='margin-bottom:6px; color:#334155; font-weight:600; font-size:0.95rem;'>Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
-    st.markdown(
-        f"<p style='color:#475569; margin:0 0 20px 0; padding-bottom:4px; font-weight:500;'>{fecha}</p>",
-        unsafe_allow_html=True,
-    )
+cantidad_temas_acta = _contar_temas_acta(sheet, numero_acta) if numero_acta else None
+tipo_actual = st.session_state.get("tipo_actividad", "Proyecto de Investigación")
+render_cabecera_carga_temas(numero_acta, fecha, tipo_actual, cantidad_temas_acta)
 
-st.markdown(
-    "<div style='margin-bottom:8px; color:#334155; font-weight:600; font-size:0.95rem;'>Elija la Actividad o Tema para enviar al Orden del día</div>",
-    unsafe_allow_html=True,
-)
-col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="top")
-with col_tipo_1:
-    st.markdown(
-        "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>Actividad o Tema</div>",
-        unsafe_allow_html=True,
-    )
-    tipo = st.selectbox(
-        "Tipo de actividad",
-        [
-            "Proyecto de Investigación",
-            "Proyecto de Cátedra",
-            "Informe Final",
-            "Informe de Avance",
-            "Jornada de Investigación",
-            "Convocatoria a Proyectos de investigación",
-            "Creación de Semillero de Investigación",
-            "Categorización Docente",
-            "Llamado a Concurso de Becas",
-            "Líneas prioritarias de investigación",
-            "Otra",
-        ],
-        key="tipo_actividad",
-        label_visibility="collapsed",
-    )
-
-# Al lado del tipo: solo cuando es Proyecto de Cátedra (fuera del form para que se vea al instante).
-catedra_lateral = ""
-with col_tipo_2:
-    if tipo == "Proyecto de Cátedra":
+col_kpi_1, col_kpi_2, col_kpi_3 = st.columns(3)
+with col_kpi_1:
+    with _container_con_estilo("ucc_card_kpi_acta"):
         st.markdown(
-            "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>"
-            "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
-            "</div>",
+            f"""
+            <p class="ucc-kpi-label">Acta en trabajo</p>
+            <p class="ucc-kpi-value">{escape(_texto_resumen(numero_acta, "Sin seleccionar"))}</p>
+            <p class="ucc-kpi-sub">Seleccione primero el Orden del Día para asociar correctamente el tema.</p>
+            """,
             unsafe_allow_html=True,
         )
-        catedra_lateral = st.text_input(
+with col_kpi_2:
+    with _container_con_estilo("ucc_card_kpi_temas"):
+        st.markdown(
+            f"""
+            <p class="ucc-kpi-label">Temas cargados</p>
+            <p class="ucc-kpi-value">{escape(_texto_resumen(cantidad_temas_acta, "0"))}</p>
+            <p class="ucc-kpi-sub">Conteo actual de registros asociados al acta seleccionada.</p>
+            """,
+            unsafe_allow_html=True,
+        )
+with col_kpi_3:
+    with _container_con_estilo("ucc_card_kpi_accion"):
+        st.markdown(
+            f"""
+            <p class="ucc-kpi-label">Siguiente acción</p>
+            <p class="ucc-kpi-value">{escape("Completar carga" if numero_acta else "Elegir acta")}</p>
+            <p class="ucc-kpi-sub">Mantenga la lógica actual: cargar, revisar y luego generar el Word del OD.</p>
+            """,
+            unsafe_allow_html=True,
+        )
+
+with _container_con_estilo("ucc_card_paso_1"):
+    _render_encabezado_bloque(
+        "Paso 1",
+        "Datos generales del acta",
+        "Seleccione el año, el Orden del Día y confirme la fecha de reunión antes de continuar.",
+    )
+    col_bas_1, col_bas_2, col_bas_3 = st.columns([1, 2, 2])
+
+    with col_bas_1:
+        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Año</div>", unsafe_allow_html=True)
+        anio = st.text_input("", "2026", key="anio")
+
+    with col_bas_2:
+        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Seleccione el Orden del Día</div>", unsafe_allow_html=True)
+        acta_label = st.selectbox(
             "",
-            key="catedra_proyecto_catedra",
-            placeholder="Ej: Anatomía I; Fisiología; Clínica Médica",
+            opciones_acta_carga,
+            index=0,
+            key="acta",
+        )
+
+    if acta_label == OPCION_ACTA_SIN_SELECCION:
+        numero_acta = None
+        fecha = ""
+    else:
+        numero_acta = int(acta_label.split("Acta ")[1])
+        fecha = fechas_actas.get(numero_acta, "")
+
+    with col_bas_3:
+        st.markdown("<div style='margin-bottom:6px; color:#334155; font-weight:600; font-size:0.95rem;'>Fecha de la reunión de Consejo de Investigación</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<p style='color:#475569; margin:0 0 20px 0; padding-bottom:4px; font-weight:500;'>{escape(fecha)}</p>",
+            unsafe_allow_html=True,
+        )
+
+with _container_con_estilo("ucc_card_paso_2"):
+    _render_encabezado_bloque(
+        "Paso 2",
+        "Tipo de actividad o tema",
+        "El sistema mostrará más abajo solo los campos que correspondan al tipo elegido.",
+    )
+    col_tipo_1, col_tipo_2 = st.columns([2, 3], vertical_alignment="top")
+    with col_tipo_1:
+        st.markdown(
+            "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>Actividad o Tema</div>",
+            unsafe_allow_html=True,
+        )
+        tipo = st.selectbox(
+            "Tipo de actividad",
+            [
+                "Proyecto de Investigación",
+                "Proyecto de Cátedra",
+                "Informe Final",
+                "Informe de Avance",
+                "Jornada de Investigación",
+                "Convocatoria a Proyectos de investigación",
+                "Creación de Semillero de Investigación",
+                "Categorización Docente",
+                "Llamado a Concurso de Becas",
+                "Líneas prioritarias de investigación",
+                "Otra",
+            ],
+            key="tipo_actividad",
             label_visibility="collapsed",
         )
+
+    catedra_lateral = ""
+    with col_tipo_2:
+        if tipo == "Proyecto de Cátedra":
+            st.markdown(
+                "<div style='margin:0 0 10px 0; color:#334155; font-weight:600; font-size:0.95rem; line-height:1.3;'>"
+                "Cátedra o cátedras <span style='color:#94a3b8;font-weight:500;'>(escribir a mano)</span>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            catedra_lateral = st.text_input(
+                "",
+                key="catedra_proyecto_catedra",
+                placeholder="Ej: Anatomía I; Fisiología; Clínica Médica",
+                label_visibility="collapsed",
+            )
 
 with st.form("form_acta", clear_on_submit=False):
 
     # =========================
     # 📌 IDENTIFICACIÓN
     # =========================
-
-    # Mockup: 3 columnas — Denominación+input | Indicaciones (solo banner) | Puntaje+input
-    _hdr_iframe_h = 100
-    col_den, col_ind, col_pun = st.columns([2.5, 2.5, 1.05], vertical_alignment="top")
-
-    with col_den:
-        _ayuda_en_iframe(
-            f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;align-items:center;"
-            "padding:8px 12px;font:600 14px/1.25 system-ui,sans-serif;color:#334155;background:#f1f5f9;"
-            'border-radius:6px;border:1px solid #e2e8f0;">Denominación de la actividad o Tema</div>',
-            alto=_hdr_iframe_h,
+    with _container_con_estilo("ucc_card_paso_3"):
+        _render_encabezado_bloque(
+            "Paso 3",
+            "Denominación y descripción",
+            "Cargue el nombre del tema y una descripción breve. Si corresponde, agregue puntaje.",
         )
 
-    with col_ind:
-        _ayuda_en_iframe(
-            f"<div style=\"box-sizing:border-box;min-height:{_hdr_iframe_h - 2}px;padding:8px 10px;font:11.5px/1.35 system-ui,sans-serif;"
-            "color:#475569;background:#f1f5f9;border-radius:6px;border-left:4px solid #0b6b5d;"
-            'border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">'
-            "<strong>Indicaciones:</strong> "
-            "Título del proyecto; Título del Informe Final o de Avance; "
-            "Título de Jornada / Semillero / Instituto u otra actividad</div>",
-            alto=_hdr_iframe_h,
-        )
+        # Mockup: 3 columnas — Denominación+input | Indicaciones (solo banner) | Puntaje+input
+        _hdr_iframe_h = 100
+        col_den, col_ind, col_pun = st.columns([2.5, 2.5, 1.05], vertical_alignment="top")
 
-    with col_pun:
-        if tipo in TIPOS_CON_PUNTAJE:
+        with col_den:
             _ayuda_en_iframe(
-                f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;flex-direction:column;"
-                "justify-content:center;gap:6px;padding:8px 10px;font-family:system-ui,sans-serif;"
-                "background:#f1f5f9;border-radius:6px;border:1px solid #e2e8f0;\">"
-                "<div style=\"font-weight:600;color:#334155;font-size:14px;line-height:1.15;\">Puntaje</div>"
-                "<div style=\"font-size:11.5px;line-height:1.35;color:#64748b;\">"
-                "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
+                f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;align-items:center;"
+                "padding:8px 12px;font:600 14px/1.25 system-ui,sans-serif;color:#334155;background:#f1f5f9;"
+                'border-radius:6px;border:1px solid #e2e8f0;">Denominación de la actividad o Tema</div>',
                 alto=_hdr_iframe_h,
             )
 
-    # Inputs: denominación ancha (hasta borde de Indicaciones) | puntaje a la derecha
-    col_tit_w, col_pun_inp = st.columns([5.0, 1.05], vertical_alignment="top")
-    with col_tit_w:
-        titulo = st.text_input("", key="titulo_actividad_consejo")
-    with col_pun_inp:
-        puntaje = 0.0
-        if tipo in TIPOS_CON_PUNTAJE:
-            puntaje_raw = st.text_input(
-                "",
-                placeholder="Ej: 87,9",
-                key="puntaje_informe_consejo",
-                label_visibility="collapsed",
+        with col_ind:
+            _ayuda_en_iframe(
+                f"<div style=\"box-sizing:border-box;min-height:{_hdr_iframe_h - 2}px;padding:8px 10px;font:11.5px/1.35 system-ui,sans-serif;"
+                "color:#475569;background:#f1f5f9;border-radius:6px;border-left:4px solid #0b6b5d;"
+                'border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">'
+                "<strong>Indicaciones:</strong> "
+                "Título del proyecto; Título del Informe Final o de Avance; "
+                "Título de Jornada / Semillero / Instituto u otra actividad</div>",
+                alto=_hdr_iframe_h,
             )
-            _pv = parse_puntaje_valor(puntaje_raw)
-            puntaje = _pv if _pv is not None else 0.0
 
-    # Descripción solo bajo Denominación + Indicaciones (misma proporción que arriba: 2.5+2.5 vs 1.05)
-    col_desc_w, _col_desc_pad = st.columns([5.0, 1.05])
-    with col_desc_w:
-        st.markdown(
-            "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Descripción (no más de 50 palabras)</div>",
-            unsafe_allow_html=True,
-        )
-        descripcion = st.text_area("")
+        with col_pun:
+            if tipo in TIPOS_CON_PUNTAJE:
+                _ayuda_en_iframe(
+                    f"<div style=\"box-sizing:border-box;height:{_hdr_iframe_h - 2}px;display:flex;flex-direction:column;"
+                    "justify-content:center;gap:6px;padding:8px 10px;font-family:system-ui,sans-serif;"
+                    "background:#f1f5f9;border-radius:6px;border:1px solid #e2e8f0;\">"
+                    "<div style=\"font-weight:600;color:#334155;font-size:14px;line-height:1.15;\">Puntaje</div>"
+                    "<div style=\"font-size:11.5px;line-height:1.35;color:#64748b;\">"
+                    "Decimales con coma o punto (ej: 87,9 o 87.9).</div></div>",
+                    alto=_hdr_iframe_h,
+                )
+
+        # Inputs: denominación ancha (hasta borde de Indicaciones) | puntaje a la derecha
+        col_tit_w, col_pun_inp = st.columns([5.0, 1.05], vertical_alignment="top")
+        with col_tit_w:
+            titulo = st.text_input("", key="titulo_actividad_consejo")
+        with col_pun_inp:
+            puntaje = 0.0
+            if tipo in TIPOS_CON_PUNTAJE:
+                puntaje_raw = st.text_input(
+                    "",
+                    placeholder="Ej: 87,9",
+                    key="puntaje_informe_consejo",
+                    label_visibility="collapsed",
+                )
+                _pv = parse_puntaje_valor(puntaje_raw)
+                puntaje = _pv if _pv is not None else 0.0
+
+        # Descripción solo bajo Denominación + Indicaciones (misma proporción que arriba: 2.5+2.5 vs 1.05)
+        col_desc_w, _col_desc_pad = st.columns([5.0, 1.05])
+        with col_desc_w:
+            st.markdown(
+                "<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Descripción (no más de 50 palabras)</div>",
+                unsafe_allow_html=True,
+            )
+            descripcion = st.text_area("", key="descripcion")
 
     # =========================
     # 👥 EQUIPO (CONDICIONAL)
     # =========================
+    with _container_con_estilo("ucc_card_paso_4"):
+        _render_encabezado_bloque(
+            "Paso 4",
+            "Participantes y datos específicos",
+            "Según el tipo elegido, complete docente, dirección, equipo, instituto, cátedra y alumnos.",
+        )
 
-    director = ""
-    cat_director = ""
-    codirector = ""
-    categoria_codirector = ""
-    equipo = ""
-    instituto = ""
-    catedra = ""
-    alumnos = ""
-    apellido_nombre_docente = ""
-    dni_docente = ""
+        director = ""
+        cat_director = ""
+        codirector = ""
+        categoria_codirector = ""
+        equipo = ""
+        instituto = ""
+        catedra = ""
+        alumnos = ""
+        apellido_nombre_docente = ""
+        dni_docente = ""
 
-    if tipo == "Categorización Docente":
-        col_doc_1, col_doc_2 = st.columns(2)
-        with col_doc_1:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Apellido y nombre del docente</div>", unsafe_allow_html=True)
-            apellido_nombre_docente = st.text_input("", key="apellido_nombre_docente")
-        with col_doc_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>DNI</div>", unsafe_allow_html=True)
-            dni_docente = st.text_input("", key="dni_docente")
+        if tipo == "Categorización Docente":
+            col_doc_1, col_doc_2 = st.columns(2)
+            with col_doc_1:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Apellido y nombre del docente</div>", unsafe_allow_html=True)
+                apellido_nombre_docente = st.text_input("", key="apellido_nombre_docente")
+            with col_doc_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>DNI</div>", unsafe_allow_html=True)
+                dni_docente = st.text_input("", key="dni_docente")
 
-    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
+        if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
-        col_dir_1, col_dir_2 = st.columns(2)
-        with col_dir_1:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Director</div>", unsafe_allow_html=True)
-            director = st.text_input("", key="director")
-        with col_dir_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Director</div>", unsafe_allow_html=True)
-            cat_director = st.selectbox("", categoria_opciones, key="cat_director")
+            col_dir_1, col_dir_2 = st.columns(2)
+            with col_dir_1:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Director</div>", unsafe_allow_html=True)
+                director = st.text_input("", key="director")
+            with col_dir_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Director</div>", unsafe_allow_html=True)
+                cat_director = st.selectbox("", categoria_opciones, key="cat_director")
 
-        col_codir_1, col_codir_2 = st.columns(2)
-        with col_codir_1:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Codirector</div>", unsafe_allow_html=True)
-            codirector = st.text_input("", key="codirector")
-        with col_codir_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Codirector</div>", unsafe_allow_html=True)
-            categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
+            col_codir_1, col_codir_2 = st.columns(2)
+            with col_codir_1:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Codirector</div>", unsafe_allow_html=True)
+                codirector = st.text_input("", key="codirector")
+            with col_codir_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Categoría del Codirector</div>", unsafe_allow_html=True)
+                categoria_codirector = st.selectbox("", categoria_opciones, key="cat_codirector")
 
-        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
-        equipo = st.text_area("", key="equipo", height=160)
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Equipo de Investigación (no más de 50 palabras)</div>", unsafe_allow_html=True)
+            equipo = st.text_area("", key="equipo", height=160)
 
-        if tipo == "Proyecto de Cátedra":
-            # La cátedra se carga al lado del tipo (arriba); acá solo instituto / alumnos.
-            catedra = catedra_lateral
-            col_eq_1, col_eq_2 = st.columns(2)
-            with col_eq_1:
-                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
-                instituto = st.text_input("", key="instituto")
-            with col_eq_2:
-                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
-                alumnos = st.text_input("", key="alumnos")
-        else:
-            col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
-            with col_eq_1:
-                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
-                instituto = st.text_input("", key="instituto")
-            with col_eq_2:
-                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
-                catedra = st.text_input("", key="catedra")
-            with col_eq_3:
-                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem; font-size:0.92rem; line-height:1.2;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
-                alumnos = st.text_input("", key="alumnos")
+            if tipo == "Proyecto de Cátedra":
+                # La cátedra se carga al lado del tipo (arriba); acá solo instituto / alumnos.
+                catedra = catedra_lateral
+                col_eq_1, col_eq_2 = st.columns(2)
+                with col_eq_1:
+                    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
+                    instituto = st.text_input("", key="instituto")
+                with col_eq_2:
+                    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+                    alumnos = st.text_input("", key="alumnos")
+            else:
+                col_eq_1, col_eq_2, col_eq_3 = st.columns(3)
+                with col_eq_1:
+                    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Instituto de Investigación</div>", unsafe_allow_html=True)
+                    instituto = st.text_input("", key="instituto")
+                with col_eq_2:
+                    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Cátedra (Si corresponde)</div>", unsafe_allow_html=True)
+                    catedra = st.text_input("", key="catedra")
+                with col_eq_3:
+                    st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem; font-size:0.92rem; line-height:1.2;'>Número de Alumnos en el proyecto</div>", unsafe_allow_html=True)
+                    alumnos = st.text_input("", key="alumnos")
 
     # =========================
     # 🏫 UNIDAD
     # =========================
 
-    col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
-    with col_uni_res_1:
-        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Unidad Académica</div>", unsafe_allow_html=True)
-        st.caption(
-            f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. "
-            f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quite una con la × para cambiar."
-        )
-        unidades_sel = st.multiselect(
-            "",
-            opciones_unidades_select,
-            key="unidades_academicas",
-            max_selections=MAX_UNIDADES_ACADEMICAS,
-            label_visibility="collapsed",
+    with _container_con_estilo("ucc_card_paso_45"):
+        _render_encabezado_bloque(
+            "Paso 5",
+            "Unidad académica, resoluciones y financiamiento",
+            "Asocie correctamente el tema a la unidad, complete resoluciones si corresponde y agregue el responsable de carga.",
         )
 
-    # =========================
-    # 📄 RESOLUCIONES
-    # =========================
+        col_uni_res_1, col_uni_res_2, col_uni_res_3 = st.columns([2.9, 1.05, 1.05])
+        with col_uni_res_1:
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Unidad Académica</div>", unsafe_allow_html=True)
+            st.caption(
+                f"Máximo {MAX_UNIDADES_ACADEMICAS} unidades. "
+                f"Con {MAX_UNIDADES_ACADEMICAS} elegidas, quite una con la × para cambiar."
+            )
+            unidades_sel = st.multiselect(
+                "",
+                opciones_unidades_select,
+                key="unidades_academicas",
+                max_selections=MAX_UNIDADES_ACADEMICAS,
+                label_visibility="collapsed",
+            )
 
-    if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
+        if tipo in ["Proyecto de Investigación", "Proyecto de Cátedra", "Informe Final", "Informe de Avance", "Otra"]:
 
-        with col_uni_res_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CD</div>", unsafe_allow_html=True)
-            resolucion_cd = st.text_input("", key="resolucion_cd", max_chars=10, placeholder="Ej: 665")
-        with col_uni_res_3:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CS</div>", unsafe_allow_html=True)
-            resolucion_cs = st.text_input("", key="resolucion_cs", max_chars=10, placeholder="Ej: 657")
+            with col_uni_res_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CD</div>", unsafe_allow_html=True)
+                resolucion_cd = st.text_input("", key="resolucion_cd", max_chars=10, placeholder="Ej: 665")
+            with col_uni_res_3:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Resolución CS</div>", unsafe_allow_html=True)
+                resolucion_cs = st.text_input("", key="resolucion_cs", max_chars=10, placeholder="Ej: 657")
 
-    else:
-        resolucion_cd = ""
-        resolucion_cs = ""
+        else:
+            resolucion_cd = ""
+            resolucion_cs = ""
 
-    # =========================
-    # 👤 RESPONSABLE
-    # =========================
+        col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
+        with col_fin_1:
+            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Responsable de carga <span style='color:#94a3b8;font-weight:500;'>(requerido)</span></div>", unsafe_allow_html=True)
+            responsable_de_carga = st.text_input("", key="responsable")
 
-    col_fin_1, col_fin_2, col_fin_3, col_fin_4 = st.columns(4)
-    with col_fin_1:
-        st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Responsable de carga <span style='color:#94a3b8;font-weight:500;'>(requerido)</span></div>", unsafe_allow_html=True)
-        responsable_de_carga = st.text_input("", key="responsable")
+        if tipo != "Categorización Docente":
 
-    # =========================
-    # 💰 FINANCIAMIENTO
-    # =========================
+            with col_fin_2:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Tipo de financiamiento</div>", unsafe_allow_html=True)
+                tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
+            with col_fin_3:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Fuente de Financiamiento</div>", unsafe_allow_html=True)
+                fuente_financiamiento = st.text_input("", key="fuente")
+            with col_fin_4:
+                st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
+                monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
 
-    if tipo != "Categorización Docente":
-
-        with col_fin_2:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Tipo de financiamiento</div>", unsafe_allow_html=True)
-            tipo_financiamiento = st.selectbox("", ["Seleccionar...", "Interno", "Externo", "Sin financiamiento"], key="fin")
-        with col_fin_3:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Fuente de Financiamiento</div>", unsafe_allow_html=True)
-            fuente_financiamiento = st.text_input("", key="fuente")
-        with col_fin_4:
-            st.markdown("<div style='margin-bottom:-8px; color:#334155; font-weight:600; font-size:0.95rem;'>Monto en pesos (sin puntos)</div>", unsafe_allow_html=True)
-            monto_financiamiento = st.number_input("", min_value=0, step=1000, value=None, key="monto")
-
-    else:
-        tipo_financiamiento = ""
-        fuente_financiamiento = ""
-        monto_financiamiento = 0
+        else:
+            tipo_financiamiento = ""
+            fuente_financiamiento = ""
+            monto_financiamiento = 0
 
     # =========================
     # 🔘 SUBMIT
     # =========================
+
+    render_resumen_pre_envio(
+        numero_acta,
+        fecha,
+        anio,
+        tipo,
+        st.session_state.get("titulo_actividad_consejo", ""),
+        st.session_state.get("unidades_academicas", []),
+        st.session_state.get("responsable", ""),
+        st.session_state.get("director", ""),
+        st.session_state.get("descripcion", ""),
+    )
 
     submit = st.form_submit_button("Clic para enviar al Consejo de Investigación (Google Sheets)")
     st.markdown(
@@ -1192,6 +1427,7 @@ with st.form("form_acta", clear_on_submit=False):
             font-size: 18px !important;
             font-weight: 600 !important;
             border-radius: 10px !important;
+            min-height: 3.2rem;
         }
         </style>
         """,
@@ -1410,6 +1646,8 @@ if submit:
 # 📄 GENERAR WORD
 # =========================
 
+render_historial_acta(sheet, numero_acta)
+
 st.markdown('<div id="descargar-orden-del-dia"></div>', unsafe_allow_html=True)
 
 if _mantener_en_od:
@@ -1450,178 +1688,188 @@ if _mantener_en_od:
         height=0,
     )
 
-st.markdown("## 📄 Generar y descargar Orden del Día")
+with _container_con_estilo("ucc_card_od_modulo"):
+    _render_encabezado_bloque(
+        "Módulo de gestión",
+        "Generar y descargar Orden del Día",
+        "Seleccione el acta, revise cuántos temas tiene cargados y ordene la salida antes de generar el Word.",
+    )
 
-OPCION_OD_SIN_SELECCION = "Seleccione el orden del día"
-opciones_od_word = [OPCION_OD_SIN_SELECCION] + [
-    f"{n} - {actas_dict[n]['mes']}" for n in actas_dict
-]
-
-acta_word = st.selectbox(
-    "Seleccionar Orden del Día para generar y descargar",
-    options=opciones_od_word,
-    index=0,
-    key="acta_word_descargar",
-)
-
-registros_od = []
-acta_num_od = None
-if acta_word != OPCION_OD_SIN_SELECCION:
-    acta_num_od = int(acta_word.split(" - ")[0])
-    try:
-        _datos_od = sheet.get_all_records()
-    except Exception as exc:
-        st.error(f"No se pudo leer la planilla: {exc}")
-        _datos_od = []
-    _base_od = [
-        r for r in _datos_od
-        if _numero_acta_igual(r.get("numero_acta"), acta_num_od)
+    OPCION_OD_SIN_SELECCION = "Seleccione el orden del día"
+    opciones_od_word = [OPCION_OD_SIN_SELECCION] + [
+        f"{n} - {actas_dict[n]['mes']}" for n in actas_dict
     ]
-    registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
-    if registros_od:
-        st.info(f"Se encontraron **{len(registros_od)}** tema(s) para el Acta {acta_num_od}.")
 
+    acta_word = st.selectbox(
+        "Seleccionar Orden del Día para generar y descargar",
+        options=opciones_od_word,
+        index=0,
+        key="acta_word_descargar",
+    )
+
+    registros_od = []
+    acta_num_od = None
+    if acta_word != OPCION_OD_SIN_SELECCION:
+        acta_num_od = int(acta_word.split(" - ")[0])
         try:
-            _caja_od = st.container(border=True, key="od_acciones_bordo")
-        except TypeError:
-            _caja_od = st.container(border=True)
-        with _caja_od:
-            col_rest, col_gen, col_dl = st.columns(3)
-            with col_rest:
-                if st.button(
-                    "Restaurar orden de carga",
-                    key=f"od_reset_orden_{acta_num_od}",
-                    use_container_width=True,
-                    type="primary",
-                ):
-                    st.session_state.pop(_clave_orden_manual_od(acta_num_od), None)
-                    st.session_state.pop(f"od_docx_bytes_{acta_num_od}", None)
-                    st.rerun()
-            with col_gen:
-                generar = st.button(
-                    "Generar Orden del Día",
-                    key=f"od_generar_{acta_num_od}",
-                    use_container_width=True,
-                    type="primary",
-                )
-            with col_dl:
-                _docx = st.session_state.get(f"od_docx_bytes_{acta_num_od}")
-                if _docx:
-                    st.download_button(
-                        "Descargar Orden del Día",
-                        data=_docx,
-                        file_name=f"Acta_{acta_num_od}.docx",
-                        key=f"od_descargar_{acta_num_od}",
-                        use_container_width=True,
-                    )
-                else:
-                    st.button(
-                        "Descargar Orden del Día",
-                        key=f"od_descargar_disabled_{acta_num_od}",
-                        use_container_width=True,
-                        disabled=True,
-                        type="primary",
-                        help="Primero genere el Orden del Día",
-                    )
-
-        if generar:
-            st.session_state[f"od_docx_bytes_{acta_num_od}"] = _construir_bytes_orden_del_dia(
-                acta_num_od, registros_od
-            )
-            st.session_state[f"od_docx_ok_{acta_num_od}"] = True
-            st.rerun()
-
-        if st.session_state.pop(f"od_docx_ok_{acta_num_od}", False):
-            st.success(
-                f"Orden del Día del Acta {acta_num_od} generado. "
-                "Use **Descargar Orden del Día** en la misma fila."
-            )
-
-        _ui_reordenar_temas_od(acta_num_od, registros_od)
-        registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
-    else:
-        st.caption("No hay temas cargados para esta acta todavía.")
-        generar = False
-else:
-    generar = False
-        
-st.markdown("### 🧾 Generar informe por responsable")
-
-responsable_reporte = st.text_input("Responsable de carga para generar informe")
-
-generar_responsables = st.button("Generar informe del responsable de carga")
-
-if generar_responsables:
-
-    if acta_word == OPCION_OD_SIN_SELECCION:
-        st.warning("Seleccione un orden del día antes de generar el informe.")
-    else:
-        datos = sheet.get_all_records()
-
-        acta_num = int(acta_word.split(" - ")[0])
-
-        registros = [
-            r for r in datos
-            if _numero_acta_igual(r.get("numero_acta"), acta_num)
-            and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
+            _datos_od = sheet.get_all_records()
+        except Exception as exc:
+            st.error(f"No se pudo leer la planilla: {exc}")
+            _datos_od = []
+        _base_od = [
+            r for r in _datos_od
+            if _numero_acta_igual(r.get("numero_acta"), acta_num_od)
         ]
-        registros = ordenar_registros_por_unidad_academica(registros)
+        registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
+        if registros_od:
+            st.info(f"Se encontraron **{len(registros_od)}** tema(s) para el Acta {acta_num_od}.")
 
-        if not responsable_reporte.strip():
-            st.warning("Debe ingresar el responsable de carga")
+            try:
+                _caja_od = st.container(border=True, key="od_acciones_bordo")
+            except TypeError:
+                _caja_od = st.container(border=True)
+            with _caja_od:
+                col_rest, col_gen, col_dl = st.columns(3)
+                with col_rest:
+                    if st.button(
+                        "Restaurar orden de carga",
+                        key=f"od_reset_orden_{acta_num_od}",
+                        use_container_width=True,
+                        type="primary",
+                    ):
+                        st.session_state.pop(_clave_orden_manual_od(acta_num_od), None)
+                        st.session_state.pop(f"od_docx_bytes_{acta_num_od}", None)
+                        st.rerun()
+                with col_gen:
+                    generar = st.button(
+                        "Generar Orden del Día",
+                        key=f"od_generar_{acta_num_od}",
+                        use_container_width=True,
+                        type="primary",
+                    )
+                with col_dl:
+                    _docx = st.session_state.get(f"od_docx_bytes_{acta_num_od}")
+                    if _docx:
+                        st.download_button(
+                            "Descargar Orden del Día",
+                            data=_docx,
+                            file_name=f"Acta_{acta_num_od}.docx",
+                            key=f"od_descargar_{acta_num_od}",
+                            use_container_width=True,
+                        )
+                    else:
+                        st.button(
+                            "Descargar Orden del Día",
+                            key=f"od_descargar_disabled_{acta_num_od}",
+                            use_container_width=True,
+                            disabled=True,
+                            type="primary",
+                            help="Primero genere el Orden del Día",
+                        )
 
-        elif not registros:
-            st.warning("No hay registros cargados por ese responsable para esta acta")
+            if generar:
+                st.session_state[f"od_docx_bytes_{acta_num_od}"] = _construir_bytes_orden_del_dia(
+                    acta_num_od, registros_od
+                )
+                st.session_state[f"od_docx_ok_{acta_num_od}"] = True
+                st.rerun()
 
+            if st.session_state.pop(f"od_docx_ok_{acta_num_od}", False):
+                st.success(
+                    f"Orden del Día del Acta {acta_num_od} generado. "
+                    "Use **Descargar Orden del Día** en la misma fila."
+                )
+
+            _ui_reordenar_temas_od(acta_num_od, registros_od)
+            registros_od = _aplicar_orden_manual_od(acta_num_od, _base_od)
         else:
-            doc = Document()
+            st.caption("No hay temas cargados para esta acta todavía.")
+            generar = False
+    else:
+        generar = False
+        
+with _container_con_estilo("ucc_card_soft_informe_responsable"):
+    _render_encabezado_bloque(
+        "Consulta rápida",
+        "Generar informe por responsable",
+        "Obtenga un Word con los temas cargados por una persona responsable dentro del acta seleccionada.",
+    )
 
-            doc.add_heading("Informe de temas cargados", 0)
-            doc.add_paragraph(f"Acta N° {acta_num}")
-            doc.add_paragraph(f"Responsable de carga: {responsable_reporte}")
+    responsable_reporte = st.text_input("Responsable de carga para generar informe")
 
-            contador = 1
-            unidad_actual = None
+    generar_responsables = st.button("Generar informe del responsable de carga")
 
-            for r in registros:
+    if generar_responsables:
 
-                r = {k.lower().strip(): v for k, v in r.items()}
+        if acta_word == OPCION_OD_SIN_SELECCION:
+            st.warning("Seleccione un orden del día antes de generar el informe.")
+        else:
+            datos = sheet.get_all_records()
 
-                unidad = r.get("unidad académica", r.get("unidad", "")).strip()
+            acta_num = int(acta_word.split(" - ")[0])
 
-                if unidad != unidad_actual:
-                    h = doc.add_paragraph()
-                    h.paragraph_format.space_before = Pt(6)
-                    h.paragraph_format.space_after = Pt(2)
+            registros = [
+                r for r in datos
+                if _numero_acta_igual(r.get("numero_acta"), acta_num)
+                and str(r.get("responsable_de_carga", "")).strip().lower() == responsable_reporte.strip().lower()
+            ]
+            registros = ordenar_registros_por_unidad_academica(registros)
 
-                    run_h = h.add_run(unidad)
-                    run_h.bold = True
-                    run_h.font.color.rgb = RGBColor(0, 102, 204)
+            if not responsable_reporte.strip():
+                st.warning("Debe ingresar el responsable de carga")
 
-                    unidad_actual = unidad
+            elif not registros:
+                st.warning("No hay registros cargados por ese responsable para esta acta")
 
-                p = doc.add_paragraph()
-                p.paragraph_format.space_before = Pt(0)
-                p.paragraph_format.space_after = Pt(4)
-                p.paragraph_format.line_spacing = 1
+            else:
+                doc = Document()
 
-                p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+                doc.add_heading("Informe de temas cargados", 0)
+                doc.add_paragraph(f"Acta N° {acta_num}")
+                doc.add_paragraph(f"Responsable de carga: {responsable_reporte}")
 
-                descripcion = r.get("descripcion") or r.get("descripción") or ""
+                contador = 1
+                unidad_actual = None
 
-                if descripcion:
-                    p.add_run(f"   Descripción: {descripcion}\n")
+                for r in registros:
 
-                p.add_run(f"   Unidad Académica: {unidad}\n")
+                    r = {k.lower().strip(): v for k, v in r.items()}
 
-                contador += 1
+                    unidad = r.get("unidad académica", r.get("unidad", "")).strip()
 
-            buffer = BytesIO()
-            doc.save(buffer)
-            buffer.seek(0)
+                    if unidad != unidad_actual:
+                        h = doc.add_paragraph()
+                        h.paragraph_format.space_before = Pt(6)
+                        h.paragraph_format.space_after = Pt(2)
 
-            st.download_button(
-                "Descargar informe del responsable de carga",
-                data=buffer,
-                file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
-            )
+                        run_h = h.add_run(unidad)
+                        run_h.bold = True
+                        run_h.font.color.rgb = RGBColor(0, 102, 204)
+
+                        unidad_actual = unidad
+
+                    p = doc.add_paragraph()
+                    p.paragraph_format.space_before = Pt(0)
+                    p.paragraph_format.space_after = Pt(4)
+                    p.paragraph_format.line_spacing = 1
+
+                    p.add_run(f"{contador}. {r.get('tipo', '')} - {r.get('titulo', '')}\n").bold = True
+
+                    descripcion = r.get("descripcion") or r.get("descripción") or ""
+
+                    if descripcion:
+                        p.add_run(f"   Descripción: {descripcion}\n")
+
+                    p.add_run(f"   Unidad Académica: {unidad}\n")
+
+                    contador += 1
+
+                buffer = BytesIO()
+                doc.save(buffer)
+                buffer.seek(0)
+
+                st.download_button(
+                    "Descargar informe del responsable de carga",
+                    data=buffer,
+                    file_name=f"Informe_{responsable_reporte}_Acta_{acta_num}.docx"
+                )

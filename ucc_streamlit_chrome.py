@@ -34,7 +34,6 @@ def inject_botones_3d_consejo() -> None:
         {_MAIN} div[data-testid="stFormSubmitButton"] > button,
         {_MAIN} .st-key-od_acciones_bordo button,
         {_MAIN} .st-key-od_acciones_bordo [data-testid="stDownloadButton"] > button,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button,
         {_MAIN} a > button.ucc-btn-3d,
         {_MAIN} button.ucc-btn-3d {{
             background: linear-gradient(
@@ -65,15 +64,12 @@ def inject_botones_3d_consejo() -> None:
         {_MAIN} div[data-testid="stFormSubmitButton"] > button p,
         {_MAIN} div[data-testid="stFormSubmitButton"] > button span,
         {_MAIN} .st-key-od_acciones_bordo button p,
-        {_MAIN} .st-key-od_acciones_bordo button span,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button p,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button span {{
+        {_MAIN} .st-key-od_acciones_bordo button span {{
             color: #ffffff !important;
         }}
 
         {_MAIN} div[data-testid="stFormSubmitButton"] > button:hover,
         {_MAIN} .st-key-od_acciones_bordo button:hover,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button:hover,
         {_MAIN} button.ucc-btn-3d:hover {{
             background: linear-gradient(
                 180deg,
@@ -91,7 +87,6 @@ def inject_botones_3d_consejo() -> None:
 
         {_MAIN} div[data-testid="stFormSubmitButton"] > button:active,
         {_MAIN} .st-key-od_acciones_bordo button:active,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button:active,
         {_MAIN} button.ucc-btn-3d:active {{
             transform: translateY(2px) !important;
             box-shadow:
@@ -100,8 +95,7 @@ def inject_botones_3d_consejo() -> None:
             border-bottom-width: 1px !important;
         }}
 
-        {_MAIN} .st-key-od_acciones_bordo button:disabled,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] button:disabled {{
+        {_MAIN} .st-key-od_acciones_bordo button:disabled {{
             opacity: 0.55 !important;
             box-shadow: 0 2px 0 {_BORDO_SOMBRA} !important;
             transform: none !important;
@@ -181,8 +175,6 @@ def inject_botones_3d_consejo() -> None:
         */
         {_MAIN} .st-key-od_acciones_bordo div[data-testid="stButton"] > button,
         {_MAIN} .st-key-od_acciones_bordo div[data-testid="stDownloadButton"] > button,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stButton"] > button,
-        {_MAIN} div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stDownloadButton"] > button,
         {_MAIN} div[data-testid="stFormSubmitButton"] > button {{
             background: linear-gradient(
                 180deg,
@@ -208,6 +200,177 @@ def inject_botones_3d_consejo() -> None:
     )
 
 
+def inject_consejo_layout_styles() -> None:
+    """Tarjetas, chips y bloques visuales compartidos para páginas del Consejo."""
+    st.markdown(
+        f"""
+        <style>
+        {_MAIN} .ucc-page-intro {{
+            margin: 0 0 0.35rem 0;
+            color: #475569 !important;
+            font-size: 1rem;
+            line-height: 1.45;
+        }}
+
+        {_MAIN} .ucc-chip-row {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 14px 0 8px 0;
+        }}
+
+        {_MAIN} .ucc-chip {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #ecf5f2;
+            border: 1px solid #c5ddd6;
+            color: #0f172a !important;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }}
+
+        {_MAIN} .ucc-chip strong {{
+            color: #064a3f !important;
+            font-weight: 700;
+        }}
+
+        {_MAIN} .ucc-card-note {{
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #eef7f3 0%, #e4f1eb 100%);
+            border: 1px solid #c7dfd5;
+            color: #475569 !important;
+            line-height: 1.45;
+        }}
+
+        {_MAIN} a.ucc-nav-btn-3d {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 3rem;
+            padding: 12px 10px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, {_VERDE_CLARO} 0%, {_VERDE} 48%, {_VERDE_OSCURO} 100%);
+            color: #ffffff !important;
+            text-decoration: none !important;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid {_VERDE_SOMBRA};
+            border-bottom-width: 3px;
+            box-shadow:
+                0 4px 0 {_VERDE_SOMBRA},
+                0 6px 14px rgba(2, 40, 33, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        }}
+
+        {_MAIN} .ucc-section-label {{
+            margin: 0 0 0.35rem 0;
+            color: #064a3f !important;
+            font-size: 0.86rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }}
+
+        {_MAIN} .ucc-section-title {{
+            margin: 0;
+            color: #1e293b !important;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }}
+
+        {_MAIN} .ucc-section-help {{
+            margin: 0.35rem 0 0 0;
+            color: #64748b !important;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }}
+
+        {_MAIN} [class*="st-key-ucc_card_"] > div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 252, 250, 0.96) 100%);
+            border: 1px solid #c8ddd4 !important;
+            border-radius: 18px !important;
+            box-shadow: 0 10px 28px rgba(6, 74, 63, 0.08);
+            padding: 0.3rem 0.35rem;
+        }}
+
+        {_MAIN} [class*="st-key-ucc_card_soft_"] > div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background: linear-gradient(180deg, #eef7f3 0%, #e4f1eb 100%);
+            border: 1px solid #c8ddd4 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 6px 18px rgba(6, 74, 63, 0.06);
+            padding: 0.25rem 0.3rem;
+        }}
+
+        {_MAIN} [class*="st-key-ucc_card_kpi_"] > div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background: linear-gradient(180deg, #f4fbf8 0%, #e8f4ef 100%);
+            border: 1px solid #c9e0d6 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 6px 18px rgba(6, 74, 63, 0.05);
+            min-height: 108px;
+        }}
+
+        {_MAIN} .ucc-kpi-label {{
+            margin: 0;
+            color: #64748b !important;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }}
+
+        {_MAIN} .ucc-kpi-value {{
+            margin: 0.25rem 0 0 0;
+            color: #064a3f !important;
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }}
+
+        {_MAIN} .ucc-kpi-sub {{
+            margin: 0.35rem 0 0 0;
+            color: #475569 !important;
+            font-size: 0.92rem;
+            line-height: 1.35;
+        }}
+
+        {_MAIN} .ucc-summary-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 0.85rem;
+        }}
+
+        {_MAIN} .ucc-summary-item {{
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #d8e7e0;
+        }}
+
+        {_MAIN} .ucc-summary-item strong {{
+            display: block;
+            margin-bottom: 4px;
+            color: #334155 !important;
+            font-size: 0.9rem;
+        }}
+
+        {_MAIN} .ucc-summary-item span {{
+            color: #0f172a !important;
+            font-size: 0.96rem;
+            line-height: 1.4;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def hide_streamlit_cloud_toolbar() -> None:
     st.markdown(
         """
@@ -221,3 +384,4 @@ def hide_streamlit_cloud_toolbar() -> None:
         unsafe_allow_html=True,
     )
     inject_botones_3d_consejo()
+    inject_consejo_layout_styles()
