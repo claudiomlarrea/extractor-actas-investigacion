@@ -665,6 +665,18 @@ def render_historial_acta(sheet, numero_acta) -> None:
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 hide_streamlit_cloud_toolbar()
 
+# Menú lateral «Actas» aunque ya estés en esta página: /Actas?ir=dashboard
+_ir_query = str(st.query_params.get("ir", "")).strip().lower()
+if _ir_query == "dashboard":
+    st.session_state["volver_dashboard_actas"] = True
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
+    st.session_state.pop("volver_arriba_cargar_temas", None)
+    st.session_state.pop("ir_a_descargar_orden_dia", None)
+    try:
+        del st.query_params["ir"]
+    except Exception:
+        pass
+
 _ir_a_descargar_od = st.session_state.pop("ir_a_descargar_orden_dia", False)
 _viene_de_otra_pagina = st.session_state.get("_pagina_streamlit_prev") != "actas"
 st.session_state["_pagina_streamlit_prev"] = "actas"
@@ -799,6 +811,48 @@ def _inject_scroll_a_ancla(ancla_id: str, suave: bool = True) -> None:
 
 if _ancla_destino:
     _inject_scroll_a_ancla(_ancla_destino, suave=bool(_ir_a_descargar_od or _scroll_arriba or _scroll_dashboard))
+
+# Interceptar menú «Actas» para volver al dashboard aunque ya estemos en esta página.
+components.html(
+    """
+    <script>
+    (function () {
+        const win = window.parent;
+        const doc = win.document;
+        if (win._uccActasMenuBound) return;
+        win._uccActasMenuBound = true;
+
+        function esActas(el) {
+            const t = ((el.textContent || "") + " " + (el.getAttribute("href") || "")).toLowerCase();
+            return (t.includes("actas") && !t.includes("cargar")) || t.includes("/actas");
+        }
+
+        function enlazar() {
+            doc.querySelectorAll(
+                '[data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"]'
+            ).forEach(function (a) {
+                if (a._uccActasBound) return;
+                if (!esActas(a)) return;
+                a._uccActasBound = true;
+                a.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        win.sessionStorage.setItem("ucc_scroll_mode", "top");
+                        win.sessionStorage.setItem("ucc_scroll_target", "dashboard-actas");
+                        win.sessionStorage.removeItem("ucc_scroll_od");
+                    } catch (err) {}
+                    win.location.href = "/Actas?ir=dashboard";
+                }, true);
+            });
+        }
+        enlazar();
+        new MutationObserver(enlazar).observe(doc.body, { childList: true, subtree: true });
+    })();
+    </script>
+    """,
+    height=0,
+)
 
 _APP_ROOT = Path(__file__).resolve().parent.parent
 _LOGO_PATH = _APP_ROOT / "assets" / "logo_uccuyo.png"
@@ -1250,12 +1304,10 @@ def _dash_cargar_archivos(numero: int) -> None:
 
 
 _actas_ordenadas = sorted(actas_dict.keys())
-if "dashboard_acta_seleccion" not in st.session_state:
-    _pref = next(
-        (n for n in _actas_ordenadas if _MES_A_NUMERO.get(actas_dict[n]["mes"], 0) == _MES_ACTUAL),
-        _actas_ordenadas[0],
-    )
-    st.session_state["dashboard_acta_seleccion"] = _pref
+# Sin preselección: el usuario elige la tarjeta.
+_acta_sel = st.session_state.get("dashboard_acta_seleccion")
+if _acta_sel not in actas_dict:
+    _acta_sel = None
 
 # Tarjetas compactas para elegir acta
 st.markdown("**Acta en trabajo**")
@@ -1263,7 +1315,7 @@ cols_pick = st.columns(4)
 for idx, n in enumerate(_actas_ordenadas):
     estado_txt, estado_bg = _estado_acta(n)
     mes = actas_dict[n]["mes"]
-    activa = st.session_state.get("dashboard_acta_seleccion") == n
+    activa = _acta_sel == n
     clase = "ucc-pick-card is-active" if activa else "ucc-pick-card"
     with cols_pick[idx % 4]:
         st.markdown(
@@ -1288,61 +1340,68 @@ for idx, n in enumerate(_actas_ordenadas):
             st.session_state.pop("dashboard_acta_detalle", None)
             st.rerun()
 
-_acta_sel = st.session_state.get("dashboard_acta_seleccion")
-if _acta_sel not in actas_dict:
-    _acta_sel = _actas_ordenadas[0]
-    st.session_state["dashboard_acta_seleccion"] = _acta_sel
+if _acta_sel is None:
+    st.info("Elija un acta con el botón **Elegir** para usar las acciones.")
+    a1, a2, a3, a4 = st.columns(4)
+    with a1:
+        st.button("Ver temas", key="dash_accion_ver", use_container_width=True, disabled=True)
+    with a2:
+        st.button("Cargar tema", key="dash_accion_cargar", use_container_width=True, disabled=True)
+    with a3:
+        st.button("Descargar OD", key="dash_accion_od", use_container_width=True, disabled=True)
+    with a4:
+        st.button("Cargar archivo", key="dash_accion_archivo", use_container_width=True, disabled=True)
+else:
+    _estado_sel, _bg_sel = _estado_acta(_acta_sel)
+    _temas_sel = _por_acta_temas.get(_acta_sel, 0)
+    _unidades_sel_n = len(_por_acta_unidades[_acta_sel] & _EXPECTED_UNIDADES)
+    st.markdown(
+        f"""
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 12px 0;">
+          <span style="color:#334155; font-weight:700;">Seleccionada: Acta {_acta_sel} · {actas_dict[_acta_sel]['mes']}</span>
+          <span class="ucc-badge-pill" style="{_bg_sel}">{_estado_sel}</span>
+          <span style="color:#334155; font-weight:600;">{_temas_sel} tema(s)</span>
+          <span style="color:#64748b;">{_unidades_sel_n}/{_TOTAL_EXPECTED_UNIDADES} unidades</span>
+          <span style="color:#64748b;">{fechas_actas.get(_acta_sel, "")}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-_estado_sel, _bg_sel = _estado_acta(_acta_sel)
-_temas_sel = _por_acta_temas.get(_acta_sel, 0)
-_unidades_sel_n = len(_por_acta_unidades[_acta_sel] & _EXPECTED_UNIDADES)
-st.markdown(
-    f"""
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 12px 0;">
-      <span style="color:#334155; font-weight:700;">Seleccionada: Acta {_acta_sel} · {actas_dict[_acta_sel]['mes']}</span>
-      <span class="ucc-badge-pill" style="{_bg_sel}">{_estado_sel}</span>
-      <span style="color:#334155; font-weight:600;">{_temas_sel} tema(s)</span>
-      <span style="color:#64748b;">{_unidades_sel_n}/{_TOTAL_EXPECTED_UNIDADES} unidades</span>
-      <span style="color:#64748b;">{fechas_actas.get(_acta_sel, "")}</span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-a1, a2, a3, a4 = st.columns(4)
-with a1:
-    st.button(
-        "Ver temas",
-        key="dash_accion_ver",
-        use_container_width=True,
-        on_click=_dash_ver_temas,
-        args=(_acta_sel,),
-    )
-with a2:
-    st.button(
-        "Cargar tema",
-        key="dash_accion_cargar",
-        use_container_width=True,
-        on_click=_dash_cargar_tema,
-        args=(_acta_sel,),
-    )
-with a3:
-    st.button(
-        "Descargar OD",
-        key="dash_accion_od",
-        use_container_width=True,
-        on_click=_dash_descargar_od,
-        args=(_acta_sel,),
-    )
-with a4:
-    if st.button(
-        "Cargar archivo",
-        key="dash_accion_archivo",
-        use_container_width=True,
-        on_click=_dash_cargar_archivos,
-        args=(_acta_sel,),
-    ):
-        st.switch_page("pages/2_Carga_de_Archivos.py")
+    a1, a2, a3, a4 = st.columns(4)
+    with a1:
+        st.button(
+            "Ver temas",
+            key="dash_accion_ver",
+            use_container_width=True,
+            on_click=_dash_ver_temas,
+            args=(_acta_sel,),
+        )
+    with a2:
+        st.button(
+            "Cargar tema",
+            key="dash_accion_cargar",
+            use_container_width=True,
+            on_click=_dash_cargar_tema,
+            args=(_acta_sel,),
+        )
+    with a3:
+        st.button(
+            "Descargar OD",
+            key="dash_accion_od",
+            use_container_width=True,
+            on_click=_dash_descargar_od,
+            args=(_acta_sel,),
+        )
+    with a4:
+        if st.button(
+            "Cargar archivo",
+            key="dash_accion_archivo",
+            use_container_width=True,
+            on_click=_dash_cargar_archivos,
+            args=(_acta_sel,),
+        ):
+            st.switch_page("pages/2_Carga_de_Archivos.py")
 
 # Resumen de todas las actas (compacto, legible al 100%)
 _resumen_filas = []
