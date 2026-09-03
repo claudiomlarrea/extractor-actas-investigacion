@@ -492,12 +492,30 @@ def _marcar_ir_paso_1() -> None:
     st.session_state["volver_arriba_cargar_temas"] = True
 
 
+def _marcar_volver_actas() -> None:
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
+    st.session_state["volver_dashboard_actas"] = True
+    st.session_state.pop("dashboard_acta_detalle", None)
+
+
 def _marcar_ir_od() -> None:
     st.session_state["ir_a_descargar_orden_dia"] = True
 
 
+def _render_boton_volver_actas(clave: str) -> None:
+    st.button(
+        "↑ Actas",
+        key=f"volver_actas_{clave}",
+        use_container_width=True,
+        on_click=_marcar_volver_actas,
+        help="Volver al tablero de actas",
+    )
+
+
 def _render_botones_flujo(clave: str) -> None:
-    col_a, col_b, col_c = st.columns(3)
+    col_actas, col_a, col_b, col_c = st.columns(4)
+    with col_actas:
+        _render_boton_volver_actas(clave)
     with col_a:
         st.button(
             "Cargar tema",
@@ -648,14 +666,15 @@ _ir_a_descargar_od = st.session_state.pop("ir_a_descargar_orden_dia", False)
 _viene_de_otra_pagina = st.session_state.get("_pagina_streamlit_prev") != "cargar_temas"
 st.session_state["_pagina_streamlit_prev"] = "cargar_temas"
 
-_scroll_arriba = (not _ir_a_descargar_od) and (
+_scroll_dashboard = st.session_state.pop("volver_dashboard_actas", False)
+_scroll_arriba = (not _ir_a_descargar_od) and (not _scroll_dashboard) and (
     st.session_state.pop("volver_arriba_cargar_temas", False) or _viene_de_otra_pagina
 )
 
 # Al elegir acta / generar, Streamlit re-ejecuta y vuelve arriba: mantener ancla en OD.
 if _ir_a_descargar_od:
     st.session_state["_mantener_scroll_descargar_od"] = True
-if _scroll_arriba:
+if _scroll_arriba or _scroll_dashboard:
     st.session_state.pop("_mantener_scroll_descargar_od", None)
 _mantener_en_od = bool(st.session_state.get("_mantener_scroll_descargar_od"))
 
@@ -671,6 +690,7 @@ components.html(
         const storage = win.sessionStorage;
         const irOd = {"true" if _ir_a_descargar_od else "false"};
         const irArriba = {"true" if _scroll_arriba else "false"};
+        const irDashboard = {"true" if _scroll_dashboard else "false"};
 
         function contenedoresScroll() {{
             return [
@@ -697,6 +717,22 @@ components.html(
             contenedoresScroll().forEach(function (el) {{
                 if (!el || !("scrollTop" in el)) return;
                 try {{ el.scrollTop = Math.max(0, el.scrollTop - margen); }} catch (e) {{}}
+            }});
+        }}
+
+        function irTablero() {{
+            storage.setItem("ucc_scroll_mode", "top");
+            storage.removeItem("ucc_scroll_od");
+            const ancla = doc.getElementById("dashboard-actas") || doc.getElementById("inicio-cargar-temas");
+            if (ancla) {{
+                try {{ ancla.scrollIntoView({{ behavior: "auto", block: "start" }}); }} catch (e) {{}}
+            }}
+        }}
+
+        function programarTablero() {{
+            irTablero();
+            [0, 50, 150, 350, 700, 1200].forEach(function (ms) {{
+                setTimeout(irTablero, ms);
             }});
         }}
 
@@ -757,6 +793,9 @@ components.html(
             storage.setItem("ucc_scroll_mode", "od");
             storage.setItem("ucc_scroll_od", "1");
             storage.removeItem("ucc_scroll_top");
+        }} else if (irDashboard) {{
+            storage.setItem("ucc_scroll_mode", "top");
+            programarTablero();
         }} else if (irArriba) {{
             storage.setItem("ucc_scroll_top", "1");
             programarSubir();
@@ -1139,6 +1178,7 @@ def _estado_acta(numero_acta: int) -> tuple[str, str]:
     return "En curso", "background:#b45309"
 
 
+st.markdown('<div id="dashboard-actas"></div>', unsafe_allow_html=True)
 st.markdown("## 📊 Dashboard de estado")
 st.caption("Cada acta es un acceso directo: ver lo cargado, cargar un tema, descargar el Orden del Día o subir archivos.")
 
@@ -1157,13 +1197,17 @@ st.markdown(
       line-height: 1;
     }
     .ucc-dash-acta{
-      padding: 8px 10px !important;
+      padding: 14px 12px !important;
     }
-    div[class*="st-key-dash_"] button{
-      min-height: 1.7rem !important;
-      padding: 2px 6px !important;
-      font-size: 0.72rem !important;
-      margin-bottom: 0.2rem !important;
+    .ucc-dash-acta strong{
+      font-size: 1.05rem !important;
+    }
+    div[class*="st-key-dash_"] button,
+    div[class*="st-key-volver_actas"] button{
+      min-height: 2rem !important;
+      padding: 4px 8px !important;
+      font-size: 0.78rem !important;
+      margin-bottom: 0.25rem !important;
     }
     </style>
     """,
@@ -1192,9 +1236,9 @@ def _dash_cargar_archivos(numero: int) -> None:
 
 
 _actas_ordenadas = sorted(actas_dict.keys())
-cols_actas = st.columns(4)
+cols_actas = st.columns(3)
 for idx, n in enumerate(_actas_ordenadas):
-    c = cols_actas[idx % 4]
+    c = cols_actas[idx % 3]
     temas = _por_acta_temas.get(n, 0)
     unidades_presentes = len(_por_acta_unidades[n] & _EXPECTED_UNIDADES)
     estado_txt, estado_bg = _estado_acta(n)
@@ -1205,10 +1249,10 @@ for idx, n in enumerate(_actas_ordenadas):
             f"""
             <div class="ucc-summary-item ucc-dash-acta">
               <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
-                <strong style="color:#334155; font-size:0.88rem; margin:0;">Acta {n}</strong>
+                <strong style="color:#334155; margin:0;">Acta {n}</strong>
                 <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
               </div>
-              <div style="margin-top:2px; color:#064a3f; font-weight:600; font-size:0.8rem;">
+              <div style="margin-top:6px; color:#064a3f; font-weight:600; font-size:0.88rem;">
                 {mes} · {temas} tema(s) · {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES}
               </div>
             </div>
@@ -1265,7 +1309,9 @@ if _acta_detalle in actas_dict:
             if _fecha_detalle
             else "Temas cargados en Google Sheets para esta acta.",
         )
-        col_det_info, col_det_cerrar = st.columns([5, 1])
+        col_det_actas, col_det_cerrar = st.columns([1, 1])
+        with col_det_actas:
+            _render_boton_volver_actas("detalle")
         with col_det_cerrar:
             if st.button("Cerrar", key="dash_cerrar_detalle", use_container_width=True):
                 st.session_state.pop("dashboard_acta_detalle", None)
