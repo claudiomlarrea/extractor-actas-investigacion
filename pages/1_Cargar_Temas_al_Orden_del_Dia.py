@@ -687,18 +687,16 @@ components.html(
         function subir() {{
             storage.setItem("ucc_scroll_mode", "top");
             storage.removeItem("ucc_scroll_od");
-            try {{ win.scrollTo(0, 0); }} catch (e) {{}}
-            contenedoresScroll().forEach(function (el) {{
-                if (!el) return;
-                try {{
-                    if (typeof el.scrollTo === "function") el.scrollTo(0, 0);
-                    if ("scrollTop" in el) el.scrollTop = 0;
-                }} catch (e) {{}}
-            }});
             const ancla = doc.getElementById("paso-1-ancla") || doc.getElementById("inicio-cargar-temas");
             if (ancla) {{
                 try {{ ancla.scrollIntoView({{ behavior: "auto", block: "start" }}); }} catch (e) {{}}
             }}
+            // Compensa la barra superior de Streamlit para no tapar "Paso 1".
+            const margen = 130;
+            contenedoresScroll().forEach(function (el) {{
+                if (!el || !("scrollTop" in el)) return;
+                try {{ el.scrollTop = Math.max(0, el.scrollTop - margen); }} catch (e) {{}}
+            }});
         }}
 
         function programarSubir() {{
@@ -1290,11 +1288,25 @@ if _scroll_arriba:
         """
         <script>
         (function () {
-            const doc = window.parent.document;
+            const win = window.parent;
+            const doc = win.document;
             function irPaso1() {
                 const el = doc.getElementById("paso-1-ancla");
                 if (!el) return;
-                try { el.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
+                try { el.scrollIntoView({ behavior: "auto", block: "start" }); } catch (e) {}
+                const margen = 130;
+                [
+                    doc.scrollingElement,
+                    doc.documentElement,
+                    doc.body,
+                    doc.querySelector("section.main"),
+                    doc.querySelector('[data-testid="stMain"]'),
+                    doc.querySelector('[data-testid="stAppViewContainer"]'),
+                    doc.querySelector('[data-testid="stMainBlockContainer"]'),
+                ].forEach(function (sc) {
+                    if (!sc || !("scrollTop" in sc)) return;
+                    try { sc.scrollTop = Math.max(0, sc.scrollTop - margen); } catch (e) {}
+                });
             }
             [0, 80, 250, 600, 1200].forEach(function (ms) { setTimeout(irPaso1, ms); });
         })();
