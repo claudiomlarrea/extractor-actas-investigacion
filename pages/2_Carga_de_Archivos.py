@@ -1,5 +1,8 @@
-import streamlit as st
+import re
 from pathlib import Path
+
+import streamlit as st
+import streamlit.components.v1 as components
 
 from ucc_streamlit_chrome import hide_streamlit_cloud_toolbar
 
@@ -127,29 +130,63 @@ actas = {
 # RENDER
 # =========================
 
+_acta_focus = st.session_state.get("acta_archivos")
+_ancla_archivos = None
+if _acta_focus:
+    _tiene_carpeta = any(f"Acta {_acta_focus}" in nombre for nombre in actas)
+    if _tiene_carpeta:
+        st.info(f"Acta {_acta_focus}: use la carpeta de ese Orden del Día para subir el archivo.")
+    else:
+        st.warning(f"El Acta {_acta_focus} todavía no tiene carpeta de Google Drive habilitada.")
+
 for nombre, link in actas.items():
+    m_acta = re.search(r"Acta\s+(\d+)", nombre)
+    n_acta = int(m_acta.group(1)) if m_acta else None
+    destacado = n_acta is not None and n_acta == _acta_focus
+    if destacado:
+        _ancla_archivos = f"archivo-acta-{n_acta}"
 
     if "XXXXXXXX" in link:
         link_html = "<p class='no-link'>🔒 Carpeta aún no habilitada</p>"
     else:
         link_html = f'<p>🔗 <a href="{link}" target="_blank">Abrir carpeta</a></p>'
 
-    st.markdown(f"""
-    <div class="card">
+    borde = "border:2px solid #064a3f;" if destacado else ""
+    ancla = f'<div id="archivo-acta-{n_acta}"></div>' if n_acta else ""
+    st.markdown(
+        f"""
+        {ancla}
+        <div class="card" style="{borde}">
+        <h3>📁 {nombre}</h3>
+        {link_html}
+        <p><strong>Cómo cargar el archivo:</strong></p>
+        <ol>
+            <li>Se abrirá Google Drive</li>
+            <li><strong>Hacer clic en la Carpeta de su Unidad Académica</strong></li>
+            <li>Hacer clic en <strong>Nuevo → Subir archivo</strong></li>
+            <li>Seleccionar el archivo correspondiente</li>
+            <li>Verificar que quede dentro de la carpeta</li>
+        </ol>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    <h3>📁 {nombre}</h3>
-
-    {link_html}
-
-    <p><strong>Cómo cargar el archivo:</strong></p>
-
-    <ol>
-        <li>Se abrirá Google Drive</li>
-        <li><strong>Hacer clic en la Carpeta de su Unidad Académica</strong></li>
-        <li>Hacer clic en <strong>Nuevo → Subir archivo</strong></li>
-        <li>Seleccionar el archivo correspondiente</li>
-        <li>Verificar que quede dentro de la carpeta</li>
-    </ol>
-
-    </div>
-    """, unsafe_allow_html=True)
+if _ancla_archivos:
+    components.html(
+        f"""
+        <script>
+        (function () {{
+            const doc = window.parent.document;
+            const id = {_ancla_archivos!r};
+            function ir() {{
+                const el = doc.getElementById(id);
+                if (!el) return;
+                try {{ el.scrollIntoView({{ behavior: "smooth", block: "start" }}); }} catch (e) {{}}
+            }}
+            [0, 200, 600, 1200].forEach(function (ms) {{ setTimeout(ir, ms); }});
+        }})();
+        </script>
+        """,
+        height=0,
+    )

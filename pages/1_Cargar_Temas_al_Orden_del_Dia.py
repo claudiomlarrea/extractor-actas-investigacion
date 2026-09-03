@@ -1140,7 +1140,7 @@ def _estado_acta(numero_acta: int) -> tuple[str, str]:
 
 
 st.markdown("## 📊 Dashboard de estado")
-st.caption("Haga clic en **Ver temas** de cada acta para ver lo que ya está cargado.")
+st.caption("Cada acta es un acceso directo: ver lo cargado, cargar un tema, descargar el Orden del Día o subir archivos.")
 
 st.markdown(
     """
@@ -1159,16 +1159,37 @@ st.markdown(
     .ucc-dash-acta{
       padding: 8px 10px !important;
     }
-    div[class*="st-key-dash_ver_acta"] button{
-      min-height: 1.85rem !important;
-      padding: 2px 8px !important;
-      font-size: 0.8rem !important;
-      margin-bottom: 0.35rem !important;
+    div[class*="st-key-dash_"] button{
+      min-height: 1.7rem !important;
+      padding: 2px 6px !important;
+      font-size: 0.72rem !important;
+      margin-bottom: 0.2rem !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+def _dash_ver_temas(numero: int) -> None:
+    st.session_state["dashboard_acta_detalle"] = numero
+
+
+def _dash_cargar_tema(numero: int) -> None:
+    st.session_state["acta"] = f"Orden del Día {actas_dict[numero]['mes']} - Acta {numero}"
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
+    st.session_state["volver_arriba_cargar_temas"] = True
+    st.session_state.pop("dashboard_acta_detalle", None)
+
+
+def _dash_descargar_od(numero: int) -> None:
+    st.session_state["acta_word_descargar"] = f"{numero} - {actas_dict[numero]['mes']}"
+    st.session_state["ir_a_descargar_orden_dia"] = True
+    st.session_state.pop("dashboard_acta_detalle", None)
+
+
+def _dash_cargar_archivos(numero: int) -> None:
+    st.session_state["acta_archivos"] = numero
+
 
 _actas_ordenadas = sorted(actas_dict.keys())
 cols_actas = st.columns(4)
@@ -1194,8 +1215,38 @@ for idx, n in enumerate(_actas_ordenadas):
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Ver temas", key=f"dash_ver_acta_{n}", use_container_width=True):
-            st.session_state["dashboard_acta_detalle"] = n
+        b1, b2 = st.columns(2)
+        with b1:
+            st.button(
+                "Ver temas",
+                key=f"dash_ver_{n}",
+                use_container_width=True,
+                on_click=_dash_ver_temas,
+                args=(n,),
+            )
+            st.button(
+                "Descargar OD",
+                key=f"dash_od_{n}",
+                use_container_width=True,
+                on_click=_dash_descargar_od,
+                args=(n,),
+            )
+        with b2:
+            st.button(
+                "Cargar tema",
+                key=f"dash_cargar_{n}",
+                use_container_width=True,
+                on_click=_dash_cargar_tema,
+                args=(n,),
+            )
+            if st.button(
+                "Cargar archivo",
+                key=f"dash_arch_{n}",
+                use_container_width=True,
+                on_click=_dash_cargar_archivos,
+                args=(n,),
+            ):
+                st.switch_page("pages/2_Carga_de_Archivos.py")
 
 _acta_detalle = st.session_state.get("dashboard_acta_detalle")
 if _acta_detalle in actas_dict:
