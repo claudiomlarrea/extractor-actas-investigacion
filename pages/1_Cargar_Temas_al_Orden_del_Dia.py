@@ -1100,17 +1100,35 @@ _TOTAL_EXPECTED_UNIDADES = len(_EXPECTED_UNIDADES) if _EXPECTED_UNIDADES else 1
 _UMBRAL_COMPLETA = 0.85
 
 
+import datetime as _dt
+
+_MES_A_NUMERO = {
+    "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
+    "Julio": 7, "Agosto": 8, "Septiembre": 9, "Octubre": 10,
+    "Noviembre": 11, "Diciembre": 12,
+}
+_MES_ACTUAL = _dt.date.today().month
+
+
 def _estado_acta(numero_acta: int) -> tuple[str, str]:
     """Retorna (texto, background_css)."""
+    mes_acta = _MES_A_NUMERO.get(actas_dict[numero_acta]["mes"], 0)
+    acta_pasada = mes_acta < _MES_ACTUAL
+
     temas = _por_acta_temas.get(numero_acta, 0)
     if temas <= 0:
+        if acta_pasada:
+            return "Cerrada", "background:#6b7280"
         return "Sin carga", "background:#b91c1c"
+
+    if acta_pasada:
+        return "Cerrada", "background:#6b7280"
 
     unidades_presentes = len(_por_acta_unidades[numero_acta] & _EXPECTED_UNIDADES)
     cobertura = unidades_presentes / _TOTAL_EXPECTED_UNIDADES
     if cobertura >= _UMBRAL_COMPLETA:
         return "Completa", "background:#0b6b5d"
-    return "Parcial", "background:#b45309"
+    return "En curso", "background:#b45309"
 
 
 st.markdown("## 📊 Dashboard de estado")
