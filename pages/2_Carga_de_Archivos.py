@@ -110,7 +110,7 @@ st.title("📂 Carga de Archivos para el Consejo de Investigación")
 
 if st.button("↑ Actas", key="archivos_volver_actas"):
     st.session_state["volver_dashboard_actas"] = True
-    st.switch_page("pages/1_Cargar_Temas_al_Orden_del_Dia.py")
+    st.switch_page("pages/0_Actas.py")
 
 st.markdown("### Seleccione la carpeta correspondiente y cargue el archivo directamente en Google Drive")
 
