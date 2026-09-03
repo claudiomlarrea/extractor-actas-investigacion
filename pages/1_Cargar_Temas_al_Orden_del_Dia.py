@@ -39,6 +39,16 @@ def _numero_acta_igual(valor, acta_num) -> bool:
         return str(valor).strip() == str(acta_num).strip()
 
 
+def _parse_numero_acta(valor) -> int | None:
+    """Convierte numero_acta a int si es posible (193, '193' o 193.0)."""
+    if valor is None or valor == "":
+        return None
+    try:
+        return int(float(str(valor).strip().replace(",", ".")))
+    except (TypeError, ValueError):
+        return None
+
+
 def _contar_temas_acta(worksheet, acta_num) -> int:
     try:
         datos = worksheet.get_all_records()
@@ -1063,6 +1073,100 @@ opciones_unidades_select = [
 ]
 
 # =========================
+# 📊 DASHBOARD estado (por acta y unidades)
+# =========================
+
+_EXPECTED_UNIDADES = set(opciones_unidades_select)
+try:
+    _datos_sheet_all = sheet.get_all_records()
+except Exception:
+    _datos_sheet_all = []
+
+_por_acta_temas: dict[int, int] = {n: 0 for n in actas_dict.keys()}
+_por_acta_unidades: dict[int, set[str]] = {n: set() for n in actas_dict.keys()}
+_por_acta_unidad_counts: dict[int, dict[str, int]] = {n: {} for n in actas_dict.keys()}
+
+for r in _datos_sheet_all:
+    n_acta = _parse_numero_acta(r.get("numero_acta"))
+    if n_acta is None or n_acta not in actas_dict:
+        continue
+
+    _por_acta_temas[n_acta] += 1
+
+    unidad = _unidad_academica_clave(r)
+    if unidad:
+        _por_acta_unidades[n_acta].add(unidad)
+        _por_acta_unidad_counts[n_acta][unidad] = (
+            _por_acta_unidad_counts[n_acta].get(unidad, 0) + 1
+        )
+
+_TOTAL_EXPECTED_UNIDADES = len(_EXPECTED_UNIDADES) if _EXPECTED_UNIDADES else 1
+_UMBRAL_COMPLETA = 0.85
+
+
+def _estado_acta(numero_acta: int) -> tuple[str, str]:
+    """Retorna (texto, background_css)."""
+    temas = _por_acta_temas.get(numero_acta, 0)
+    if temas <= 0:
+        return "Sin carga", "background:#b91c1c"
+
+    unidades_presentes = len(_por_acta_unidades[numero_acta] & _EXPECTED_UNIDADES)
+    cobertura = unidades_presentes / _TOTAL_EXPECTED_UNIDADES
+    if cobertura >= _UMBRAL_COMPLETA:
+        return "Completa", "background:#0b6b5d"
+    return "Parcial", "background:#b45309"
+
+
+st.markdown("## 📊 Dashboard de estado")
+st.caption("Señala cuántos temas hay y qué cobertura de unidades ya tiene cada Acta.")
+
+st.markdown(
+    """
+    <style>
+    .ucc-badge-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+_actas_ordenadas = sorted(actas_dict.keys())
+cols_actas = st.columns(4)
+for idx, n in enumerate(_actas_ordenadas):
+    c = cols_actas[idx % 4]
+    temas = _por_acta_temas.get(n, 0)
+    unidades_presentes = len(_por_acta_unidades[n] & _EXPECTED_UNIDADES)
+    estado_txt, estado_bg = _estado_acta(n)
+
+    with c:
+        st.markdown(
+            f"""
+            <div class="ucc-summary-item" style="padding:14px 12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <strong style="color:#334155;">Acta {n}</strong>
+                <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
+              </div>
+              <div style="margin-top:8px; color:#475569; font-weight:700;">
+                {temas} tema(s)
+              </div>
+              <div style="margin-top:6px; color:#64748b;">
+                {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES} unidades con carga
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+# =========================
 # 📝 FORMULARIO
 # =========================
 
@@ -1079,7 +1183,7 @@ else:
     numero_acta = int(acta_label.split("Acta ")[1])
     fecha = fechas_actas.get(numero_acta, "")
 
-cantidad_temas_acta = _contar_temas_acta(sheet, numero_acta) if numero_acta else None
+cantidad_temas_acta = _por_acta_temas.get(numero_acta, 0) if numero_acta else None
 tipo_actual = st.session_state.get("tipo_actividad", "Proyecto de Investigación")
 render_cabecera_carga_temas(numero_acta, fecha, tipo_actual, cantidad_temas_acta)
 
@@ -1114,6 +1218,44 @@ with col_kpi_3:
             """,
             unsafe_allow_html=True,
         )
+
+if numero_acta:
+    _unidades_counts = _por_acta_unidad_counts.get(numero_acta, {})
+    _unidades_presentes = set(_unidades_counts.keys())
+    _unidades_top = sorted(_unidades_counts.items(), key=lambda kv: kv[1], reverse=True)[:6]
+    _unidades_pendientes = sorted(_EXPECTED_UNIDADES - _unidades_presentes)
+
+    with _container_con_estilo("ucc_card_unidades_acta"):
+        st.markdown("### Unidades con temas (Acta seleccionado)")
+        st.caption(
+            f"Top unidades con carga y cuántas unidades faltan completar (según el listado del sistema)."
+        )
+
+        st.markdown(
+            "<div class='ucc-chip-row'>"
+            + "".join(
+                f"<span class='ucc-chip'><strong>{escape(str(c[1]))}</strong>&nbsp;{escape(str(c[0]))}</span>"
+                for c in _unidades_top
+            )
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+
+        faltan_n = len(_unidades_pendientes)
+        st.markdown(
+            f"<div style='margin-top:10px; color:#64748b; font-weight:700;'>Unidades pendientes: {faltan_n}</div>",
+            unsafe_allow_html=True,
+        )
+        if faltan_n > 0:
+            with st.expander("Ver unidades pendientes (detalle)"):
+                st.markdown(
+                    "<br>".join(
+                        escape(u) for u in _unidades_pendientes[:80]
+                    )
+                    if _unidades_pendientes
+                    else "N/A",
+                    unsafe_allow_html=False,
+                )
 
 with _container_con_estilo("ucc_card_paso_1"):
     _render_encabezado_bloque(
