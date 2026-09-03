@@ -268,6 +268,46 @@ def inject_consejo_layout_styles() -> None:
                 inset 0 1px 0 rgba(255, 255, 255, 0.22);
         }}
 
+        /* st.page_link navigation buttons – verde intenso */
+        {_MAIN} [data-testid="stPageLink-NavLink"] {{
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 2.8rem;
+            padding: 10px 14px !important;
+            border-radius: 10px !important;
+            background: linear-gradient(180deg, #1a9a6e 0%, #0f7a55 48%, #065f42 100%) !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            border: 1px solid #054d35 !important;
+            border-bottom-width: 3px !important;
+            box-shadow:
+                0 3px 0 #054d35,
+                0 5px 12px rgba(2, 40, 33, 0.30),
+                inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }}
+        {_MAIN} [data-testid="stPageLink-NavLink"]:hover {{
+            transform: translateY(-1px);
+            box-shadow:
+                0 5px 0 #054d35,
+                0 7px 16px rgba(2, 40, 33, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+        }}
+        {_MAIN} [data-testid="stPageLink-NavLink"]:active {{
+            transform: translateY(2px);
+            box-shadow:
+                0 1px 0 #054d35,
+                inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+        }}
+        {_MAIN} [data-testid="stPageLink-NavLink"] p,
+        {_MAIN} [data-testid="stPageLink-NavLink"] span {{
+            color: #ffffff !important;
+        }}
+
         {_MAIN} .ucc-section-label {{
             margin: 0 0 0.35rem 0;
             color: #064a3f !important;
