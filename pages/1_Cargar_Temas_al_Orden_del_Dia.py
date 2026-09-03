@@ -1149,12 +1149,21 @@ st.markdown(
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding: 4px 10px;
+      padding: 2px 8px;
       border-radius: 999px;
       color: #fff;
       font-weight: 800;
-      font-size: 0.85rem;
+      font-size: 0.72rem;
       line-height: 1;
+    }
+    .ucc-dash-acta{
+      padding: 8px 10px !important;
+    }
+    div[class*="st-key-dash_ver_acta"] button{
+      min-height: 1.85rem !important;
+      padding: 2px 8px !important;
+      font-size: 0.8rem !important;
+      margin-bottom: 0.35rem !important;
     }
     </style>
     """,
@@ -1173,19 +1182,13 @@ for idx, n in enumerate(_actas_ordenadas):
     with c:
         st.markdown(
             f"""
-            <div class="ucc-summary-item" style="padding:14px 12px;">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <strong style="color:#334155;">Acta {n}</strong>
+            <div class="ucc-summary-item ucc-dash-acta">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                <strong style="color:#334155; font-size:0.88rem; margin:0;">Acta {n}</strong>
                 <span class="ucc-badge-pill" style="{estado_bg}">{estado_txt}</span>
               </div>
-              <div style="margin-top:4px; color:#064a3f; font-weight:600; font-size:0.92rem;">
-                {mes}
-              </div>
-              <div style="margin-top:6px; color:#475569; font-weight:700;">
-                {temas} tema(s)
-              </div>
-              <div style="margin-top:4px; color:#64748b;">
-                {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES} unidades con carga
+              <div style="margin-top:2px; color:#064a3f; font-weight:600; font-size:0.8rem;">
+                {mes} · {temas} tema(s) · {unidades_presentes}/{_TOTAL_EXPECTED_UNIDADES}
               </div>
             </div>
             """,
@@ -1236,6 +1239,7 @@ if _acta_detalle in actas_dict:
                 pd.DataFrame(_tabla_detalle),
                 use_container_width=True,
                 hide_index=True,
+                height=220,
             )
 
 # =========================
