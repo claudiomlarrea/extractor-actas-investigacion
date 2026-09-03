@@ -521,14 +521,12 @@ def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: i
             unsafe_allow_html=True,
         )
         col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.markdown(
+                '<a class="ucc-nav-btn-3d" href="#" onclick="var m=window.parent.document.querySelector(\'section.main\');if(m)m.scrollTo({top:0,behavior:\'smooth\'});else window.scrollTo({top:0,behavior:\'smooth\'});return false;">📝 Cargar tema</a>',
+                unsafe_allow_html=True,
+            )
         try:
-            with col_a:
-                st.page_link(
-                    "pages/1_Cargar_Temas_al_Orden_del_Dia.py",
-                    label="Cargar tema",
-                    icon="📝",
-                    use_container_width=True,
-                )
             with col_b:
                 st.page_link(
                     "pages/1_Descargar_Orden_del_Dia.py",
@@ -544,12 +542,10 @@ def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: i
                     use_container_width=True,
                 )
         except AttributeError:
-            with col_a:
-                st.markdown('<a class="ucc-nav-btn-3d" href="/Cargar_Temas_al_Orden_del_Dia">Cargar tema</a>', unsafe_allow_html=True)
             with col_b:
-                st.markdown('<a class="ucc-nav-btn-3d" href="/Descargar_Orden_del_Dia">Generar OD</a>', unsafe_allow_html=True)
+                st.markdown('<a class="ucc-nav-btn-3d" href="/Descargar_Orden_del_Dia">📄 Generar OD</a>', unsafe_allow_html=True)
             with col_c:
-                st.markdown('<a class="ucc-nav-btn-3d" href="/Carga_de_Archivos">Cargar archivo</a>', unsafe_allow_html=True)
+                st.markdown('<a class="ucc-nav-btn-3d" href="/Carga_de_Archivos">📂 Cargar archivo</a>', unsafe_allow_html=True)
 
 
 def render_resumen_pre_envio(
