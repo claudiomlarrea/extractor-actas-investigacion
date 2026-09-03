@@ -486,34 +486,38 @@ def _render_encabezado_bloque(paso: str, titulo: str, ayuda: str) -> None:
     )
 
 
-def _render_botones_flujo() -> None:
-    """Cargar tema recarga la página con ?ir=paso1 para salir del ancla de OD."""
-    components.html(
-        """
-        <style>
-        .ucc-nav-row{display:flex;gap:12px;width:100%;font-family:system-ui,-apple-system,sans-serif;}
-        .ucc-nav-row a{
-            flex:1;display:flex;align-items:center;justify-content:center;
-            min-height:2.8rem;padding:10px 14px;
-            border-radius:10px;border:1px solid #054d35;border-bottom-width:3px;
-            background:linear-gradient(180deg,#1a9a6e 0%,#0f7a55 48%,#065f42 100%);
-            color:#fff!important;font-weight:700;font-size:0.95rem;
-            text-decoration:none;cursor:pointer;
-            box-shadow:0 3px 0 #054d35,0 5px 12px rgba(2,40,33,.3),inset 0 1px 0 rgba(255,255,255,.2);
-            transition:transform .1s,box-shadow .1s;
-        }
-        .ucc-nav-row a:hover{transform:translateY(-1px);
-            box-shadow:0 5px 0 #054d35,0 7px 16px rgba(2,40,33,.35),inset 0 1px 0 rgba(255,255,255,.25);}
-        .ucc-nav-row a:active{transform:translateY(2px);box-shadow:0 1px 0 #054d35;}
-        </style>
-        <div class="ucc-nav-row">
-            <a href="/Cargar_Temas_al_Orden_del_Dia?ir=paso1" target="_parent">Cargar tema</a>
-            <a href="/Descargar_Orden_del_Dia" target="_parent">Generar OD</a>
-            <a href="/Carga_de_Archivos" target="_parent">Cargar archivo</a>
-        </div>
-        """,
-        height=55,
-    )
+def _marcar_ir_paso_1() -> None:
+    st.session_state.pop("_mantener_scroll_descargar_od", None)
+    st.session_state["volver_arriba_cargar_temas"] = True
+
+
+def _marcar_ir_od() -> None:
+    st.session_state["ir_a_descargar_orden_dia"] = True
+
+
+def _render_botones_flujo(clave: str) -> None:
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.button(
+            "Cargar tema",
+            key=f"flujo_cargar_tema_{clave}",
+            use_container_width=True,
+            on_click=_marcar_ir_paso_1,
+        )
+    with col_b:
+        st.button(
+            "Generar OD",
+            key=f"flujo_generar_od_{clave}",
+            use_container_width=True,
+            on_click=_marcar_ir_od,
+        )
+    with col_c:
+        if st.button(
+            "Cargar archivo",
+            key=f"flujo_cargar_archivo_{clave}",
+            use_container_width=True,
+        ):
+            st.switch_page("pages/2_Carga_de_Archivos.py")
 
 
 def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: int | None) -> None:
@@ -550,7 +554,7 @@ def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: i
             """,
             unsafe_allow_html=True,
         )
-        _render_botones_flujo()
+        _render_botones_flujo("hero")
 
 
 def render_resumen_pre_envio(
@@ -638,15 +642,6 @@ def render_historial_acta(sheet, numero_acta) -> None:
 
 st.set_page_config(page_title="Consejo de Investigación", layout="wide")
 hide_streamlit_cloud_toolbar()
-
-_ir_a_paso1 = str(st.query_params.get("ir", "")).strip().lower() == "paso1"
-if _ir_a_paso1:
-    st.session_state.pop("_mantener_scroll_descargar_od", None)
-    st.session_state["volver_arriba_cargar_temas"] = True
-    try:
-        del st.query_params["ir"]
-    except Exception:
-        pass
 
 _ir_a_descargar_od = st.session_state.pop("ir_a_descargar_orden_dia", False)
 _viene_de_otra_pagina = st.session_state.get("_pagina_streamlit_prev") != "cargar_temas"
@@ -1290,6 +1285,23 @@ if numero_acta:
                 )
 
 st.markdown('<div id="paso-1-ancla"></div>', unsafe_allow_html=True)
+if _scroll_arriba:
+    components.html(
+        """
+        <script>
+        (function () {
+            const doc = window.parent.document;
+            function irPaso1() {
+                const el = doc.getElementById("paso-1-ancla");
+                if (!el) return;
+                try { el.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
+            }
+            [0, 80, 250, 600, 1200].forEach(function (ms) { setTimeout(irPaso1, ms); });
+        })();
+        </script>
+        """,
+        height=0,
+    )
 with _container_con_estilo("ucc_card_paso_1"):
     _render_encabezado_bloque(
         "Paso 1",
@@ -1869,7 +1881,7 @@ with _container_con_estilo("ucc_card_od_modulo"):
         "Generar y descargar Orden del Día",
         "Seleccione el acta, revise cuántos temas tiene cargados y ordene la salida antes de generar el Word.",
     )
-    _render_botones_flujo()
+    _render_botones_flujo("od")
 
     OPCION_OD_SIN_SELECCION = "Seleccione el orden del día"
     opciones_od_word = [OPCION_OD_SIN_SELECCION] + [
