@@ -522,9 +522,31 @@ def render_cabecera_carga_temas(numero_acta, fecha, tipo, cantidad_temas_acta: i
         )
         col_a, col_b, col_c = st.columns(3)
         with col_a:
-            st.markdown(
-                '<a class="ucc-nav-btn-3d" href="#" onclick="var el=document.getElementById(\'paso-1-ancla\')||window.parent.document.getElementById(\'paso-1-ancla\');if(el){el.scrollIntoView({behavior:\'smooth\',block:\'start\'});}return false;">📝 Cargar tema</a>',
-                unsafe_allow_html=True,
+            components.html(
+                """
+                <style>
+                .ucc-scroll-btn{
+                    display:flex;align-items:center;justify-content:center;
+                    width:100%;min-height:2.8rem;padding:10px 14px;
+                    border-radius:10px;border:1px solid #054d35;border-bottom-width:3px;
+                    background:linear-gradient(180deg,#1a9a6e 0%,#0f7a55 48%,#065f42 100%);
+                    color:#fff;font-weight:700;font-size:0.95rem;
+                    text-decoration:none;cursor:pointer;
+                    box-shadow:0 3px 0 #054d35,0 5px 12px rgba(2,40,33,.3),inset 0 1px 0 rgba(255,255,255,.2);
+                }
+                .ucc-scroll-btn:hover{transform:translateY(-1px);}
+                .ucc-scroll-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #054d35;}
+                </style>
+                <a class="ucc-scroll-btn" href="#" onclick="
+                    var doc=window.parent.document;
+                    var el=doc.getElementById('paso-1-ancla');
+                    if(!el){var all=doc.querySelectorAll('[id]');for(var i=0;i<all.length;i++){if(all[i].id==='paso-1-ancla'){el=all[i];break;}}}
+                    if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}
+                    else{var main=doc.querySelector('section.main');if(main)main.scrollTo({top:main.scrollHeight,behavior:'smooth'});}
+                    return false;
+                ">📝 Cargar tema</a>
+                """,
+                height=50,
             )
         try:
             with col_b:
