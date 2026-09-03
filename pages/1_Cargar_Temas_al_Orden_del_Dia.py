@@ -14,6 +14,7 @@ from google.oauth2.service_account import Credentials
 from docx import Document
 from io import BytesIO
 from docx.shared import Pt, RGBColor
+import pandas as pd
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -1139,7 +1140,7 @@ def _estado_acta(numero_acta: int) -> tuple[str, str]:
 
 
 st.markdown("## 📊 Dashboard de estado")
-st.caption("Señala cuántos temas hay y qué cobertura de unidades ya tiene cada Acta.")
+st.caption("Haga clic en **Ver temas** de cada acta para ver lo que ya está cargado.")
 
 st.markdown(
     """
@@ -1190,6 +1191,52 @@ for idx, n in enumerate(_actas_ordenadas):
             """,
             unsafe_allow_html=True,
         )
+        if st.button("Ver temas", key=f"dash_ver_acta_{n}", use_container_width=True):
+            st.session_state["dashboard_acta_detalle"] = n
+
+_acta_detalle = st.session_state.get("dashboard_acta_detalle")
+if _acta_detalle in actas_dict:
+    _mes_detalle = actas_dict[_acta_detalle]["mes"]
+    _fecha_detalle = fechas_actas.get(_acta_detalle, "")
+    _filas_detalle = [
+        _fila_sheet_normalizada(r)
+        for r in _datos_sheet_all
+        if _numero_acta_igual(r.get("numero_acta"), _acta_detalle)
+    ]
+    with _container_con_estilo("ucc_card_dashboard_detalle"):
+        _render_encabezado_bloque(
+            "Detalle del acta",
+            f"Acta {_acta_detalle} · {_mes_detalle}",
+            f"{_fecha_detalle}. Temas cargados en Google Sheets para esta acta."
+            if _fecha_detalle
+            else "Temas cargados en Google Sheets para esta acta.",
+        )
+        col_det_info, col_det_cerrar = st.columns([5, 1])
+        with col_det_cerrar:
+            if st.button("Cerrar", key="dash_cerrar_detalle", use_container_width=True):
+                st.session_state.pop("dashboard_acta_detalle", None)
+                st.rerun()
+        if not _filas_detalle:
+            st.info("Esta acta todavía no tiene temas cargados.")
+        else:
+            _tabla_detalle = []
+            for r in _filas_detalle:
+                _tabla_detalle.append(
+                    {
+                        "Tipo": str(r.get("tipo") or "").strip(),
+                        "Denominación": str(r.get("titulo") or r.get("título") or "").strip(),
+                        "Unidad académica": str(
+                            r.get("unidad académica") or r.get("unidad") or ""
+                        ).strip(),
+                        "Director": str(r.get("director") or "").strip(),
+                        "Responsable de carga": str(r.get("responsable_de_carga") or "").strip(),
+                    }
+                )
+            st.dataframe(
+                pd.DataFrame(_tabla_detalle),
+                use_container_width=True,
+                hide_index=True,
+            )
 
 # =========================
 # 📝 FORMULARIO
